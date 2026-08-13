@@ -11,18 +11,45 @@ writes a design brief with real values in it, generates a full doc pack into you
 then hands you one ready-to-paste prompt at a time. When Claude Code reports back, it
 reads the repo and checks whether that report was true.
 
+> **Where it runs:** Build Mode is a **Cowork** skill. It does the planning, designing and
+> prompt writing in Cowork, and Claude Code does the building. The two are separate
+> sessions and you move between them. Install it in Cowork.
+
 ---
 
 ## Install
+
+### In Cowork
+
+Paste this into a Cowork session:
+
+```
+Install this skill: https://github.com/Samcarr01/build-mode
+```
+
+That is it. Then connect the session to your project folder and start talking.
+
+### In Claude Code (optional)
+
+The repo is also a plugin marketplace, if you want the skill available on the Claude Code
+side too:
 
 ```
 /plugin marketplace add Samcarr01/build-mode
 /plugin install build-mode@samcarr
 ```
 
-If the install summary says `Run /reload-plugins to activate.`, run that.
+If the install summary says `Run /reload-plugins to activate.`, run that. Update later
+with `/plugin marketplace update samcarr`.
 
-Then connect a session to your project folder and say something like:
+This is genuinely optional. The skill is written for Cowork and uses Cowork's tools, so
+Cowork is where it earns its keep.
+
+---
+
+## Using it
+
+Once installed, connect a Cowork session to your project folder and say something like:
 
 > I want to build a habit tracker
 
@@ -41,12 +68,12 @@ session pointed at a different folder cannot see any of it.
 
 ```
 Your idea
-   -> Build Mode  : interview, stack call, design brief, roadmap, doc pack
-   -> Build Mode  : writes docs/next-prompt.md into the repo
+   -> Cowork      : interview, stack call, design brief, roadmap, doc pack
+   -> Cowork      : writes docs/next-prompt.md into the repo
    -> You         : in Claude Code, type  /next
    -> Claude Code : plans, builds, updates PROGRESS.md + ROADMAP.md
-   -> You         : back in the planning session, "done" / "it broke" / "next"
-   -> Build Mode  : reads the repo, verifies, learns, writes the next prompt
+   -> You         : back in Cowork, "done" / "it broke" / "next"
+   -> Cowork      : reads the repo, verifies, learns, writes the next prompt
 ```
 
 Nothing in that loop depends on you remembering anything. The repo carries the state.
@@ -86,7 +113,7 @@ It also sets up `.claude/skills/` in the repo so you get `/next`, `/checkpoint` 
 
 ## What is actually in here
 
-Eight files, about 88KB. The bulk of it is not prose, it is specifics:
+Eight files, about 85KB. The bulk of it is not prose, it is specifics:
 
 - **`SKILL.md`** - the six modes, the memory rules, the folder discipline
 - **`references/stack-picker.md`** - default stack and when to deviate, with costs
@@ -104,7 +131,7 @@ Eight files, about 88KB. The bulk of it is not prose, it is specifics:
 ## Optional add-ons
 
 Build Mode works on its own. These skills make its output better where they exist, and it
-degrades gracefully where they do not.
+degrades gracefully where they do not. Install them in **Cowork**, alongside Build Mode.
 
 **Design and UI**
 
@@ -134,14 +161,14 @@ directions).
 
 ### One thing worth knowing about add-ons
 
-**Your planning session and Claude Code do not share skills.** A skill enabled on your
-Claude account is not automatically available inside Claude Code on your machine, and
-there is no one-line fix.
+**Cowork and Claude Code do not share skills.** A skill enabled on your Claude account is
+available in Cowork, but it is not automatically available inside Claude Code on your
+machine, and there is no one-line fix.
 
 Build Mode handles this by baking the output in rather than depending on the skill. It
-uses the design skills during planning and writes the actual hex values, type scale and
-spacing steps into `docs/DESIGN.md`. Claude Code then reads a document with real numbers
-in it and does not need the skill at all. Same for architecture rules into
+uses the design skills in Cowork and writes the actual hex values, type scale and spacing
+steps into `docs/DESIGN.md`. Claude Code then reads a document with real numbers in it
+and does not need the skill at all. Same for architecture rules into
 `docs/ARCHITECTURE.md`.
 
 That is deliberate, and it is the single most useful thing the skill does.
@@ -164,7 +191,6 @@ Tell it you read code fluently and it dials back the explaining.
 - Verified against Claude Code as of August 2026. It moves fast, so check the live docs at
   [code.claude.com](https://code.claude.com/docs) if something behaves differently to the
   `claude-code-setup.md` reference.
-- Updates: `/plugin marketplace update samcarr`
 
 ## Licence
 
