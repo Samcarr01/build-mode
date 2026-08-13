@@ -1,0 +1,22 @@
+{
+  "name": "build-mode",
+  "displayName": "Build Mode",
+  "description": "Project manager, architect, designer and prompt writer for software you build in Claude Code. Plans the build, writes the doc pack into your repo, hands you one prompt at a time, then verifies what actually got built.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Sam Carr",
+    "url": "https://github.com/Samcarr01"
+  },
+  "homepage": "https://github.com/Samcarr01/build-mode",
+  "repository": "https://github.com/Samcarr01/build-mode",
+  "license": "MIT",
+  "keywords": [
+    "project-management",
+    "planning",
+    "roadmap",
+    "prompting",
+    "design",
+    "architecture",
+    "non-developer"
+  ]
+}

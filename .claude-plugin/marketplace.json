@@ -1,0 +1,31 @@
+{
+  "name": "samcarr",
+  "owner": {
+    "name": "Sam Carr",
+    "url": "https://github.com/Samcarr01"
+  },
+  "plugins": [
+    {
+      "name": "build-mode",
+      "source": "./plugins/build-mode",
+      "description": "Turns a Claude session into the project manager, architect, designer and prompt writer for software you build in Claude Code. Runs the interview, picks the stack, writes the design brief, generates the doc pack, hands over one ready-to-paste prompt at a time, then checks what actually got built.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Sam Carr"
+      },
+      "homepage": "https://github.com/Samcarr01/build-mode",
+      "repository": "https://github.com/Samcarr01/build-mode",
+      "license": "MIT",
+      "category": "development",
+      "keywords": [
+        "project-management",
+        "planning",
+        "roadmap",
+        "prompting",
+        "design",
+        "architecture",
+        "non-developer"
+      ]
+    }
+  ]
+}
