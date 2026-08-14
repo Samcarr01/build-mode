@@ -39,6 +39,16 @@ Loaded into every Claude Code session, so every line costs tokens forever. Under
 | Typecheck | `npx tsc --noEmit` |
 | Deploy | <or "push to main, Vercel deploys automatically"> |
 
+## Deploying
+<!-- /checkpoint reads this before it pushes anything. Be exact. -->
+Pushing `main`: <does it deploy? does it run migrations? does it reach real users?>
+Who decides: <"ask me first" or "push freely, deploys are manual">
+
+<e.g. "Pushing main auto-deploys both services and runs migrations against the
+production database first. Never push without asking." or "Vercel builds a preview
+per branch. Pushing main deploys, but there is no database, so it is cheap to get
+wrong. Push freely.">
+
 <!-- Add a Test row only once tests actually exist. A command listed here that does
      not run is worse than no row: /checkpoint will try it and report a false failure. -->
 
@@ -55,8 +65,8 @@ Loaded into every Claude Code session, so every line costs tokens forever. Under
 - Use plan mode by default. Show the plan and wait before editing. Skip it only for
   a one-file change that is obviously safe.
 - When the task is done, run `/checkpoint` before doing anything else. It builds,
-  typechecks, drives the new flow in a browser with the Playwright MCP, then commits
-  and pushes. A task is not done until that has passed.
+  typechecks, drives the new flow in a browser, then commits. It pushes only if the
+  Deploying section above says a push is safe. A task is not done until that passed.
 - If you are stuck after two real attempts, run `/blocked` instead of guessing again.
   A clear description of the problem is worth more than a third attempt.
 
@@ -90,10 +100,11 @@ catch a bad call by reading a diff. So:
 - If a decision has a real trade-off, say so and recommend one. Do not present a menu.
 ```
 
-Two sections do the heavy lifting there. **Superpowers** stops a plugin that reloads on
-every `/clear` from re-opening decisions that were already made, while keeping the three
-of its skills that genuinely protect someone who cannot read a diff. **The person you
-are working with** changes how Claude Code reports back for the whole project.
+Three sections do the heavy lifting there. **Deploying** is what stops `/checkpoint`
+turning every finished task into a live deploy. **Superpowers** stops a plugin that
+reloads on every `/clear` from re-opening decisions that were already made, while keeping
+the three of its skills that genuinely protect someone who cannot read a diff. **The
+person you are working with** changes how Claude Code reports back for the whole project.
 
 
 ---
@@ -226,6 +237,7 @@ Validation on both sides, error states for taken email and weak password.
 **Checked:** Build passes, no type errors. Drove it in the browser: signed up with a
 new email and landed on the redirect, then tried the same email again and got the
 "already registered" error rather than a blank page.
+**Pushed:** no - waiting, a push deploys on this project.
 **Not done:** No email verification yet - that is M1-T5.
 **Unsure about:** Redirect after sign-up goes to `/dashboard`, which does not exist yet.
 
@@ -233,7 +245,7 @@ new email and landed on the redirect, then tried the same email again and got th
 > validation are there. Redirect target confirmed missing, added as `M1-T4`. Marked `[x]`.
 ```
 
-Two lines carry most of the weight. **Commit** is the project's undo button - without a SHA on every entry, "put it back to before M1-T3" is archaeology rather than a command. **Checked** is what separates a real tick from an optimistic one: it records what was actually clicked and seen, so a later session can tell the difference between verified and assumed.
+Three lines carry most of the weight. **Commit** is the project's undo button - without a SHA on every entry, "put it back to before M1-T3" is archaeology rather than a command. **Checked** is what separates a real tick from an optimistic one: it records what was actually clicked and seen. **Pushed** says whether this is live yet, so nobody has to guess whether the deployed site includes it.
 
 When you decided something on the user's behalf because you could not ask - which this skill tells you to do constantly - record it here too, so it is visible and cheap to reverse:
 
