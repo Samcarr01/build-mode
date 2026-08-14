@@ -9,7 +9,7 @@
       "name": "build-mode",
       "source": "./plugins/build-mode",
       "description": "Turns a Claude session into the project manager, architect, designer and prompt writer for software you build in Claude Code. Runs the interview, picks the stack, writes the design brief, generates the doc pack, hands over one ready-to-paste prompt at a time, then verifies what actually got built against the live app.",
-      "version": "2.0.1",
+      "version": "2.0.2",
       "author": {
         "name": "Sam Carr"
       },
