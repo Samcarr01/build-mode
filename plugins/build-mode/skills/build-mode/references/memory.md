@@ -2,15 +2,9 @@
 
 One file, in the repo: **`docs/LEARNINGS.md`**.
 
-That location is the whole design. Both Cowork and Claude Code can read and write it, it is version controlled so you can see when a lesson was learned, it travels with the project to another machine, and it needs no permissions from anyone. A memory file living outside the repo has to be found, and finding it means asking for access to a folder, which is a bad trade for a convenience.
+That location is the whole design. Both Cowork and Claude Code can read and write it, it is version controlled, it travels with the project, and it needs no permissions from anyone. There is deliberately no global profile file: almost everything worth remembering is specific to one codebase, and the few things that are not - the user's accounts, their tooling, their design taste - already live in `docs/TOOLING.md` and `docs/DESIGN.md`. A memory file outside the repo has to be found, and finding it means a permission prompt, which is a bad trade for a convenience.
 
-## Why per-project rather than one global file
-
-Almost everything worth remembering is specific to one codebase. "The Supabase client must be created per-request in server components" is true of this project, this framework version, this month. Filed globally it becomes noise inside a year; filed in the repo it is exactly where the next person needing it will be.
-
-The things that genuinely are cross-project - which accounts the user has, what is installed on the Claude Code side, their design taste - are few, cheap to re-establish, and mostly belong in `docs/TOOLING.md` and `docs/DESIGN.md` per project anyway. Not worth a permission prompt at the start of every session.
-
-Worth knowing: Claude Code also keeps its own automatic memory per repository, at `~/.claude/projects/<project>/memory/`. It is machine-local and you cannot read it, which is why `docs/LEARNINGS.md` exists in the repo instead of relying on it. The two run happily alongside each other.
+Claude Code also keeps its own automatic memory at `~/.claude/projects/<project>/memory/`. It is machine-local and you cannot read it. The two run happily alongside each other.
 
 ## What goes in
 
@@ -59,9 +53,9 @@ The distinction matters because the two files fail in opposite directions. `PROG
 
 **Claude Code** writes after each task, through `/checkpoint`, and when it hits a wall, through `/blocked`. Both of those skills instruct it to add to `LEARNINGS.md` only if there is something worth adding, which is why neither carries `disable-model-invocation` - a prompt that tells Claude Code to run a command it cannot run is how this loop quietly rots.
 
-**You write** at the end of every mode, not just at the end of a project. Most of the value is in small observations from a sync or an unblock, and those are exactly the ones lost by waiting. A blocker that took an hour is the single highest-value entry there is - it is the one most likely to recur and the one most expensive when it does.
+**You write** after Sync, Unblock and Undo - the three modes where something was actually found out. Not after Next task, Replan or Design pass, where you handed over a prompt and learnt nothing; a learn step that fires with nothing to record trains you to write filler. A blocker that took an hour is the highest-value entry there is, and a revert is a close second: something got built in a way that had to be thrown away, and that is worth not repeating.
 
-Say in one line what you added: "noted that the env var needs setting in Vercel too, since that caught you out again." They can then correct it, and memory they cannot see is memory they cannot trust.
+Say in one line what you added: "noted that the env var needs setting in Vercel too, since that caught you out again." The user can then correct it, and memory they cannot see is memory they cannot trust.
 
 ## When it is working
 
