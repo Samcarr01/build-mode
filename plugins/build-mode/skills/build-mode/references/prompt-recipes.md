@@ -26,9 +26,10 @@ Every prompt has the same six parts, in this order. The order matters: context b
 ## Done when
 - [ ] <Verifiable by clicking something or running something>
 - [ ] <...>
+- [ ] `npm run build` completes and there are no new type errors
 
 ## Before you finish
-- Run `/checkpoint`.
+- Run `/checkpoint`. It builds, clicks through what you made, then commits and pushes.
 - Do not start the next task.
 ```
 
@@ -38,7 +39,7 @@ And a plan-mode line at the top of every prompt except a trivial one-file change
 Start in plan mode. Show me the plan and wait for approval before editing anything.
 ```
 
-Default this on rather than off. If the user cannot read a diff, the plan is the only review the work gets. A minute spent reading a plan is the cheapest possible place to catch a wrong direction.
+Default this on rather than off. The user cannot read a diff, so the plan is the only review the work gets. A minute spent reading a plan is the cheapest possible place to catch a wrong direction.
 
 ## Writing each part
 
@@ -56,9 +57,11 @@ Default this on rather than off. If the user cannot read a diff, the plan is the
 
 **Done when.** The most important section. Every tick must be checkable by clicking something or running something. Not "auth works properly" but "signing up with an email that already exists shows an error rather than a blank page". If you cannot write it as something observable, the task is not defined well enough yet - go back and split it.
 
-Four ticks or fewer. More than that and the task is too big for one session.
+Four ticks or fewer, plus the build tick. More than that and the task is too big for one session.
 
-Two things to check before you finalise them. Does any tick depend on a tool Claude Code may not have, like an MCP server? Does any tick depend on something a later task builds - "user A cannot read user B's rows" needs two accounts, which may not exist yet? If so, rewrite it as something checkable today, or move it to the task where it becomes checkable.
+Write them so **Claude Code can check them itself in a browser**, not so the user has to. "Signing up with an existing email shows an error rather than a blank page" is something a browser can be driven through. "The flow feels right" is not. `/checkpoint` walks these ticks in a real browser before it is allowed to write `[x]`, so a tick phrased as an observable click is worth three phrased as a judgement.
+
+One thing to check before you finalise them: does any tick depend on something a later task builds? "User A cannot read user B's rows" needs two accounts, which may not exist yet. If so, rewrite it as something checkable today, or move it to the task where it becomes checkable.
 
 ## Recipes by task type
 
@@ -68,35 +71,49 @@ Two things to check before you finalise them. Does any tick depend on a tool Cla
 # M0-T1 Project skeleton
 
 ## Context
-New project: <one line on what it is>. Nothing exists yet. This task creates the
-repo and gets an empty page deployed, so the deploy pipeline is proven before there
-is anything complicated to debug.
+New project: <one line on what it is>. The planning docs are already in the folder,
+nothing else is. This task creates the app and gets an empty page deployed, so the
+deploy pipeline is proven before there is anything complicated to debug.
 
 ## Build
-1. Create a <framework> app with TypeScript, Tailwind and the App Router.
-2. Set up <UI library> with the base config.
-3. Replace the default homepage with a single page showing the project name.
-4. Add a `.gitignore` covering `.env*`, `node_modules`, `.next`. Add a `.env.example`
+1. **First, get the folder out of the scaffolder's way.** `create-next-app` refuses to
+   run in a directory containing files it does not recognise, and `CLAUDE.md` is one of
+   them. So: `mv CLAUDE.md docs/CLAUDE.md.tmp` before you start, and move it back
+   afterwards. (`docs/` and `.claude/` are both ignored by the scaffolder, so they can
+   stay where they are.)
+2. Create a <framework> app with TypeScript, Tailwind and the App Router, in this
+   directory.
+3. Move `CLAUDE.md` back to the project root. Check it is there before continuing.
+4. Set up <UI library> with the base config.
+5. Replace the default homepage with a single page showing the project name.
+6. Add a `.gitignore` covering `.env*`, `node_modules`, `.next`. Add a `.env.example`
    listing the variable names with no values.
-5. Initialise git, commit, push to a new **private** GitHub repo called `<name>`.
-6. Stop there. Do not build any features.
+7. Initialise git, commit, push to a new **private** GitHub repo called `<name>`.
+8. Stop there. Do not build any features.
 
 ## Constraints
 - No extra dependencies beyond the above.
 - Private repo. <One line on why: this holds real data / it is not ready to be public.>
 - Do not scaffold folders for features that do not exist yet. Empty directories
   become a filing system nobody agreed to.
-- The `docs/` files already exist. Do not overwrite them.
+- The `docs/` files and the `.claude/` folder already exist and are not yours to
+  change. Do not overwrite, move or tidy them.
 
 ## Done when
 - [ ] `npm run dev` serves a page at localhost:3000 showing the project name
 - [ ] `npm run build` completes without errors
+- [ ] `CLAUDE.md` is back in the project root and `.claude/skills/next/SKILL.md` still exists
 - [ ] The repo exists on GitHub with one commit
 
 ## Before you finish
 - Run `/checkpoint`.
 - Do not start the next task.
 ```
+
+Step 1 is not fussiness. It is a verified failure: with `CLAUDE.md` in the folder,
+`create-next-app` prints *"The directory contains files that could conflict"* and exits.
+Without that line, the very first prompt of every project stalls, and Claude Code
+improvises around a collision the plan created.
 
 ### Feature
 
@@ -160,6 +177,9 @@ what is already there.
 - Migrations only. Anything done by hand in the dashboard is lost on the next environment.
 - Every table gets RLS. A table without it is readable by anyone with the public key.
 - Do not drop or rename an existing column without flagging it first.
+- If superpowers is installed, run `superpowers:requesting-code-review` before you
+  finish. This touches user data, and a second model reading it is the only review
+  it will get.
 
 ## Done when
 - [ ] The migration applies cleanly to a fresh database
@@ -178,8 +198,9 @@ Schema is the most expensive thing to change later, so it gets the most careful 
 ## Context
 <What it does for the user and where it appears.>
 
-**Use these:** <MCP if there is one>. Check the official docs for the current API
-rather than working from memory - this library changes often.
+**Use these:** <MCP if there is one>. Use the `context7` MCP to pull the current docs
+for <library> rather than working from memory - this library changes often and a
+half-remembered API costs an hour.
 
 ## Build
 1. <Setup, including which env vars are needed>
@@ -274,7 +295,8 @@ Different shape. The goal is a good diagnosis, not a fast fix.
 2. <Second>
 3. <Third>
 
-**Use these:** <Supabase MCP get_logs / Vercel MCP get_runtime_errors / etc.>
+**Use these:** `superpowers:systematic-debugging` if installed - root cause before fixes.
+<Plus Supabase MCP get_logs / Vercel MCP get_runtime_errors / etc.>
 
 ## How to approach it
 Find the cause before changing anything. Say what you think is wrong and why,
@@ -327,3 +349,5 @@ Things that reliably produce bad sessions.
 **Assuming context.** "Continue where we left off" means nothing to a fresh session. Every prompt stands alone.
 
 **Silence on the docs.** Without an explicit instruction to update PROGRESS.md and ROADMAP.md, they rot within three sessions and the whole system stops working. Every prompt ends with `/checkpoint`.
+
+**Done-checks only a human can run.** "It looks right", "the spacing feels balanced", "the flow makes sense". The user is the slowest and least reliable test runner in this system, and they only run each check once. If a tick can be rewritten as something a browser tool can click, rewrite it. Save their attention for the two or three judgement calls that genuinely need eyes.
