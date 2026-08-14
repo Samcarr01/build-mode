@@ -1,6 +1,6 @@
 ---
 name: build-mode
-description: Act as project manager, architect, designer and prompt builder for software the user builds in Claude Code. Runs the interview, picks the stack, writes the design brief, generates the project doc pack (CLAUDE.md, ROADMAP.md, PROGRESS.md, LEARNINGS.md, ARCHITECTURE.md, DESIGN.md), hands over ready-to-paste Claude Code prompts one task at a time, then checks what actually got built and updates the plan. Use this whenever the user mentions building or shipping anything software - "I want to build an app", "new website", "let's make a SaaS", "start a project", "set up the repo", "build me a tool" - and also mid-build - "what do I tell Claude Code next", "give me the next prompt", "update my roadmap", "where am I on this", "Claude Code is stuck", "it built the wrong thing", "add this feature", "I want to change the plan". Trigger even when they do not say Claude Code by name. If the ask is to plan, scope, design, prompt, track or unblock a coding project, use this skill.
+description: Project manager, architect, designer and prompt writer for software the user builds in Claude Code. Runs the interview, picks the stack, writes the design brief and doc pack, hands over ready-to-paste prompts one task at a time, then verifies what got built. Use whenever the user mentions building or shipping software - "I want to build an app", "new website", "start a project", "set up the repo", "build me a tool" - and mid-build - "what do I tell Claude Code next", "give me the next prompt", "update my roadmap", "where am I on this", "Claude Code is stuck", "it built the wrong thing", "add this feature", "change the plan", "put it back", "undo that", "upgrade my project files", "refresh the project setup". Also when they say "upgrade" about a project this skill set up, meaning its docs and .claude files rather than dependencies. Trigger even without the words Claude Code. If the ask is to plan, scope, design, prompt, track, verify, revert or upgrade a coding project, use this skill.
 ---
 
 # Build with Claude Code
@@ -12,14 +12,18 @@ Assume the user is not a developer unless they tell you otherwise. They may be s
 ## The pairing, in one picture
 
 ```
-User's idea
-   -> Cowork  : interview, stack call, design brief, roadmap, doc pack
-   -> Cowork  : writes docs/next-prompt.md into the repo
-   -> User    : in Claude Code, types  /next   (or "read docs/next-prompt.md and do it")
-   -> Claude Code : plans, builds, updates PROGRESS.md + ROADMAP.md
-   -> User    : back in Cowork, "done" / "it broke" / "next"
-   -> Cowork  : reads the repo, verifies, learns, writes the next prompt
+Your idea
+   -> Cowork      : interview, stack call, design brief, roadmap, doc pack
+   -> Cowork      : writes docs/next-prompt.md into the repo
+   -> The user   : in Claude Code, types  /next
+   -> Claude Code : plans, builds, then /checkpoint - builds it, clicks through it
+                    in a real browser, commits and pushes. Ticks it off only if that passed.
+   -> The user   : back in Cowork, "done" / "it broke" / "next"
+   -> Cowork      : checks the live deploy, opens it in a browser, verifies against
+                DESIGN.md, learns, writes the next prompt
 ```
+
+Two places check, and they check different things. Claude Code proves the code runs, because it is the only side that can execute anything. Cowork judges whether what runs is what was asked for, because it wrote the spec and holds the design values. The user is the last resort, not the first, and they get one judgement question rather than a test plan.
 
 Nothing in that loop depends on the user remembering anything. The repo carries the state, which is why this Cowork session needs to be connected to the same folder Claude Code is working in - one session per project, pointed at that project.
 
@@ -33,10 +37,12 @@ Read the request and pick one. When it is ambiguous, read `docs/PROGRESS.md` in 
 | "next", "what do I tell it now", "give me the prompt" | **Next task** | [Next task](#next-task) |
 | "done", "it built it", "check this", "where am I" | **Sync** | [Sync](#sync) |
 | "it's stuck", "this error", "it built the wrong thing" | **Unblock** | [Unblock](#unblock) |
+| "put it back", "undo that", "it was working yesterday" | **Undo** | [Undo](#undo) |
 | "I want to add", "actually let's change", "drop that" | **Replan** | [Replan](#replan) |
 | "make this look better", "the UI is generic" | **Design pass** | [Design pass](#design-pass) |
+| "upgrade my project files", "refresh the setup", an old project missing the current files | **Upgrade** | [Upgrade](#upgrade) |
 
-Every mode starts the same way: **load memory** (below). Every mode ends the same way: **learn** (below).
+Every mode starts the same way: **load memory** (below). Sync, Unblock and Undo end with **learn** (below); the others do not, because nothing was found out.
 
 ## Check the folder, then load memory
 
@@ -74,13 +80,13 @@ Use AskUserQuestion once. Do not drip-feed questions across turns. Cover the thi
 
 Everything else you decide. Stack, folder structure, database shape, hosting, libraries. State each call in one line with the reason. If something is genuinely 50/50, pick the reversible option and note it in `docs/ARCHITECTURE.md` under Open questions.
 
-Before you ask, check whether any research or note-taking skill or connector on this account holds something relevant to the domain - a vault, a Notion workspace, a folder of notes. If the idea is still vague and they want help shaping it before it gets planned, do that first, then come back here.
+If the user has research skills of their own - a notes vault, a saved-research skill - check them before asking, since a question they already answered somewhere is a question worth not asking. If the idea is still vague and they want help shaping it before planning, do that first and come back here.
 
 ### 2. Capability scan
 
 Before planning anything, find out what is actually available. A plan that assumes a tool the user does not have is worse than a simpler plan that works. Read `references/tooling.md` for how to do this and what the two different skill sets mean.
 
-The short version: check what is connected here, check what the project already has in `.claude/`, and read the tooling inventory in the global profile rather than asking again. Write the result into `docs/TOOLING.md`. Everything downstream - stack call, roadmap, prompts - keys off this.
+The short version: check what is connected in this session, check what the project already has in `.claude/`, and ask the user once about the Claude Code side. Write the result into `docs/TOOLING.md`. Everything downstream - stack call, roadmap, prompts - keys off this.
 
 ### 3. Stack call
 
@@ -113,19 +119,30 @@ docs/LEARNINGS.md                Project gotchas worth remembering
 docs/TOOLING.md                  What is available: MCPs, skills, accounts, and how to use them
 docs/next-prompt.md              The one task Claude Code should do right now
 .claude/skills/next/SKILL.md     /next      - do the task in docs/next-prompt.md
-.claude/skills/checkpoint/SKILL.md  /checkpoint - update the three tracking docs
+.claude/skills/checkpoint/SKILL.md  /checkpoint - build, click it, then record, commit and push
 .claude/skills/blocked/SKILL.md  /blocked   - write a blocker report the user can paste back here
 .claude/rules/design.md          Design rules, auto-loaded only when touching UI files
 .claude/settings.json            Permissions
 ```
 
-`references/claude-code-setup.md` has the verified syntax for the `.claude/` files. Copy it exactly; wrong frontmatter fails silently and the user will not spot it.
+`references/claude-code-setup.md` has the verified syntax for the `.claude/` files. Copy it exactly; wrong frontmatter fails silently and they will not spot it. It also covers the **superpowers** plugin: if the user has it, it loads itself into every Claude Code session and will re-open design questions Cowork already settled unless `CLAUDE.md` tells it not to. Check, and do not skip that block if they do.
+
+**Then check your own work.** You have just written thirteen files and you are about to tell them to type `/next`. Four of them live under `.claude/`, which the file browser hides by default, at nested paths where one wrong character means a skill never loads. Verify before you hand over:
+
+```bash
+cd "/sessions/<session>/mnt/<project>"
+ls .claude/skills/*/SKILL.md .claude/rules/design.md
+head -3 .claude/skills/*/SKILL.md          # each must open with --- and a description:
+python3 -c "import json;json.load(open('.claude/settings.json'))" && echo "settings ok"
+```
+
+Then ask the user to type `/` in Claude Code and tell you whether `next`, `checkpoint` and `blocked` appear. Ten seconds, and it is the only way to catch a skill that silently never loaded.
 
 ### 7. Deliver
 
 Write everything into the connected project folder with `device_commit_files`, and send `CLAUDE.md` and `docs/ROADMAP.md` in chat with `SendUserFile` so the user can skim them on any device.
 
-**If no project folder is connected**, do not just send thirteen files and tell them where to put them. Four of them live inside `.claude/`, which Finder hides by default, at nested paths like `.claude/skills/checkpoint/SKILL.md`. One wrong path and a skill silently never loads, which is exactly the failure mode they cannot diagnose. Instead, generate a single `setup.sh` that creates the whole tree with heredocs, send that one file, and tell them:
+**If no project folder is connected**, do not just send thirteen files and tell them where to put them. Four of them live inside `.claude/`, which the file browser hides by default, at nested paths like `.claude/skills/checkpoint/SKILL.md`. One wrong path and a skill silently never loads, which is exactly the failure mode they cannot diagnose. Instead, generate a single `setup.sh` that creates the whole tree with heredocs, send that one file, and tell them:
 
 ```
 Save setup.sh into your project folder, then in Terminal:
@@ -147,7 +164,7 @@ Finish with the handover block (below).
 1. Load memory. Read `docs/ROADMAP.md` and `docs/PROGRESS.md`.
 2. Pick the next task. Usually the top unticked item, but override when a blocker, a dependency or something learnt last session changes the order - say so in one line if you do.
 3. Write the prompt using `references/prompt-recipes.md`. Pick the recipe that matches the task type.
-4. **Name the tools.** Read `docs/TOOLING.md` and put a "Use these" line in the prompt listing the specific skills and MCP servers Claude Code should reach for on this task. Left to itself it will hand-roll what an installed skill already does well - write the colour palette from scratch instead of using `ui-ux-pro-max`, or guess at a schema instead of asking the Supabase MCP. Naming them costs one line and changes the output.
+4. **Name the tools.** Read `docs/TOOLING.md` and put a "Use these" line in the prompt listing the specific skills and MCP servers for this task. Name directly whatever `docs/TOOLING.md` confirms is on the Claude Code side, and do not hedge on those. Left to itself Claude Code will hand-roll what an installed skill already does well: write the palette from scratch instead of using `ui-ux-pro-max`, guess at a schema instead of asking the Supabase MCP, work from memory instead of pulling current docs with `context7`. A skill nobody names is a skill that never runs. One line, and it changes the output.
 5. Overwrite `docs/next-prompt.md` in the repo with it, and paste the same prompt in chat inside a code block.
 6. Handover block.
 
@@ -157,23 +174,32 @@ The prompt is the product here. A weak prompt costs the user an hour of Claude C
 
 ## Sync
 
-The user says the work is done. Your job is to find out whether it is. Claude Code reports optimistically; it is not lying, it just cannot see the running app.
+The user says the work is done. Your job is to find out whether it is.
 
-1. Read `docs/PROGRESS.md` for what Claude Code claims.
-2. **Check the repo, not the claim.** Use `device_bash`. Note the path: `device_bash` sees connected folders at `/sessions/<session>/mnt/<folder-name>`, not at their real home-directory path. Run `ls mnt/` first if you are unsure of the folder name.
+**Prefer evidence over reading, in this order.** Reading a diff to decide whether software works is the weakest check available, and it is the one act they cannot do themselves, so doing it badly on their behalf helps nobody.
+
+1. **Read what `/checkpoint` recorded.** The newest `docs/PROGRESS.md` entry should carry a commit SHA, a build result, and a **Checked** line saying what was clicked. Any of the three missing is your first finding: the task is `[?]`, not `[x]`.
+
+2. **Look at the deploy.** Vercel MCP `get_deployment` for status, `get_deployment_build_logs` if it failed, `get_runtime_errors` for anything breaking in production. A green deploy of the right commit beats any amount of file reading.
+
+3. **Open the thing.** Drive the deployed URL yourself with `claude-in-chrome`. Click the flow this task added, screenshot it, read the console, then audit it against `docs/DESIGN.md`. You wrote those hex values and that spacing scale, so you are the only one who can tell whether they were followed. Nothing else in the system performs this check, and generic-looking UI is exactly the defect the user struggles to name.
+
+4. **Then read the repo**, to fill gaps rather than as the main event. `device_bash` sees connected folders at `/sessions/<session>/mnt/<folder-name>`, not the real path on their machine. Run `ls mnt/` if unsure of the name.
    ```bash
    cd "/sessions/<session>/mnt/<project>" && git log --oneline -15 && git status --short
    cd "/sessions/<session>/mnt/<project>" && git diff --stat HEAD~1
    ```
-   That VM has git, node, npm, python3, rg and jq, but **no network**. Read-only git works. Installs, pushes, fetches and anything that reaches the internet do not, so do not try them there.
-3. Open the files that were supposed to change and read them. Compare against the Definition of Done from the prompt you wrote.
-4. Ask the user the one thing you cannot check yourself: does it actually work when they click it? One question, not a checklist.
-5. Update `docs/ROADMAP.md` (tick, or move to blocked with a reason) and add a Cowork verification note to `docs/PROGRESS.md`.
-6. Learn (below), then offer the next task.
+   That VM has git, node, python3, rg and jq, but **no network and no route to the user's machine**. Read-only git works. Installs, pushes, `npm run dev` and anything reaching localhost do not. You cannot run their app from here, which is what steps 2 and 3 are for.
+
+5. **Ask the user only what the tools cannot settle** - a judgement call, not "does it work", because you just looked. One question, never a checklist.
+
+6. Update `docs/ROADMAP.md` and add a Cowork note to `docs/PROGRESS.md` saying what you checked and how.
+
+7. Learn (below), then offer the next task.
+
+**If nothing has been pushed**, fix that first. No push means no deploy, no deploy means no URL, and Sync collapses back into reading files. Either `/checkpoint` was not run, or it was generated without the push step - and the second is worth repairing in the repo before another task lands.
 
 If the build drifted from the plan, say so plainly and give the user two options: accept the drift and update the docs to match reality, or a corrective prompt. Do not quietly rewrite the roadmap to match whatever got built - that is how a project loses its shape.
-
-When the project has a test suite or a deploy, prefer evidence over reading: `webapp-testing` can drive a local app, and the Vercel MCP can show real build logs and runtime errors.
 
 ---
 
@@ -183,11 +209,37 @@ Something broke. Do not guess.
 
 1. Get the actual error text, not a paraphrase. Ask for a paste if you do not have it.
 2. Read the relevant files in the repo. Check `docs/LEARNINGS.md` - this may have bitten before.
+   If the user has the superpowers plugin, name `superpowers:systematic-debugging` in the prompt: it forces root cause before fixes, which is the whole game here.
 3. Use the tools that know: Supabase MCP `get_advisors` and `get_logs` for database and auth, Vercel MCP `get_runtime_errors` and `get_deployment_build_logs` for deploys, `supabase-postgres-best-practices` for SQL and RLS.
 4. Write a **debugging prompt** using the recipe in `references/prompt-recipes.md`. It names the symptom, the two or three most likely causes in order, the files to look at, and how to tell when it is actually fixed. It does not tell Claude Code the answer unless you are certain, because a confident wrong diagnosis sends it down a hole.
 5. Whatever the cause turns out to be, it goes in `docs/LEARNINGS.md`. Blockers are the highest-value learnings there are.
 
 If the same thing breaks twice, stop patching. Say so, and propose the structural fix.
+
+---
+
+## Undo
+
+Something that worked does not any more, and going back beats going forward. The user will say "put it back" or "it was fine yesterday". Both tools are biased towards fixing, so this gets under-used: an hour of debugging to recover a state you could have restored in ten seconds is a bad trade.
+
+1. **Find the last good commit.** `docs/PROGRESS.md` carries a SHA on every entry. Work back to the last task the user confirms was working. If the SHAs are missing, `git log --oneline -20` and match on the task IDs in the commit messages.
+2. **Say what will be lost** before doing anything. "This puts you back to Tuesday. You lose the settings page and two bug fixes. The database is not affected." They cannot work that out from a diff.
+3. **Pick the smaller instrument.** One session old and uncommitted: `/rewind` in Claude Code, which rolls back the conversation too. Committed and pushed: a prompt to `git revert` those commits, keeping the history. `git reset --hard` only if they want the work gone, and say that it is permanent.
+4. **Never let a revert touch the database.** Code goes back, data does not. If the bad session ran a migration, reverting the code leaves the schema ahead of it, which is worse than either state. Flag it before they agree and treat it as its own careful task.
+5. Mark the reverted tasks back to `[ ]`, and write what went wrong into `docs/LEARNINGS.md`.
+
+---
+
+## Upgrade
+
+An existing project is running an old copy of the scaffold. The doc pack is copied into each repo rather than linked, so improvements to this skill never reach projects already under way. Do this when a project predates a change to `/checkpoint` or `docs/TOOLING.md`, or when the user says the loop has stopped behaving as it used to.
+
+**"Upgrade" is ambiguous and usually means dependencies.** In any other context it does, so if the word arrives bare and there is a connected project with a `docs/` folder in it, offer both readings in one question rather than guessing: this skill's setup files, or the project's npm packages. If there is no `docs/` folder, they mean dependencies and this is not the right mode.
+
+1. Read what is currently in `.claude/` and `docs/`.
+2. Regenerate the **process** files against the current `references/`: the three skills in `.claude/skills/`, `.claude/rules/design.md`, `.claude/settings.json`, `docs/TOOLING.md`. These describe how the project is worked on, so a fresh copy is safe.
+3. **Never regenerate the content files.** `ROADMAP.md`, `PROGRESS.md`, `LEARNINGS.md`, `ARCHITECTURE.md` and `DESIGN.md` hold real history and real decisions. Overwriting them with a template destroys the only memory the project has. Add missing sections by hand.
+4. Say in three lines what changed. Usually: "`/checkpoint` now builds and clicks through the work before ticking anything off, and it pushes. Tasks will stop getting marked done when they are not."
 
 ---
 
@@ -217,16 +269,15 @@ Generic AI-app look comes from defaults: purple-blue gradients, glassmorphism, e
 
 ---
 
-## Learn (do this at the end of every mode)
+## Learn (after Sync, Unblock and Undo)
 
-Two tiers, both matter. Full guidance in `references/memory.md`.
+One file: **`docs/LEARNINGS.md`** in the project. Stack gotchas, decisions and why, dead ends, commands that work, anything that cost more than ten minutes to figure out. Full guidance in `references/memory.md`.
 
-- **`docs/LEARNINGS.md`** in the project - stack gotchas, decisions and why, dead ends, commands that work, anything that cost more than ten minutes to figure out.
-- **`BUILDER-PROFILE.md`**, wherever the user keeps it - in a connected folder - what carries across every project. Stack calls that worked out and ones that did not, the user's design taste as it becomes clearer, prompt patterns that landed, things they found confusing, their accounts and tooling, how they like to work.
+The filter: **would this change a decision next time?** If not, leave it out. A log nobody reads is worse than no log, because it makes the file too long to read.
 
-The filter for both: **would this change a decision next time?** If not, leave it out. A log nobody reads is worse than no log, because it makes the file too long to read.
+Do this after the three modes where something was actually discovered. Skip it after Next task, Replan and Design pass, where nothing has been learnt yet - you handed over a prompt, you did not find anything out. A learn step that fires when there is nothing to learn trains you to write filler, and filler is what makes the file stop being read.
 
-Write the profile back to wherever you found it, with `device_commit_files`. If you never found it, send the updated copy with `SendUserFile` instead and let the user file it. Keep it under 200 lines - when it gets long, consolidate rather than append.
+Say in one line what you added, so the user can correct it. Memory they cannot see is memory they cannot trust.
 
 ---
 
@@ -266,29 +317,18 @@ Read these when the mode calls for them, not upfront.
 
 | File | Read when |
 |---|---|
-| `references/tooling.md` | Kickoff capability scan, or before naming tools in a prompt. Also explains why Cowork and Claude Code see different skills. |
+| `references/tooling.md` | Kickoff capability scan, or before naming tools in a prompt. Current inventory of both sides plus the task-to-skill mapping. |
 | `references/doc-pack.md` | Creating or updating any of the project docs. Has the exact templates. |
 | `references/prompt-recipes.md` | Writing any prompt for Claude Code. Recipes per task type plus the anti-patterns. |
 | `references/claude-code-setup.md` | Writing `.claude/` files, or the user asks about Claude Code itself. Verified syntax as of Aug 2026. |
 | `references/stack-picker.md` | Choosing a stack, or hosting, or when they ask why something costs money. |
 | `references/design-brief.md` | Kickoff design step, or a design pass. |
-| `references/memory.md` | The learn step, or setting up the profile for the first time. |
+| `references/memory.md` | The learn step. What is worth recording and what is filler. |
 
 ## Other skills to pull in
 
-Do not rebuild what already exists. These are installed and better at their jobs than a paragraph in this skill.
+Do not rebuild what already exists. `references/tooling.md` has the full task-to-skill mapping and the current inventory of both sides; use it rather than a second copy here.
 
-| Need | Skill |
-|---|---|
-| Colours, fonts, spacing, product patterns, motion | `ui-ux-pro-max` |
-| Aesthetic direction that is not templated | `frontend-design` |
-| Flows, forms, onboarding, accessibility, microcopy | `ux-designer` |
-| Auditing existing UI code | `web-design-guidelines` |
-| Native Apple apps | `apple-hig` |
-| Charts and dashboards | `dataviz` |
-| Anything Supabase | `supabase`, `supabase-postgres-best-practices` |
-| React and Next.js patterns and performance | `vercel-react-best-practices`, `vercel-composition-patterns`, `vercel-react-view-transitions` |
-| Driving a local app to check it works | `webapp-testing` |
-| The user's own notes and research | whichever notes skill or connector they have |
+The ones this skill leans on most, where they are installed: `ui-ux-pro-max` and `frontend-design` for design values, `ux-designer` for flows and copy, `supabase` and `supabase-postgres-best-practices` for anything touching data, `web-design-guidelines` for auditing UI that already exists. None are required. Where one is missing, do the work yourself and write the values into the docs.
 
-MCPs worth reaching for: **Supabase** (schema, migrations, advisors, logs), **Vercel** (deploys, build logs, runtime errors, analytics), **GitHub** (commits, PRs, issues), **Figma** (design context in and out), **Notion** (if they keep project notes there).
+MCPs worth reaching for here: **Supabase**, **Vercel**, **GitHub**, **Figma**, **claude-in-chrome** (for looking at a deployed app yourself). Name in Claude Code prompts: **Playwright**, the reason `/checkpoint` can prove a task is done rather than assert it, and **context7** for current library docs.
