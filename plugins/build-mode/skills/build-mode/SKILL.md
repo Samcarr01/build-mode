@@ -232,14 +232,42 @@ Something that worked does not any more, and going back beats going forward. The
 
 ## Upgrade
 
-An existing project is running an old copy of the scaffold. The doc pack is copied into each repo rather than linked, so improvements to this skill never reach projects already under way. Do this when a project predates a change to `/checkpoint` or `docs/TOOLING.md`, or when the user says the loop has stopped behaving as it used to.
+An existing project is running an old copy of the scaffold. The doc pack is copied into each repo rather than linked, so improvements to this skill never reach projects already under way. Do this when a project predates a change to `/checkpoint`, or when the user says the loop has stopped behaving as it used to.
+
+**The risk here is not getting it wrong, it is destroying working state.** They are mid-build. Treat every file as guilty until proven to be pure process.
 
 **"Upgrade" is ambiguous and usually means dependencies.** In any other context it does, so if the word arrives bare and there is a connected project with a `docs/` folder in it, offer both readings in one question rather than guessing: this skill's setup files, or the project's npm packages. If there is no `docs/` folder, they mean dependencies and this is not the right mode.
 
-1. Read what is currently in `.claude/` and `docs/`.
-2. Regenerate the **process** files against the current `references/`: the three skills in `.claude/skills/`, `.claude/rules/design.md`, `.claude/settings.json`, `docs/TOOLING.md`. These describe how the project is worked on, so a fresh copy is safe.
-3. **Never regenerate the content files.** `ROADMAP.md`, `PROGRESS.md`, `LEARNINGS.md`, `ARCHITECTURE.md` and `DESIGN.md` hold real history and real decisions. Overwriting them with a template destroys the only memory the project has. Add missing sections by hand.
-4. Say in three lines what changed. Usually: "`/checkpoint` now builds and clicks through the work before ticking anything off, and it pushes. Tasks will stop getting marked done when they are not."
+This runs against a project with real work in it, so the order below is not negotiable. Survey, then restore point, then plan, then write. Never open by writing a file.
+
+**1. Make a restore point before touching anything.**
+
+```bash
+cd "/sessions/<session>/mnt/<project>" && git status --short && git log --oneline -3
+```
+
+If the tree is dirty, stop and say so: uncommitted work means an undo would take their own changes with it. Ask them to commit or stash first, or to tell you to go ahead knowing that. If it is clean, note the current SHA in chat before you start. That one line is what makes every step below reversible.
+
+**2. Survey what is actually there.** Read, do not assume:
+
+- `.claude/skills/*/SKILL.md` - which of the three exist, and does `/checkpoint` already build, click and push, or is it the old notes-only version?
+- `.claude/rules/`, `.claude/settings.json`, `.mcp.json`
+- `docs/TOOLING.md` - **this is the record of what is connected.** Accounts, project refs, which MCPs each side has, what is deliberately not set up.
+- `docs/ROADMAP.md` and `PROGRESS.md` - where the build actually is, so nothing you say contradicts it
+
+Then check the live picture against it, because the file may be months stale: `ListConnectors` here, and ask them in one line whether the Claude Code side has changed since - particularly whether a browser tool exists, because that decides which `/checkpoint` you can generate.
+
+**3. Say what you will change, and get a yes.** Three short lists: files being replaced, files being merged, files not being touched. They are halfway through a build and the fear is that this eats their work, so showing the blast radius before you act is most of the job.
+
+**4. Replace only the pure-process files.** The three skills in `.claude/skills/`, `.claude/rules/design.md`, `.claude/settings.json`. These describe how the project is worked on and contain nothing discovered, so a fresh copy is safe. Preserve any project-specific `allow` rules already in `settings.json` rather than flattening it back to the default.
+
+**5. Merge `docs/TOOLING.md`, never replace it.** It looks like a process file and is not. Accounts, project refs, the **Not available** list and the two-sides inventory are all findings, some of which cost a conversation to establish and cannot be recovered from a template. Add the new sections, correct anything the survey proved wrong, and leave every real value alone.
+
+**6. Never touch the content files.** `ROADMAP.md`, `PROGRESS.md`, `LEARNINGS.md`, `ARCHITECTURE.md`, `DESIGN.md`. These are the project's memory and history. If one is missing a section the current templates have - commit SHAs in PROGRESS entries, the `[@]` status key in ROADMAP - add that section by hand, going forward only. Do not backfill, reformat or tidy. A tidied history is a lost history.
+
+**7. Report in three lines**, then hand back. Usually: "`/checkpoint` now builds, clicks through the work in a browser and pushes before ticking anything off. Your roadmap, progress log and design are untouched. Restore point is `a4f9c21` if anything looks wrong."
+
+**If the project has no `docs/` and no `.claude/`**, this is not an upgrade. It is an existing codebase adopting the system for the first time: read the code to write `ARCHITECTURE.md` from what is actually built, ask where they think they are up to for `ROADMAP.md`, and generate the rest fresh. Say which of it you inferred rather than knew.
 
 ---
 
