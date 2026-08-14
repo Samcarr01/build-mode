@@ -1,6 +1,6 @@
 # Picking the stack
 
-The user is not a developer, so this is your call, not theirs. Make it, state it in one line with the reason, and move on. A menu of options handed to someone with no basis to choose between them is not helpfulness, it is passing the buck.
+The user is probably not a developer, so this is your call, not theirs. Make it, state it in one line with the reason, and move on. A menu of options handed to someone with no basis to choose between them is not helpfulness, it is passing the buck.
 
 Two things to get right, because both are expensive to undo: **where the data lives** and **where it runs**. Everything else can change later without much pain.
 
@@ -29,7 +29,7 @@ Reach for Railway when the thing needs to **keep running** rather than respond a
 - A Python or Go service alongside the frontend
 - A long-running AI job - Vercel's serverless functions have a time limit that a slow model call will hit
 
-Railway runs a container that stays up, which suits all of that. It starts costing money sooner than Vercel's hobby tier, so it is a reasonable call when the shape fits but not the default. The usual arrangement is frontend on Vercel, worker on Railway, both talking to the same Supabase.
+Railway runs a container that stays up, which suits all of that. It starts costing money sooner than Vercel's hobby tier, so reach for it when the shape genuinely fits. The usual arrangement is frontend on Vercel, worker on Railway, both talking to the same Supabase.
 
 If the app is request-response - user clicks, server responds, done - Vercel is simpler and cheaper. Do not reach for Railway out of a vague sense that it is more "real".
 
