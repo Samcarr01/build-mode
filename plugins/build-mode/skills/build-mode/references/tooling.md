@@ -2,22 +2,30 @@
 
 Two failure modes this file exists to prevent. One: planning around a tool the user does not have, so the plan quietly does not work. Two: Claude Code hand-rolling something an installed skill already does properly, because nobody told it the skill was there. Both are cheap to avoid and expensive to discover late.
 
-## The thing that confuses everyone
+## The two sides
 
-**Cowork and Claude Code do not see the same skills.**
+Cowork and Claude Code load skills from different places. Cowork uses the skills enabled on the user's claude.ai account. Claude Code uses `~/.claude/skills/` on their machine plus the project's `.claude/skills/`. Neither can see the other's, and you cannot copy one across.
 
-- **Cowork** (here) loads the skills enabled on the user's claude.ai account, synced at session start. It does **not** read `~/.claude/skills/` on their own machine.
-- **Claude Code** (the CLI on their Mac) loads `~/.claude/skills/` and the project's `.claude/skills/`. It does **not** see their claude.ai account skills.
+**So the inventory is a thing you establish, not assume.** Do it once at kickoff, write it into `docs/TOOLING.md`, and never guess again in that project.
 
-So `ui-ux-pro-max` being available to you here says nothing about whether Claude Code can use it. If a skill matters to the build, it has to exist on the Claude Code side too.
+**Where both sides have a skill, name it directly in prompts.** "Use `ui-ux-pro-max` for the component patterns" is a stronger instruction than "if `ui-ux-pro-max` is installed, use it, otherwise work from DESIGN.md" - the hedge earns nothing once you have confirmed it is there, and a hedged prompt reliably produces "I'll use the skill" followed by improvisation.
 
-Be careful not to paper over this. You cannot copy a skill across from here: `ui-ux-pro-max` lives on the user's claude.ai account, not on a filesystem you can reach, and `device_bash` cannot see their home directory. There is no one-line fix, so do not promise one.
+**Where only Cowork has it, bake the output in instead.** This is the single most useful thing this skill does. Use the design skills here, in Cowork, and write their actual conclusions - the hex values, the type scale, the spacing steps - into `docs/DESIGN.md`. Use the database skills here and write the resulting rules into `docs/ARCHITECTURE.md`. Claude Code then reads a document with real numbers in it and does not need the skill at all.
 
-**The reliable answer is to bake the output in rather than depend on the skill.** Use `ui-ux-pro-max` here, in Cowork, and write its actual conclusions - the hex values, the type scale, the spacing steps - into `docs/DESIGN.md`. Claude Code then reads a document with real values in it and does not need the skill at all. Same for architecture: use `supabase-postgres-best-practices` here, and write the resulting rules into `docs/ARCHITECTURE.md`. This is the single most useful thing this skill does, and it is why the design step happens in Cowork rather than being delegated.
+Do this even when both sides have the skill. A document beats a skill call: it is already decided, it cannot drift between sessions, and it survives a compact. The skill on the Claude Code side becomes a second pair of hands rather than the only source.
 
-Then, as a bonus rather than a dependency: ask the user once whether these skills are also installed on the Claude Code side, and record the answer in `docs/TOOLING.md`. If they are, name them in prompts. If they are not, they can add them from a plugin marketplace when they feel like it, and nothing breaks in the meantime.
+**Where neither side has it, say so and give the fallback in the same breath.** A named gap with a workaround is fine. A silent gap is what wrecks a plan.
 
-The same split applies to MCP servers. Yours are connected to this Cowork session. Claude Code reads its own from `~/.claude.json` and the project's `.mcp.json`.
+## The one dependency that changes what this skill can promise
+
+**A browser-driving tool on the Claude Code side.** Either the Playwright MCP or the `webapp-testing` skill. This is what lets `/checkpoint` click through the work and prove a task is done, rather than assert it. Nothing in Cowork can do this: Cowork has no route to localhost on the user's machine, so the only side that can run the app is the side that lives on it.
+
+Check for it at kickoff and record the answer.
+
+- **Present.** Generate `/checkpoint` with the browser walk in, as written in `claude-code-setup.md`. This is the intended setup.
+- **Absent.** Generate `/checkpoint` with build and typecheck only, and **tell the user plainly what that costs**: Claude Code can now prove the code compiles but not that the feature works, so every Done-when tick lands back on them to click, once, manually. Then offer the fix in the same message - installing the Playwright MCP is a few minutes and it is the highest-value thing they can add to this workflow. Do not quietly generate a weaker `/checkpoint` and say nothing.
+
+Never write a check into `/checkpoint` that the machine cannot run. A command that errors every time trains the user to ignore the output, which is worse than not having the check.
 
 ## Running the scan
 
@@ -30,9 +38,9 @@ ls -la /sessions/<session>/mnt/<project>/.claude/skills/ 2>/dev/null
 cat  /sessions/<session>/mnt/<project>/.mcp.json 2>/dev/null
 ```
 
-Two path traps worth remembering. `device_list_dir` and `device_stage_files` take the real path on the user's own machine (`/Users/<name>/...` on a Mac, `/home/<name>/...` on Linux). `device_bash` runs in a Linux VM where connected folders are mounted at `/sessions/<session>/mnt/<folder-name>` - run `ls mnt/` to get the exact name. And that VM has **no network**, so git reads, node and python work, but `npm install`, `git push` and anything that fetches do not.
+Two path traps worth remembering. `device_list_dir` and `device_stage_files` take the real path on the user's machine (`/Users/<name>/...` or equivalent). `device_bash` runs in a Linux VM where connected folders are mounted at `/sessions/<session>/mnt/<folder-name>` - run `ls mnt/` to get the exact name. And that VM has **no network**, so git reads, node and python work, but `npm install`, `git push` and anything that fetches do not.
 
-**What is on their Mac globally.** You cannot see it. `device_bash` only reaches connected folders, not their home directory, so `~/.claude/skills/` and `~/.claude.json` are out of reach. Ask once at kickoff, write the answer into `docs/TOOLING.md`, and never ask again in that project. That inventory - accounts, CLIs, which MCPs Claude Code has - is the most valuable thing in the file, precisely because it is the part you cannot look up.
+**What is on their machine globally.** You cannot see it. `device_bash` only reaches connected folders, not their home directory, so `~/.claude/skills/` and `~/.claude.json` are out of reach. Ask once at kickoff, write the answer into `docs/TOOLING.md`, and never ask again in that project. That inventory - accounts, CLIs, which MCPs Claude Code has - is the most valuable thing in the file, precisely because it is the part you cannot look up.
 
 ## docs/TOOLING.md
 
@@ -44,15 +52,24 @@ Write what you found into the project so both sides can read it. Keep it short; 
 ## MCP servers
 | Server | Available to | Use it for |
 |---|---|---|
-| Supabase | Cowork + Claude Code | Schema, migrations, RLS advisors, logs. Ask it rather than guessing at the database. |
-| Vercel | Cowork | Deploys, build logs, runtime errors. Check here first when a deploy fails. |
-| GitHub | Cowork | Commits, PRs, issues. |
+| Playwright | Claude Code | Driving a real browser. This is how `/checkpoint` proves a task is done. |
+| Supabase | Both | Schema, migrations, RLS advisors, logs. Ask it rather than guessing at the database. |
+| Vercel | Both | Deploys, build logs, runtime errors. Check here first when a deploy fails. |
+| GitHub | Both | Commits, PRs, issues. |
+| context7 | Claude Code | Current docs for any third-party library. |
 
-## Claude Code skills in this project
-| Skill | Use it for |
-|---|---|
-| `ui-ux-pro-max` | Colours, type pairing, spacing, motion, product patterns |
-| `supabase` | Anything touching Supabase client or auth |
+## Plugins
+Ask whether the user has any Claude Code plugins enabled, and check `/plugin` output if
+they can paste it. **obra/superpowers** matters most: it is common, it loads itself on
+every session, and it will re-open design questions this skill already settled unless
+`CLAUDE.md` tells it not to. See `claude-code-setup.md` for the full handling.
+
+## Skills
+| Skill | Cowork | Claude Code |
+|---|---|---|
+| <e.g. ui-ux-pro-max> | yes | yes |
+| <e.g. dataviz> | yes | no - bake values into DESIGN.md |
+Name the both-sides ones directly in prompts. No hedging.
 
 ## Accounts
 Supabase: project `<ref>`, free tier
@@ -60,22 +77,24 @@ Vercel: hobby, connected to the GitHub repo
 Domain: <where it is registered>
 
 ## Not available
-<Things deliberately not set up, and what to do instead.>
+<Things neither side has, and what to do instead. Be specific: "no browser tool on the
+Claude Code side, so /checkpoint builds and typechecks only and the user clicks the rest."
+This section stops you re-proposing the same missing thing every session.>
 ```
 
 The **Not available** section earns its place. It stops you re-proposing the same missing thing every session.
 
 ## Naming tools in prompts
 
-Add one line to every prompt you hand over. Claude Code will not go looking for a skill it has not been reminded of, and a skill's whole value is that someone already worked out the right answer.
+Add one line to every prompt you hand over. This is the highest-leverage line in the whole skill. Claude Code will not go looking for a skill nobody reminded it of, so an install full of good skills sits unused while it hand-rolls a colour palette from scratch. If the user's Claude Code shows usage counts per skill, look: the ones that get named get used, and the rest read "never used".
 
 ```
 **Use these:** `docs/DESIGN.md` for the palette and type scale - the values there are
-already decided, do not invent new ones. If the `ui-ux-pro-max` skill is installed,
-use it for the component patterns; if not, work from DESIGN.md alone.
+already decided, do not invent new ones. `ui-ux-pro-max` for the component patterns
+and `ux-designer` for the empty state and the error copy.
 ```
 
-Note the hedge. Name a skill Claude Code may not have and you get "I'll use the ui-ux-pro-max skill" followed by improvisation, which is worse than naming nothing. Point at the document first, since that always exists, and treat the skill as an upgrade. Only drop the hedge for a skill you have confirmed is installed.
+Point at the document first, since that always exists and is already decided. Then name the skills, plainly, no conditionals.
 
 Rough mapping from task type to what to name:
 
@@ -84,12 +103,13 @@ Rough mapping from task type to what to name:
 | Any screen or component | `ui-ux-pro-max`, `frontend-design`, plus `docs/DESIGN.md` |
 | Forms, onboarding, empty states, error copy | `ux-designer` |
 | Reviewing UI that already exists | `web-design-guidelines` |
-| Charts, dashboards, KPI tiles | `dataviz` |
 | Database, auth, RLS, migrations | `supabase`, `supabase-postgres-best-practices`, Supabase MCP |
 | React or Next.js structure and performance | `vercel-react-best-practices`, `vercel-composition-patterns` |
 | Page transitions and animation | `vercel-react-view-transitions` |
 | Native iOS or macOS | `apple-hig` |
-| Checking it works before saying done | `webapp-testing` |
+| Checking it works before saying done | Playwright MCP, `webapp-testing` |
+| Any third-party library or API | `context7` MCP for the current docs |
+| Charts, dashboards, KPI tiles | `ui-ux-pro-max`, plus the chart values already in `docs/DESIGN.md` |
 
 For MCP work, name the tool, not just the server: "use the Supabase MCP `get_advisors` to check the RLS policies" beats "use Supabase".
 
