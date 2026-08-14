@@ -36,8 +36,11 @@ Loaded into every Claude Code session, so every line costs tokens forever. Under
 | Run locally | `npm run dev` |
 | Build | `npm run build` |
 | Lint | `npm run lint` |
-| Test | `npm test` |
+| Typecheck | `npx tsc --noEmit` |
 | Deploy | <or "push to main, Vercel deploys automatically"> |
+
+<!-- Add a Test row only once tests actually exist. A command listed here that does
+     not run is worse than no row: /checkpoint will try it and report a false failure. -->
 
 ## Read before you start a task
 - `docs/ROADMAP.md` - what is being built and in what order
@@ -51,7 +54,9 @@ Loaded into every Claude Code session, so every line costs tokens forever. Under
 - One task per session. The task is in `docs/next-prompt.md`. Do that and stop.
 - Use plan mode by default. Show the plan and wait before editing. Skip it only for
   a one-file change that is obviously safe.
-- When the task is done, run `/checkpoint` before doing anything else.
+- When the task is done, run `/checkpoint` before doing anything else. It builds,
+  typechecks, drives the new flow in a browser with the Playwright MCP, then commits
+  and pushes. A task is not done until that has passed.
 - If you are stuck after two real attempts, run `/blocked` instead of guessing again.
   A clear description of the problem is worth more than a third attempt.
 
@@ -61,15 +66,35 @@ Loaded into every Claude Code session, so every line costs tokens forever. Under
 - Ask before adding a dependency that does something the stack already does.
 - <Naming conventions, folder layout, anything that differs from the framework default.>
 
+## Superpowers
+<!-- Include this section ONLY if the user has the superpowers plugin. Leave it out
+     entirely otherwise: instructions about an absent plugin are noise. -->
+The superpowers plugin is installed and loads every session. For this project:
+
+- **Do not run `brainstorming`.** The design work is already done. Requirements are in
+  `docs/ROADMAP.md`, decisions in `docs/ARCHITECTURE.md`, visual rules in `docs/DESIGN.md`.
+  Read those instead of asking. If a task looks wrong against them, say so before you
+  build - that is the review, not a reason to start a fresh design conversation.
+- **Do not run `writing-plans`.** The plan is `docs/ROADMAP.md` and the current task is
+  `docs/next-prompt.md`. Do not write plans into `docs/superpowers/`.
+- **Do use `verification-before-completion`** on every task. Evidence before claims.
+- **Do use `systematic-debugging`** for any bug. Root cause before fixes.
+- **Do use `requesting-code-review`** before anything touching auth, payments or user data.
+- Skip `using-git-worktrees` and `subagent-driven-development`. One task, one branch here.
+
 ## The person you are working with
-Assume the user is not a developer. They may ship fast and understand systems, but they will not
+The user is probably not a developer. They may ship fast and understand systems, but they will not
 catch a bad call by reading a diff. So:
 - Explain what you did in plain English, not in diff summaries.
 - Flag anything irreversible - schema changes, deletions, deploys - before doing it.
 - If a decision has a real trade-off, say so and recommend one. Do not present a menu.
 ```
 
-That last section does more work than it looks like it does. It changes how Claude Code reports back for the whole project.
+Two sections do the heavy lifting there. **Superpowers** stops a plugin that reloads on
+every `/clear` from re-opening decisions that were already made, while keeping the three
+of its skills that genuinely protect someone who cannot read a diff. **The person you
+are working with** changes how Claude Code reports back for the whole project.
+
 
 ---
 
@@ -143,7 +168,7 @@ Built in the design step. Full guidance in `design-brief.md`. The rule that matt
 **Shipped:** <one line on what currently works>
 
 Status key: [ ] not started, [~] in progress, [?] built but not verified,
-[x] done and verified, [!] blocked, ~~cut~~
+[x] done and verified, [!] blocked, [@] waiting on the user, ~~cut~~
 
 ---
 
@@ -151,8 +176,9 @@ Status key: [ ] not started, [~] in progress, [?] built but not verified,
 Goal: something deployed and reachable on the internet.
 
 - [x] `M0-T1` Repo, Next.js app, pushed to GitHub
-- [x] `M0-T2` Deployed to Vercel, custom domain pointing at it
-- [ ] `M0-T3` Supabase project connected, one test read working
+- [@] `M0-T2` **Needs you:** create the Vercel account and connect the GitHub repo
+- [ ] `M0-T3` Deployed to Vercel, custom domain pointing at it
+- [ ] `M0-T4` Supabase project connected, one test read working
 
 ## Phase 1 - <the smallest useful version>
 Goal: <what a user can do at the end of this phase>.
@@ -175,7 +201,8 @@ Not scheduled. Here so they stop taking up space in conversation.
 Rules that keep this useful:
 
 - **IDs are permanent.** `M1-T3` means the same task forever. Never renumber. PROGRESS entries and old prompts point at these.
-- **`[?]` is the honest default** after Claude Code says it is finished. It moves to `[x]` only once you have checked the repo or the user has clicked the thing. This one distinction is what stops a roadmap drifting away from reality.
+- **`[?]` is the honest default** when there is no evidence yet. `/checkpoint` writes `[x]` only after it has built the project and walked the flow in a browser, and `[!]` when either fails. If you are looking at a `[x]` with no build result and no click recorded in PROGRESS.md, treat it as `[?]` and check.
+- **`[@]` is for the steps only the user can do**: creating an account, pasting an API key into Vercel, pointing a domain, approving something in a dashboard. Give these their own task IDs rather than burying them inside a build task, because a build task that secretly needs the user is the most common way a project stalls for a week. Say exactly what they have to do and where.
 - **The three lines at the top** are what the user reads on their phone. Keep them current.
 - Tasks are one session each. If the Definition of Done needs more than four ticks, split it.
 
@@ -192,15 +219,21 @@ Append at the top. Never edit or delete history - a wrong entry that was later c
 
 ## 2026-08-07 - M1-T3 - Sign-up form
 **By:** Claude Code
+**Commit:** `a4f9c21`
 **Built:** Email and password sign-up at `/signup`, wired to Supabase Auth.
 Validation on both sides, error states for taken email and weak password.
 **Files:** `app/signup/page.tsx`, `components/auth-form.tsx`, `lib/supabase/client.ts`
+**Checked:** Build passes, no type errors. Drove it in the browser: signed up with a
+new email and landed on the redirect, then tried the same email again and got the
+"already registered" error rather than a blank page.
 **Not done:** No email verification yet - that is M1-T5.
 **Unsure about:** Redirect after sign-up goes to `/dashboard`, which does not exist yet.
 
-> **Cowork check 2026-08-07:** Verified in the repo. Form and validation are there.
-> Redirect target confirmed missing, added as `M1-T4`. Marked `[x]`.
+> **Cowork check 2026-08-07:** Verified against the deployed preview. Form and
+> validation are there. Redirect target confirmed missing, added as `M1-T4`. Marked `[x]`.
 ```
+
+Two lines carry most of the weight. **Commit** is the project's undo button - without a SHA on every entry, "put it back to before M1-T3" is archaeology rather than a command. **Checked** is what separates a real tick from an optimistic one: it records what was actually clicked and seen, so a later session can tell the difference between verified and assumed.
 
 When you decided something on the user's behalf because you could not ask - which this skill tells you to do constantly - record it here too, so it is visible and cheap to reverse:
 
@@ -238,4 +271,4 @@ The **Unsure about** line is the highest-value line in the file. It is where the
 - Reset the local database: `npx supabase db reset`
 ```
 
-The filter, for both this and the global profile: **would this change a decision next time?** If not, leave it out.
+The filter: **would this change a decision next time?** If not, leave it out.
