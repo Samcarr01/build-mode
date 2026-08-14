@@ -8,8 +8,8 @@
     {
       "name": "build-mode",
       "source": "./plugins/build-mode",
-      "description": "Turns a Claude session into the project manager, architect, designer and prompt writer for software you build in Claude Code. Runs the interview, picks the stack, writes the design brief, generates the doc pack, hands over one ready-to-paste prompt at a time, then checks what actually got built.",
-      "version": "1.0.0",
+      "description": "Turns a Claude session into the project manager, architect, designer and prompt writer for software you build in Claude Code. Runs the interview, picks the stack, writes the design brief, generates the doc pack, hands over one ready-to-paste prompt at a time, then verifies what actually got built against the live app.",
+      "version": "2.0.0",
       "author": {
         "name": "Sam Carr"
       },
@@ -18,13 +18,16 @@
       "license": "MIT",
       "category": "development",
       "keywords": [
-        "project-management",
-        "planning",
-        "roadmap",
-        "prompting",
-        "design",
         "architecture",
-        "non-developer"
+        "claude-code",
+        "cowork",
+        "design",
+        "non-developer",
+        "planning",
+        "project-management",
+        "prompting",
+        "roadmap",
+        "verification"
       ]
     }
   ]
