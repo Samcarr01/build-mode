@@ -20,7 +20,7 @@ Your idea
                     in a real browser, commits and pushes. Ticks it off only if that passed.
    -> The user   : back in Cowork, "done" / "it broke" / "next"
    -> Cowork      : checks the live deploy, opens it in a browser, verifies against
-                DESIGN.md, learns, writes the next prompt
+                DESIGN.md and the mockup, scores the design, learns, writes the next prompt
 ```
 
 Two places check, and they check different things. Claude Code proves the code runs, because it is the only side that can execute anything. Cowork judges whether what runs is what was asked for, because it wrote the spec and holds the design values. The user is the last resort, not the first, and they get one judgement question rather than a test plan.
@@ -39,7 +39,7 @@ Read the request and pick one. When it is ambiguous, read `docs/PROGRESS.md` in 
 | "it's stuck", "this error", "it built the wrong thing" | **Unblock** | [Unblock](#unblock) |
 | "put it back", "undo that", "it was working yesterday" | **Undo** | [Undo](#undo) |
 | "I want to add", "actually let's change", "drop that" | **Replan** | [Replan](#replan) |
-| "make this look better", "the UI is generic" | **Design pass** | [Design pass](#design-pass) |
+| "make this look better", "the UI is generic", "it's boring", a polish task is next, or a Sync design score failed | **Design pass** | [Design pass](#design-pass) |
 | "upgrade my project files", "refresh the setup", an old project missing the current files | **Upgrade** | [Upgrade](#upgrade) |
 
 Every mode starts the same way: **load memory** (below). Sync, Unblock and Undo end with **learn** (below); the others do not, because nothing was found out.
@@ -76,7 +76,8 @@ Use AskUserQuestion once. Do not drip-feed questions across turns. Cover the thi
 - **What it is and who for** - offer 2 or 3 concrete readings of their idea rather than an open question
 - **Smallest useful version** - what must exist on day one for it to be worth using
 - **Money and accounts** - free/paid, and which of Supabase, Vercel, Railway, Stripe, GitHub they already have set up
-- **Look and feel** - offer named directions (e.g. "clean and neutral like Linear", "warm and editorial", "dark and technical")
+
+**Look and feel is not in this round.** It gets its own round in step 4, with pictures. Squeezed into one text question here it gets answers like "dark and technical", and Claude Code builds the most literal grey reading of that.
 
 Everything else you decide. Stack, folder structure, database shape, hosting, libraries. State each call in one line with the reason. If something is genuinely 50/50, pick the reversible option and note it in `docs/ARCHITECTURE.md` under Open questions.
 
@@ -92,9 +93,14 @@ The short version: check what is connected in this session, check what the proje
 
 Read `references/stack-picker.md`. Make the call, write it into `docs/ARCHITECTURE.md`, explain it to the user in two or three lines of plain English with the monthly cost.
 
-### 4. Design brief
+### 4. Design direction and values
 
-Read `references/design-brief.md`. This is the step that stops the app looking like every other AI-generated app, so do not skip it even for internal tools. It produces `docs/DESIGN.md` with real values: fonts, hex codes, spacing scale, component rules, motion. Use `ui-ux-pro-max` for the palette, type pairing and product-type patterns, `frontend-design` for the aesthetic direction, and `apple-hig` when it is a native Apple app.
+Read `references/design-brief.md`. This is the step that stops the app looking like every other AI-generated app, and it guards against both defaults: the 2024 gradient look and the flat grey dev-tool clone that a token-only brief produces. Do not skip it even for internal tools.
+
+Two parts here, the third comes after the roadmap:
+
+- **Design interview, its own `AskUserQuestion` round, three questions max.** A reference URL or two they like the look of (then open them and write down why they work), density (operator console or one thing per screen), and mood chosen from three direction artboards you draft with the `design` skill rather than three adjectives. They pick a picture.
+- **Values and rules.** `ui-ux-pro-max` for the palette, type pairing and product-type patterns, `frontend-design` for the aesthetic direction, `apple-hig` when it is a native Apple app. Write `docs/DESIGN.md` with the Layout, Hierarchy and Copy sections filled in, not just the tokens. Those three sections are what a token sheet misses.
 
 ### 5. Roadmap
 
@@ -104,15 +110,25 @@ Read `references/doc-pack.md` for the exact format. Rules that matter:
 - Tasks are sized to one Claude Code session, roughly 30 to 90 minutes. If you cannot write a Definition of Done in four ticks or fewer, split it.
 - Every task has a stable ID (`M1-T3`). IDs never get reused or renumbered, even when tasks are cut, because PROGRESS.md and past prompts point at them.
 - Order by risk, not by comfort. The thing most likely to break the project goes early.
+- Every milestone that adds a screen ends with a **polish task** (`Mx-Tn Design polish: <screens>`). It gives the design review a scheduled home. If the screens already score well in Sync it is ticked with a note and costs nothing.
 
-### 6. Write the doc pack
+### 6. Screens and mockups
+
+Now the roadmap says which screens Phase 1 builds, so design them. Read the Screens and Mockups sections of `references/design-brief.md`.
+
+For each core screen (three to five, never more): write its entry in the Screens section of `docs/DESIGN.md` (job, hero element, layout, word budget), then draft it with the `design` skill at 1440 wide using the real tokens and real words. The user looks, tweaks if they want, says yes. That yes is the design approval. Render the approved artboards to PNG with Playwright in the workspace and put them in the repo at `docs/design/<screen>.png` with the artboard source beside them.
+
+Every UI prompt from now on names the mockup. A picture in the prompt is what Claude Code follows; a token table is what it fills gaps from. If the `design` skill is unavailable, an ASCII wireframe in the Screens section is the fallback.
+
+### 7. Write the doc pack
 
 Templates for the six `docs/` files are in `references/doc-pack.md`; `docs/TOOLING.md` is in `tooling.md`, the `.claude/` files are in `claude-code-setup.md`, and `docs/next-prompt.md` comes from `prompt-recipes.md`.
 
 ```
 CLAUDE.md                        Claude Code's standing brief. Under 200 lines, hard limit.
 docs/ARCHITECTURE.md             Stack, data model, routes, env vars, decisions, open questions
-docs/DESIGN.md                   The design system, with real values
+docs/DESIGN.md                   The design system: tokens, layout, hierarchy, copy budget, screens
+docs/design/<screen>.png         Approved mockup per core screen, plus its .html source
 docs/ROADMAP.md                  Phases -> milestones -> tasks with IDs and status
 docs/PROGRESS.md                 Append-only build log, newest first
 docs/LEARNINGS.md                Project gotchas worth remembering
@@ -127,7 +143,7 @@ docs/next-prompt.md              The one task Claude Code should do right now
 
 `references/claude-code-setup.md` has the verified syntax for the `.claude/` files. Copy it exactly; wrong frontmatter fails silently and they will not spot it. It also covers the **superpowers** plugin: if the user has it, it loads itself into every Claude Code session and will re-open design questions Cowork already settled unless `CLAUDE.md` tells it not to. Check, and do not skip that block if they do.
 
-**Then check your own work.** You have just written thirteen files and you are about to tell them to type `/next`. Four of them live under `.claude/`, which the file browser hides by default, at nested paths where one wrong character means a skill never loads. Verify before you hand over:
+**Then check your own work.** You have just written the whole doc pack and you are about to tell them to type `/next`. Four of them live under `.claude/`, which the file browser hides by default, at nested paths where one wrong character means a skill never loads. Verify before you hand over:
 
 ```bash
 cd "/sessions/<session>/mnt/<project>"
@@ -138,11 +154,11 @@ python3 -c "import json;json.load(open('.claude/settings.json'))" && echo "setti
 
 Then ask the user to type `/` in Claude Code and tell you whether `next`, `checkpoint` and `blocked` appear. Ten seconds, and it is the only way to catch a skill that silently never loaded.
 
-### 7. Deliver
+### 8. Deliver
 
 Write everything into the connected project folder with `device_commit_files`, and send `CLAUDE.md` and `docs/ROADMAP.md` in chat with `SendUserFile` so the user can skim them on any device.
 
-**If no project folder is connected**, do not just send thirteen files and tell them where to put them. Four of them live inside `.claude/`, which the file browser hides by default, at nested paths like `.claude/skills/checkpoint/SKILL.md`. One wrong path and a skill silently never loads, which is exactly the failure mode they cannot diagnose. Instead, generate a single `setup.sh` that creates the whole tree with heredocs, send that one file, and tell them:
+**If no project folder is connected**, do not just send the doc pack file by file and tell them where to put it. Four of them live inside `.claude/`, which the file browser hides by default, at nested paths like `.claude/skills/checkpoint/SKILL.md`. One wrong path and a skill silently never loads, which is exactly the failure mode they cannot diagnose. Instead, generate a single `setup.sh` that creates the whole tree with heredocs, send that one file, and tell them:
 
 ```
 Save setup.sh into your project folder, then in Terminal:
@@ -152,6 +168,8 @@ Save setup.sh into your project folder, then in Terminal:
 
 That creates all the files. Delete setup.sh afterwards.
 ```
+
+The mockup PNGs cannot travel inside a shell script. Send them with `SendUserFile` as well and say they go in `docs/design/`, or skip the PNGs and leave the `.html` artboard sources in the script so the first connected session can render them.
 
 Then ask them to connect the project folder in the desktop app, so later sessions can verify the build rather than taking Claude Code's word for it.
 
@@ -182,7 +200,9 @@ The user says the work is done. Your job is to find out whether it is.
 
 2. **Look at the deploy.** Vercel MCP `get_deployment` for status, `get_deployment_build_logs` if it failed, `get_runtime_errors` for anything breaking in production. A green deploy of the right commit beats any amount of file reading.
 
-3. **Open the thing.** Drive the deployed URL yourself with `claude-in-chrome`. Click the flow this task added, screenshot it, read the console, then audit it against `docs/DESIGN.md`. You wrote those hex values and that spacing scale, so you are the only one who can tell whether they were followed. Nothing else in the system performs this check, and generic-looking UI is exactly the defect the user struggles to name.
+3. **Open the thing.** Drive the deployed URL yourself with `claude-in-chrome`. Click the flow this task added, screenshot it at 1440 and 390, read the console, then check it against `docs/DESIGN.md` and the screen's mockup in `docs/design/`.
+
+   **If the task touched a screen, score it** with `references/design-review.md`: squint test, five-second test, space used, word count, picture and motion. One point each. Four or five passes. Three or under is a design fail: the task stays `[?]`, you say which checks failed, and the next prompt is a Design pass, not a new feature. Token compliance alone is not a pass; a screen can use every hex value in the file and still be a grey column of text. Nothing else in the system performs this check, and generic-looking UI is exactly the defect the user struggles to name, so do not wait for them to name it.
 
 4. **Then read the repo**, to fill gaps rather than as the main event. `device_bash` sees connected folders at `/sessions/<session>/mnt/<folder-name>`, not the real path on their machine. Run `ls mnt/` if unsure of the name.
    ```bash
@@ -263,7 +283,7 @@ Then check the live picture against it, because the file may be months stale: `L
 
 **5. Merge `docs/TOOLING.md`, never replace it.** It looks like a process file and is not. Accounts, project refs, the **Not available** list and the two-sides inventory are all findings, some of which cost a conversation to establish and cannot be recovered from a template. Add the new sections, correct anything the survey proved wrong, and leave every real value alone.
 
-**6. Never touch the content files.** `ROADMAP.md`, `PROGRESS.md`, `LEARNINGS.md`, `ARCHITECTURE.md`, `DESIGN.md`. These are the project's memory and history. If one is missing a section the current templates have - commit SHAs in PROGRESS entries, the `[@]` status key in ROADMAP - add that section by hand, going forward only. Do not backfill, reformat or tidy. A tidied history is a lost history.
+**6. Never touch the content files.** `ROADMAP.md`, `PROGRESS.md`, `LEARNINGS.md`, `ARCHITECTURE.md`, `DESIGN.md`. These are the project's memory and history. If one is missing a section the current templates have - commit SHAs in PROGRESS entries, the `[@]` status key in ROADMAP, the Layout, Hierarchy, Copy and Screens sections in DESIGN.md - add that section by hand, going forward only. For DESIGN.md that means filling the new sections with real values for this project, not pasting the template; it is the fastest way to lift an older project's screens. Do not backfill, reformat or tidy. A tidied history is a lost history.
 
 **7. Report in three lines**, then hand back. Usually: "`/checkpoint` now builds, clicks through the work in a browser and pushes before ticking anything off. Your roadmap, progress log and design are untouched. Restore point is `a4f9c21` if anything looks wrong."
 
@@ -286,14 +306,16 @@ Be honest about cost. "That adds about two sessions and needs a database change"
 
 ## Design pass
 
-Either the UI looks generic, or a screen needs designing before it gets built.
+Either the UI looks generic, a Sync design score failed, a polish task is due, or a screen needs designing before it gets built.
 
-1. Read `docs/DESIGN.md`. If it does not exist, create it from `references/design-brief.md` first.
-2. Use `ui-ux-pro-max` for concrete values and product-type patterns, `ux-designer` for flows, forms and accessibility, `web-design-guidelines` to audit existing UI code, `dataviz` for anything with charts, `apple-hig` for native Apple apps.
-3. If Figma is connected, `get_design_context` on a Figma URL turns their design into buildable spec, and `use_figma` pushes a built screen back into Figma.
-4. Output a **UI prompt** (recipe in `references/prompt-recipes.md`) with real values in it. "Make it look premium" produces nothing. "Cards at 12px radius, 1px `#E4E4E7` border, no shadow, 24px internal padding, `Inter` 15px/1.5 body" produces the thing.
+1. **Score and diagnose first.** Screenshot the screen at 1440 and 390 and run the five checks in `references/design-review.md`. Its diagnosis table says which of five causes you are looking at: no mockup, no hierarchy spec, the centred-column layout, the copy budget ignored, or vague tokens. Each has a different fix and "make it look better" fixes none of them. Say which one it is in one line.
+2. **Fix the document before the screen.** Read `docs/DESIGN.md`. If it does not exist, or lacks the Layout, Hierarchy, Copy or Screens sections, bring it up to `references/design-brief.md` first. A screen built from a vague file will drift back.
+3. **Mock it up.** If the screen has no mockup in `docs/design/`, draft one with the `design` skill using the real tokens and real words, get the user's yes on the canvas, and commit the PNG. This is the step that was skipped whenever a screen came out wrong.
+4. Use `ui-ux-pro-max` for concrete values and product-type patterns, `ux-designer` for flows, forms and accessibility, `web-design-guidelines` to audit existing UI code, `dataviz` for anything with numbers that deserve a picture, `apple-hig` for native Apple apps.
+5. If Figma is connected, `get_design_context` on a Figma URL turns their design into buildable spec, and `use_figma` pushes a built screen back into Figma.
+6. Output a **UI prompt** (recipe in `references/prompt-recipes.md`) that names the mockup, the hero element, the layout rule and the copy budget, with real values. "Make it look premium" produces nothing. "Match `docs/design/dashboard.png`. Main area fills the viewport on a 12-column grid. Hero stat spans 2 columns at 40px with a sparkline. Cards at 12px radius, 1px `#27272A` border, no shadow, 24px padding. Under 60 words outside the data" produces the thing.
 
-Generic AI-app look comes from defaults: purple-blue gradients, glassmorphism, emoji headings, centred hero with three feature cards, `shadow-lg` everywhere, default Inter at default sizes. Name them in the prompt as things to avoid.
+Generic comes from two defaults, and the prompt names both as things to avoid: the 2024 look (purple-blue gradients, glassmorphism, emoji headings, centred hero with three cards, `shadow-lg`) and the flat clone (grey-on-grey at 13px, monospace everywhere, identical card grids, text-only stat tiles, content in a narrow centred column, no icons, nothing moving).
 
 ---
 
@@ -350,13 +372,14 @@ Read these when the mode calls for them, not upfront.
 | `references/prompt-recipes.md` | Writing any prompt for Claude Code. Recipes per task type plus the anti-patterns. |
 | `references/claude-code-setup.md` | Writing `.claude/` files, or the user asks about Claude Code itself. Verified syntax as of Aug 2026. |
 | `references/stack-picker.md` | Choosing a stack, or hosting, or when they ask why something costs money. |
-| `references/design-brief.md` | Kickoff design step, or a design pass. |
+| `references/design-brief.md` | Kickoff design steps (direction, values, screens, mockups), or a design pass. Has the full DESIGN.md template. |
+| `references/design-review.md` | Sync on any task that touched a screen, and the start of every design pass. The five-check score and the diagnosis table. |
 | `references/memory.md` | The learn step. What is worth recording and what is filler. |
 
 ## Other skills to pull in
 
 Do not rebuild what already exists. `references/tooling.md` has the full task-to-skill mapping and the current inventory of both sides; use it rather than a second copy here.
 
-The ones this skill leans on most, where they are installed: `ui-ux-pro-max` and `frontend-design` for design values, `ux-designer` for flows and copy, `supabase` and `supabase-postgres-best-practices` for anything touching data, `web-design-guidelines` for auditing UI that already exists. None are required. Where one is missing, do the work yourself and write the values into the docs.
+The ones this skill leans on most, where they are installed: `design` for direction artboards and screen mockups the user can look at before anything is coded, `ui-ux-pro-max` and `frontend-design` for design values, `dataviz` for any number that deserves a picture, `ux-designer` for flows and copy, `supabase` and `supabase-postgres-best-practices` for anything touching data, `web-design-guidelines` for auditing UI that already exists. None are required. Where one is missing, do the work yourself and write the values into the docs.
 
 MCPs worth reaching for here: **Supabase**, **Vercel**, **GitHub**, **Figma**, **claude-in-chrome** (for looking at a deployed app yourself). Name in Claude Code prompts: **Playwright**, the reason `/checkpoint` can prove a task is done rather than assert it, and **context7** for current library docs.
