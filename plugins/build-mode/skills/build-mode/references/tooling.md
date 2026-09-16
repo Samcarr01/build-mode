@@ -12,6 +12,8 @@ Cowork and Claude Code load skills from different places. Cowork uses the skills
 
 **Where only Cowork has it, bake the output in instead.** This is the single most useful thing this skill does. Use the design skills here, in Cowork, and write their actual conclusions - the hex values, the type scale, the spacing steps - into `docs/DESIGN.md`. Use the database skills here and write the resulting rules into `docs/ARCHITECTURE.md`. Claude Code then reads a document with real numbers in it and does not need the skill at all.
 
+The `design` skill (the Claude Design canvas) is the clearest case. It is Cowork-only, and it is how the screen mockups in `docs/design/` get made: draft the artboards here, get the user's yes, render them to PNG. Claude Code never needs the skill; it needs the pictures, which it can read.
+
 Do this even when both sides have the skill. A document beats a skill call: it is already decided, it cannot drift between sessions, and it survives a compact. The skill on the Claude Code side becomes a second pair of hands rather than the only source.
 
 **Where neither side has it, say so and give the fallback in the same breath.** A named gap with a workaround is fine. A silent gap is what wrecks a plan.
@@ -69,6 +71,7 @@ every session, and it will re-open design questions this skill already settled u
 |---|---|---|
 | <e.g. ui-ux-pro-max> | yes | yes |
 | <e.g. dataviz> | yes | no - bake values into DESIGN.md |
+| <e.g. design> | yes | no - mockups rendered to docs/design/*.png, which Claude Code reads |
 Name the both-sides ones directly in prompts. No hedging.
 
 ## Accounts
@@ -100,7 +103,8 @@ Rough mapping from task type to what to name:
 
 | Task | Name these |
 |---|---|
-| Any screen or component | `ui-ux-pro-max`, `frontend-design`, plus `docs/DESIGN.md` |
+| Any screen or component | The mockup in `docs/design/`, `docs/DESIGN.md` (§Layout, §Hierarchy, §Copy, §Screens), `ui-ux-pro-max`, `frontend-design` |
+| Stat tiles, sparklines, progress rings | `ui-ux-pro-max` chart patterns, plus the chart tokens in `docs/DESIGN.md` (designed in Cowork with `dataviz` where installed) |
 | Forms, onboarding, empty states, error copy | `ux-designer` |
 | Reviewing UI that already exists | `web-design-guidelines` |
 | Database, auth, RLS, migrations | `supabase`, `supabase-postgres-best-practices`, Supabase MCP |

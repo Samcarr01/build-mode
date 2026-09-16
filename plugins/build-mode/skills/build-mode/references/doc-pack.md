@@ -165,7 +165,7 @@ Reversible: <yes/no, and what it would cost to change>.
 
 ## docs/DESIGN.md
 
-Built in the design step. Full guidance in `design-brief.md`. The rule that matters: **real values only**. "Modern and clean" tells Claude Code nothing. `#0A0A0A` tells it exactly what to do.
+Built in the design step. Full guidance and the template in `design-brief.md`. Two rules that matter. **Real values only**: "modern and clean" tells Claude Code nothing, `#0A0A0A` tells it exactly what to do. **Tokens are not enough**: the file also carries Layout (does the main area fill the viewport or sit in a column), Hierarchy (what leads on each screen, which numbers get a picture), a Copy budget, and a Screens section pointing at the mockups in `docs/design/`. A token-only file produces a token-compliant screen that is still flat and wordy.
 
 ---
 
@@ -197,6 +197,8 @@ Goal: <what a user can do at the end of this phase>.
 - [ ] `M1-T1` <task>
       Done when: <the single most important check>
 - [ ] `M1-T2` <task>
+- [ ] `M1-T6` Design polish: <the screens this phase added>
+      Done when: each screen scores 4 or more on the five checks in the design review
 
 ## Phase 2 - <next>
 ...
@@ -214,6 +216,7 @@ Rules that keep this useful:
 - **IDs are permanent.** `M1-T3` means the same task forever. Never renumber. PROGRESS entries and old prompts point at these.
 - **`[?]` is the honest default** when there is no evidence yet. `/checkpoint` writes `[x]` only after it has built the project and walked the flow in a browser, and `[!]` when either fails. If you are looking at a `[x]` with no build result and no click recorded in PROGRESS.md, treat it as `[?]` and check.
 - **`[@]` is for the steps only the user can do**: creating an account, pasting an API key into Vercel, pointing a domain, approving something in a dashboard. Give these their own task IDs rather than burying them inside a build task, because a build task that secretly needs the user is the most common way a project stalls for a week. Say exactly what they have to do and where.
+- **Every phase that adds a screen ends with a polish task.** It is the scheduled home for the design review in `design-review.md`. If the screens already scored 4 or 5 in Sync, tick it with a note; it costs nothing when the work was right first time.
 - **The three lines at the top** are what the user reads on their phone. Keep them current.
 - Tasks are one session each. If the Definition of Done needs more than four ticks, split it.
 
