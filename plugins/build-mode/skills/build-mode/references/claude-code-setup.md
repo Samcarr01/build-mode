@@ -67,10 +67,14 @@ paths:
 
 # UI rules
 
-Read `docs/DESIGN.md` before building any screen.
+Read `docs/DESIGN.md` before building any screen. If the screen has a mockup in
+`docs/design/`, open the PNG and match it.
 Use the tokens defined there. Do not introduce new colours or font sizes.
 No `shadow-lg`, no purple-to-blue gradients, no emoji in headings.
+No grey-on-grey at 13px, no text-only stat tiles, no content in a narrow centred column.
 ```
+
+That is the short form for illustration. The full rule file this skill generates is in `design-brief.md` under "The paired rule file"; use that one.
 
 Glob patterns support `*`, `**` and brace expansion `{a,b}`. Rules with `paths:` do not survive `/compact` - they reload next time a matching file is read.
 
