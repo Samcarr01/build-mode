@@ -129,30 +129,47 @@ Users land here after logging in. Right now they see a blank page. This is the f
 the rest of the app hangs off, so getting the structure right matters more than the
 detail inside it.
 
-**Read first:** docs/DESIGN.md in full, docs/ARCHITECTURE.md (§Routes)
-**Use these:** the `ui-ux-pro-max` skill for spacing and type scale, `ux-designer`
-for the empty state and nav labels.
+**Read first:** docs/DESIGN.md in full (§Layout, §Hierarchy, §Copy, §Screens > Dashboard),
+docs/ARCHITECTURE.md (§Routes)
+**Match this:** `docs/design/dashboard.png`. Open it before you write a line. The picture
+wins on layout and hierarchy; the token table wins on exact values.
+**Use these:** the `ui-ux-pro-max` skill for the stat tile and sidebar patterns,
+`ux-designer` for the empty state and nav labels.
+
+## The screen in one line
+A stranger should be able to say in five seconds that this is where they see how
+their projects are doing, and that "New project" is the thing to do next.
 
 ## Build
-1. Sidebar nav, 240px, items: <list>. Active state per docs/DESIGN.md.
-2. Main area, max width 1200px, 32px padding.
-3. Empty state: <heading>, <one line of body>, one primary button.
-4. Responsive: sidebar collapses to a top bar below 768px.
+1. Sidebar nav, 240px, items: <list> with Lucide icons at 20px. Active state per DESIGN.md.
+2. Main area fills the rest of the viewport on a 12-column grid, 32px padding.
+   No max width on the page. Page header: title left, primary action button top right.
+3. Stat row: the hero stat (<which>) spans 4 columns at display size with a 7-day
+   sparkline; the three secondary stats span 2 columns each at h1 size.
+   "<ratio stat>" is a progress ring, not a fraction in text.
+4. Recent list below: status pill with colour, title, one-line meta. Rows lift 1px on hover.
+5. Empty state: "<heading, 6 words max>", "<body, 12 words max>", one primary button.
+6. Responsive: at 768 the sidebar collapses to a top bar; at 390 the stat row stacks
+   with the hero first.
 
 ## Constraints
 - Only the tokens in docs/DESIGN.md. No new colours, no new font sizes.
-- No gradients. No glassmorphism. No emoji in headings. No `shadow-lg`.
+- Copy budget: labels 3 words, no helper text on this screen, under 60 words outside
+  the data. Anything explaining how the product works goes in a tooltip.
+- Not the 2024 look: no gradients, glassmorphism, emoji headings, `shadow-lg`.
+- Not the flat clone: no grey-on-grey at 13px, no monospace outside IDs, no grid of
+  identical cards, no text-only stat tiles, no empty side margins, nothing static.
 - Real content, not lorem ipsum. Write the actual words.
-- Do not wire up data. Static layout only, this task.
+- Do not wire up data. Static layout with realistic sample values, this task.
 
 ## Done when
-- [ ] The dashboard renders at `/dashboard` and matches docs/DESIGN.md
-- [ ] Nav highlights the current page
-- [ ] It is usable at 375px wide with no horizontal scrolling
+- [ ] Screenshot at 1440 matches `docs/design/dashboard.png` in layout and hierarchy
+- [ ] The hero stat is visibly the largest element and has its sparkline
+- [ ] It is usable at 390px wide with no horizontal scrolling, hero stat first
 - [ ] Keyboard tab order goes through nav then main, with visible focus rings
 ```
 
-Naming the anti-patterns explicitly is what keeps it from looking AI-generated. They are strong defaults in every model, and a general instruction to "look premium" will not override them.
+Three things make this recipe work, and all three are missing from a token-only prompt. **The picture**: Claude Code reads images, and a mockup settles layout and hierarchy in a way no list of tokens can. **The one-line purpose**: it tells Claude Code what the screen is for, so it can make a hundred small choices in that direction. **Both anti-pattern lists**: the 2024 defaults and the flat clone are each strong pulls in every model, and banning only the first lands you in the second. A general instruction to "look premium" overrides neither.
 
 ### Data model or migration
 

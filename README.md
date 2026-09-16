@@ -7,10 +7,11 @@ built, in what order, to what standard, and whether the thing it just said was f
 actually is. Build Mode is the other half of that pairing.
 
 You describe what you want. It interviews you once, picks the stack and tells you why,
-writes a design brief with real values in it, generates a full doc pack into your repo,
-then hands you one ready-to-paste prompt at a time. When Claude Code reports back, it
-checks the live deploy, opens the app in a browser and verifies the work rather than
-taking the report on trust.
+writes a design brief with real values in it, mocks up the core screens for you to
+approve, generates a full doc pack into your repo, then hands you one ready-to-paste
+prompt at a time. When Claude Code reports back, it checks the live deploy, opens the
+app in a browser, verifies the work and scores the design rather than taking the report
+on trust.
 
 > **Where it runs:** Build Mode is a **Cowork** skill. It does the planning, designing and
 > prompt writing in Cowork, and Claude Code does the building. The two are separate
@@ -18,7 +19,36 @@ taking the report on trust.
 
 ---
 
-## What is new in 2.0
+## What is new in 2.1
+
+2.0 made the build loop honest. 2.1 makes the design loop honest, because a project that
+passed every 2.0 check still came out flat, grey and wordy: every hex value correct, and
+nothing to look at.
+
+- **Design gets its own interview round, with pictures.** After the stack call it asks for
+  a reference URL you like, a density choice, and a mood picked from three direction
+  artboards it draws with the `design` skill. Three adjectives in a text box produced
+  "dark and technical" and the most literal grey reading of it; three pictures do not.
+- **`DESIGN.md` is no longer just tokens.** It now carries Layout (does the main area fill
+  the viewport or sit in a centred column), Hierarchy (what leads on each screen, which
+  numbers get a sparkline or a ring), a Copy budget (labels 3 words, helper text one line
+  and only where needed, under 60 words per screen outside the data) and a Screens section.
+- **Mockups before code.** Each core screen is drafted on the design canvas, you say yes,
+  and the PNG goes into `docs/design/`. Every UI prompt from then on says "match this
+  picture". Claude Code reads images; a mockup settles layout in a way no token table can.
+- **The Never list now bans both defaults.** The 2024 look (gradients, glass, three
+  feature cards) and the flat dev-tool clone (grey-on-grey at 13px, monospace everywhere,
+  identical card grids, text-only stat tiles, content in a narrow column, nothing moving).
+  Banning only the first lands you in the second.
+- **Sync scores the design.** Any task that touched a screen gets five checks: squint
+  test, five-second test, space used, word count, picture and motion. Three or under
+  fails the task and queues a design pass, without you having to say "it looks generic".
+- **A polish task ends every milestone** that adds a screen, so the review has a
+  scheduled home.
+- **Upgrade mode adds the new sections** to `DESIGN.md` in a project already under way,
+  which is the route for lifting an older build.
+
+## What was new in 2.0
 
 Version 1 was a good planner with a weak evidence loop. It could tell Claude Code what to
 build, but nothing in the system ever proved the result worked. Version 2 closes that.
@@ -112,7 +142,8 @@ values into your docs instead. Install them in **Cowork**, alongside Build Mode.
 | `ux-designer` | Flows, forms, onboarding, accessibility, microcopy |
 | `apple-hig` | Native Apple apps, exact measurements and platform conventions |
 | `web-design-guidelines` | Auditing UI code that already exists |
-| `dataviz` | Anything with a chart in it |
+| `dataviz` | Any number that deserves a picture: sparklines, rings, KPI tiles, charts |
+| `design` | Direction artboards and screen mockups you approve before anything is coded. Ships with Cowork |
 
 **Backend and framework**
 
@@ -185,8 +216,8 @@ Your idea
    -> Claude Code : plans, builds, then /checkpoint - builds it, clicks through it
                     in a browser, commits and pushes. Ticks it off only if that passed
    -> You         : back in Cowork, "done" / "it broke" / "next"
-   -> Cowork      : checks the deploy, opens the app, verifies against DESIGN.md,
-                    learns, writes the next prompt
+   -> Cowork      : checks the deploy, opens the app, verifies against DESIGN.md and
+                    the mockup, scores the design, learns, writes the next prompt
 ```
 
 Two places check, and they check different things. Claude Code proves the code runs,
@@ -208,7 +239,7 @@ It reads what you said and picks one:
 | "it's stuck", "this error", "it built the wrong thing" | **Unblock** |
 | "put it back", "undo that", "it was working yesterday" | **Undo** |
 | "I want to add", "actually let's change", "drop that" | **Replan** |
-| "make this look better", "the UI is generic" | **Design pass** |
+| "make this look better", "the UI is generic", "it's boring" | **Design pass** |
 | "upgrade my project files", "refresh the setup" | **Upgrade** |
 
 ---
@@ -222,7 +253,8 @@ It reads what you said and picks one:
 | `docs/PROGRESS.md` | What actually got built, with commit SHAs, newest first |
 | `docs/LEARNINGS.md` | Anything that cost more than ten minutes to figure out |
 | `docs/ARCHITECTURE.md` | Stack call, schema, decisions and why |
-| `docs/DESIGN.md` | Fonts, hex codes, spacing scale, component rules, motion |
+| `docs/DESIGN.md` | Fonts, hex codes, spacing, layout, hierarchy, copy budget, one spec per core screen |
+| `docs/design/*.png` | The approved mockup for each core screen, named in every UI prompt |
 | `docs/TOOLING.md` | What is actually available, so plans do not assume tools you lack |
 | `docs/next-prompt.md` | The current prompt, overwritten each time |
 
@@ -234,11 +266,14 @@ Claude Code touches a UI file.
 
 ## What is actually in here
 
-Eight files. The bulk of it is not prose, it is specifics:
+Nine files. The bulk of it is not prose, it is specifics:
 
 - **`SKILL.md`** - the eight modes, the memory rules, the folder discipline
 - **`references/stack-picker.md`** - default stack and when to deviate, with costs
-- **`references/design-brief.md`** - why AI-built apps all look the same, and the fix
+- **`references/design-brief.md`** - the two ways AI-built apps all look the same, and the
+  full `DESIGN.md` template with layout, hierarchy, copy budget and screens
+- **`references/design-review.md`** - the five-check design score Sync runs, and the
+  diagnosis table a design pass starts from
 - **`references/doc-pack.md`** - exact templates for every document
 - **`references/prompt-recipes.md`** - the six-part prompt shape, plus worked recipes for
   a new screen, a third-party integration, an LLM feature and a bug report
