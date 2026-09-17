@@ -122,7 +122,7 @@ Every UI prompt from now on names the mockup. A picture in the prompt is what Cl
 
 ### 7. Write the doc pack
 
-Templates for the six `docs/` files are in `references/doc-pack.md`; `docs/TOOLING.md` is in `tooling.md`, the `.claude/` files are in `claude-code-setup.md`, and `docs/next-prompt.md` comes from `prompt-recipes.md`.
+Templates for the six `docs/` files are in `references/doc-pack.md`; `docs/TOOLING.md` is in `tooling.md`, the `.claude/` files including the two subagents are in `claude-code-setup.md`, and `docs/next-prompt.md` comes from `prompt-recipes.md`.
 
 ```
 CLAUDE.md                        Claude Code's standing brief. Under 200 lines, hard limit.
@@ -137,28 +137,31 @@ docs/next-prompt.md              The one task Claude Code should do right now
 .claude/skills/next/SKILL.md     /next      - do the task in docs/next-prompt.md
 .claude/skills/checkpoint/SKILL.md  /checkpoint - build, click it, then record, commit and push
 .claude/skills/blocked/SKILL.md  /blocked   - write a blocker report the user can paste back here
+.claude/agents/code-reviewer.md  Read-only reviewer subagent, named before /checkpoint in every non-trivial prompt
+.claude/agents/test-debug-runner.md  Test and debug subagent, named first in every debugging prompt
 .claude/rules/design.md          Design rules, auto-loaded only when touching UI files
 .claude/settings.json            Permissions
 ```
 
 `references/claude-code-setup.md` has the verified syntax for the `.claude/` files. Copy it exactly; wrong frontmatter fails silently and they will not spot it. It also covers the **superpowers** plugin: if the user has it, it loads itself into every Claude Code session and will re-open design questions Cowork already settled unless `CLAUDE.md` tells it not to. Check, and do not skip that block if they do.
 
-**Then check your own work.** You have just written the whole doc pack and you are about to tell them to type `/next`. Four of them live under `.claude/`, which the file browser hides by default, at nested paths where one wrong character means a skill never loads. Verify before you hand over:
+**Then check your own work.** You have just written the whole doc pack and you are about to tell them to type `/next`. Six of them live under `.claude/`, which the file browser hides by default, at nested paths where one wrong character means a skill never loads. Verify before you hand over:
 
 ```bash
 cd "/sessions/<session>/mnt/<project>"
-ls .claude/skills/*/SKILL.md .claude/rules/design.md
+ls .claude/skills/*/SKILL.md .claude/rules/design.md .claude/agents/*.md
 head -3 .claude/skills/*/SKILL.md          # each must open with --- and a description:
+head -3 .claude/agents/*.md                # each must open with --- and a name:
 python3 -c "import json;json.load(open('.claude/settings.json'))" && echo "settings ok"
 ```
 
-Then ask the user to type `/` in Claude Code and tell you whether `next`, `checkpoint` and `blocked` appear. Ten seconds, and it is the only way to catch a skill that silently never loaded.
+Then ask the user to type `/` in Claude Code and tell you whether `next`, `checkpoint` and `blocked` appear, and to type `@` and tell you whether `code-reviewer (agent)` and `test-debug-runner (agent)` appear. Ten seconds, and it is the only way to catch a file that silently never loaded. If the project had no `.claude/agents/` folder when their Claude Code session started, the agents need one restart of Claude Code to show up; skills do not.
 
 ### 8. Deliver
 
 Write everything into the connected project folder with `device_commit_files`, and send `CLAUDE.md` and `docs/ROADMAP.md` in chat with `SendUserFile` so the user can skim them on any device.
 
-**If no project folder is connected**, do not just send the doc pack file by file and tell them where to put it. Four of them live inside `.claude/`, which the file browser hides by default, at nested paths like `.claude/skills/checkpoint/SKILL.md`. One wrong path and a skill silently never loads, which is exactly the failure mode they cannot diagnose. Instead, generate a single `setup.sh` that creates the whole tree with heredocs, send that one file, and tell them:
+**If no project folder is connected**, do not just send the doc pack file by file and tell them where to put it. Six of them live inside `.claude/`, which the file browser hides by default, at nested paths like `.claude/skills/checkpoint/SKILL.md`. One wrong path and a skill silently never loads, which is exactly the failure mode they cannot diagnose. Instead, generate a single `setup.sh` that creates the whole tree with heredocs, send that one file, and tell them:
 
 ```
 Save setup.sh into your project folder, then in Terminal:
@@ -183,10 +186,34 @@ Finish with the handover block (below).
 2. Pick the next task. Usually the top unticked item, but override when a blocker, a dependency or something learnt last session changes the order - say so in one line if you do.
 3. Write the prompt using `references/prompt-recipes.md`. Pick the recipe that matches the task type.
 4. **Name the tools.** Read `docs/TOOLING.md` and put a "Use these" line in the prompt listing the specific skills and MCP servers for this task. Name directly whatever `docs/TOOLING.md` confirms is on the Claude Code side, and do not hedge on those. Left to itself Claude Code will hand-roll what an installed skill already does well: write the palette from scratch instead of using `ui-ux-pro-max`, guess at a schema instead of asking the Supabase MCP, work from memory instead of pulling current docs with `context7`. A skill nobody names is a skill that never runs. One line, and it changes the output.
-5. Overwrite `docs/next-prompt.md` in the repo with it, and paste the same prompt in chat inside a code block.
-6. Handover block.
+5. **Add the review line.** In the prompt's Before-you-finish section, before the `/checkpoint` line, put: `Run @agent-code-reviewer on the files you changed. Fix anything it marks critical or warning, say what you changed, then run /checkpoint.` Leave it out only for the same trivial one-file change that skips plan mode, and for the scaffold task. See [Subagents in the loop](#subagents-in-the-loop).
+6. Overwrite `docs/next-prompt.md` in the repo with it, and paste the same prompt in chat inside a code block.
+7. Handover block.
 
 The prompt is the product here. A weak prompt costs the user an hour of Claude Code going the wrong way. `references/prompt-recipes.md` is worth reading in full every time until the shape is second nature.
+
+---
+
+## Subagents in the loop
+
+Two subagents ship with every project, and they are named at two fixed points in the prompts. Nothing else in the loop is delegated. A subagent is a second Claude with a fresh context window that does one scoped job and returns a summary, so it pays off on verbose, self-contained work that benefits from a fresh pair of eyes (review, test output), and loses on work that shares context or needs the user in the conversation (planning, building a task, `/checkpoint`). Both draw on the user's normal usage limits. The templates are in `references/claude-code-setup.md` under Project subagents.
+
+| Where | Subagent | What it does |
+|---|---|---|
+| Every non-trivial prompt, Before you finish | `@agent-code-reviewer` | Read-only review of the changed files before `/checkpoint`. It cannot edit, run commands or call MCP, so it cannot damage anything, and it is the only code review the work gets besides the plan, because the user cannot read a diff. |
+| Every debugging prompt, Use these | `@agent-test-debug-runner` | Reproduces the failure with the narrowest command and reports the cause and a fix plan. It cannot edit. Then the fix happens in the main session, where the user can see it. The verbose test output never enters the main context. |
+
+**What is not delegated, and why.**
+
+- **Building.** The steps of one task depend on each other (schema, then API, then screen) and touch the same files. Those are the two cases Anthropic's docs say never to parallelise. Do not write "use a subagent for the API and another for the UI" into a Build section. If a task genuinely splits into independent pieces, split it into two tasks on the roadmap; the loop tracks tasks, not workers, and the user cannot review what three workers did.
+- **`/next` and `/checkpoint`.** Plan approval needs the user in the conversation, and `/checkpoint` is the evidence they rely on. Neither runs in a subagent.
+- **Research.** Claude Code already spawns its built-in Explore and Plan subagents in plan mode. No prompt change needed.
+- **Deploy and log checks.** Sync and Unblock read the hosting MCPs from here and hand the evidence to the prompt. A deploy-checking subagent in Claude Code would duplicate that.
+- **Superpowers' `subagent-driven-development` and `using-git-worktrees`** stay off, as before. Its `requesting-code-review` is replaced by the project reviewer so there is one reviewer, not two.
+
+Do not add a third agent to a project. More specialists make Claude Code's routing worse, not better. If the reviewer's reports are consistently empty on real work, raise its `maxTurns` or move it to a stronger model before adding anyone else.
+
+**Cost control.** Both run on Sonnet with a turn cap and a 400-word report. The reviewer is one extra bounded call per task; on a small project it measured at about a tenth of the session. If `/usage` in Claude Code shows subagents taking a large share, lower the reviewer's `effort` to `low` before dropping it. Subagents cannot see the main conversation, so the delegation line names the files; that is why Next task step 5 says "the files you changed".
 
 ---
 
@@ -229,7 +256,7 @@ Something broke. Do not guess.
 
 1. Get the actual error text, not a paraphrase. Ask for a paste if you do not have it.
 2. Read the relevant files in the repo. Check `docs/LEARNINGS.md` - this may have bitten before.
-   If the user has the superpowers plugin, name `superpowers:systematic-debugging` in the prompt: it forces root cause before fixes, which is the whole game here.
+   Name `@agent-test-debug-runner` first in the prompt's Use-these line, to reproduce the failure and locate the cause without editing anything. If the user has the superpowers plugin, also name `superpowers:systematic-debugging` for the fix in the main session: it forces root cause before fixes, which is the whole game here. See [Subagents in the loop](#subagents-in-the-loop).
 3. Use the tools that know: Supabase MCP `get_advisors` and `get_logs` for database and auth, Vercel MCP `get_runtime_errors` and `get_deployment_build_logs` for deploys, `supabase-postgres-best-practices` for SQL and RLS.
 4. Write a **debugging prompt** using the recipe in `references/prompt-recipes.md`. It names the symptom, the two or three most likely causes in order, the files to look at, and how to tell when it is actually fixed. It does not tell Claude Code the answer unless you are certain, because a confident wrong diagnosis sends it down a hole.
 5. Whatever the cause turns out to be, it goes in `docs/LEARNINGS.md`. Blockers are the highest-value learnings there are.
@@ -271,6 +298,7 @@ If the tree is dirty, stop and say so: uncommitted work means an undo would take
 **2. Survey what is actually there.** Read, do not assume:
 
 - `.claude/skills/*/SKILL.md` - which of the three exist, and does `/checkpoint` already build, click and push, or is it the old notes-only version?
+- `.claude/agents/` - do the two subagents exist, and does `CLAUDE.md` still point at `requesting-code-review` instead of the project reviewer?
 - `.claude/rules/`, `.claude/settings.json`, `.mcp.json`
 - `docs/TOOLING.md` - **this is the record of what is connected.** Accounts, project refs, which MCPs each side has, what is deliberately not set up.
 - `docs/ROADMAP.md` and `PROGRESS.md` - where the build actually is, so nothing you say contradicts it
@@ -279,7 +307,7 @@ Then check the live picture against it, because the file may be months stale: `L
 
 **3. Say what you will change, and get a yes.** Three short lists: files being replaced, files being merged, files not being touched. They are halfway through a build and the fear is that this eats their work, so showing the blast radius before you act is most of the job.
 
-**4. Replace only the pure-process files.** The three skills in `.claude/skills/`, `.claude/rules/design.md`, `.claude/settings.json`. These describe how the project is worked on and contain nothing discovered, so a fresh copy is safe. Preserve any project-specific `allow` rules already in `settings.json` rather than flattening it back to the default.
+**4. Replace only the pure-process files.** The three skills in `.claude/skills/`, the two subagents in `.claude/agents/`, `.claude/rules/design.md`, `.claude/settings.json`. These describe how the project is worked on and contain nothing discovered, so a fresh copy is safe. Preserve any project-specific `allow` rules already in `settings.json` rather than flattening it back to the default. When adding the subagents to a project that had none, fill the reviewer's data-isolation line from `docs/ARCHITECTURE.md`, and tell the user Claude Code needs one restart to see them.
 
 **5. Merge `docs/TOOLING.md`, never replace it.** It looks like a process file and is not. Accounts, project refs, the **Not available** list and the two-sides inventory are all findings, some of which cost a conversation to establish and cannot be recovered from a template. Add the new sections, correct anything the survey proved wrong, and leave every real value alone.
 
@@ -370,7 +398,7 @@ Read these when the mode calls for them, not upfront.
 | `references/tooling.md` | Kickoff capability scan, or before naming tools in a prompt. Current inventory of both sides plus the task-to-skill mapping. |
 | `references/doc-pack.md` | Creating or updating any of the project docs. Has the exact templates. |
 | `references/prompt-recipes.md` | Writing any prompt for Claude Code. Recipes per task type plus the anti-patterns. |
-| `references/claude-code-setup.md` | Writing `.claude/` files, or the user asks about Claude Code itself. Verified syntax as of Aug 2026. |
+| `references/claude-code-setup.md` | Writing `.claude/` files, or the user asks about Claude Code itself. Verified syntax as of Sep 2026, including the two subagent templates. |
 | `references/stack-picker.md` | Choosing a stack, or hosting, or when they ask why something costs money. |
 | `references/design-brief.md` | Kickoff design steps (direction, values, screens, mockups), or a design pass. Has the full DESIGN.md template. |
 | `references/design-review.md` | Sync on any task that touched a screen, and the start of every design pass. The five-check score and the diagnosis table. |
