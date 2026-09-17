@@ -29,9 +29,13 @@ Every prompt has the same six parts, in this order. The order matters: context b
 - [ ] `npm run build` completes and there are no new type errors
 
 ## Before you finish
+- Run `@agent-code-reviewer` on the files you changed. Fix anything it marks critical
+  or warning, say what you changed, then run `/checkpoint`.
 - Run `/checkpoint`. It builds, clicks through what you made, then commits and pushes.
 - Do not start the next task.
 ```
+
+The reviewer line is left out of exactly two prompts: the scaffold task, which is generated boilerplate, and a trivial one-file change, the same case that skips plan mode. Everything else gets it. The reviewer cannot edit, so "fix anything it marks" is an instruction to the main session, and the prompt names the files because a subagent cannot see the conversation.
 
 And a plan-mode line at the top of every prompt except a trivial one-file change:
 
@@ -194,9 +198,9 @@ what is already there.
 - Migrations only. Anything done by hand in the dashboard is lost on the next environment.
 - Every table gets RLS. A table without it is readable by anyone with the public key.
 - Do not drop or rename an existing column without flagging it first.
-- If superpowers is installed, run `superpowers:requesting-code-review` before you
-  finish. This touches user data, and a second model reading it is the only review
-  it will get.
+- Run `@agent-code-reviewer` on the migration and the code that calls it before you
+  finish, even if the change is small. This touches user data, and a second model
+  reading it is the only review it will get.
 
 ## Done when
 - [ ] The migration applies cleanly to a fresh database
@@ -312,7 +316,9 @@ Different shape. The goal is a good diagnosis, not a fast fix.
 2. <Second>
 3. <Third>
 
-**Use these:** `superpowers:systematic-debugging` if installed - root cause before fixes.
+**Use these:** `@agent-test-debug-runner` first, to reproduce the failure with the
+narrowest command and report the cause without editing anything. Then
+`superpowers:systematic-debugging` if installed - root cause before fixes.
 <Plus Supabase MCP get_logs / Vercel MCP get_runtime_errors / etc.>
 
 ## How to approach it
@@ -356,6 +362,8 @@ Do not put your suspected answer in the Build section unless you are genuinely c
 Things that reliably produce bad sessions.
 
 **Multiple tasks in one prompt.** "Build auth and the dashboard and wire up billing" gets you three half-finished things and a context window with no room left. One task.
+
+**Splitting one task across subagents.** "Use a subagent for the API and another for the UI" sounds efficient and is not. The steps of one task depend on each other and touch the same files, which are the two cases Anthropic says never to parallelise, and the user cannot review what three workers did. Subagents appear in exactly two places: the reviewer before `/checkpoint`, and the test runner at the start of a debugging prompt. If a task really has independent halves, it is two tasks on the roadmap.
 
 **Vague quality words.** "Make it clean and modern", "production-ready", "polished". These mean nothing operationally, so the model falls back on its defaults, which is exactly the generic look you were trying to avoid. Replace with values and constraints.
 

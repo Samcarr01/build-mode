@@ -19,6 +19,35 @@ on trust.
 
 ---
 
+## What is new in 2.2
+
+2.1 made the design loop honest. 2.2 gives the build loop a second pair of eyes, in the
+two places where a fresh context actually helps and nowhere else.
+
+- **Every project now ships two Claude Code subagents.** `code-reviewer` is read-only
+  (it has no edit, shell or MCP tools, so it cannot touch the code it judges) and runs
+  before `/checkpoint` on every non-trivial task, with the stack's data-isolation check
+  built in: RLS on Supabase, tenant scoping in the API layer, or none for a single-user
+  app. `test-debug-runner` opens every debugging prompt: it reproduces the failure with
+  the narrowest command and reports the cause and a fix plan without applying it, so the
+  test noise never lands in the main conversation.
+- **They are named at two fixed points in the prompts**, by `@agent-` mention so they
+  are guaranteed to run: the reviewer in Before-you-finish, the runner in the debugging
+  recipe's Use-these line. The scaffold task and trivial one-file changes skip the
+  reviewer.
+- **Nothing else is delegated, on purpose.** Building stays in the main session, because
+  the steps of one task depend on each other and touch the same files. `/next` and
+  `/checkpoint` stay where you can see them. Research already uses Claude Code's built-in
+  Explore agent. Splitting a task across subagents is now a named anti-pattern.
+- **One reviewer, not two.** If you have the superpowers plugin, `CLAUDE.md` now points it
+  at the project reviewer instead of `requesting-code-review`.
+- **Upgrade mode adds the two agents** to a project already under way and reminds you
+  that Claude Code needs one restart to see a new `.claude/agents/` folder.
+- **Measured, not assumed.** Both agents were tested on a planted bug (a lookup that took
+  a tenant id and never used it). The reviewer named the line and called it critical, the
+  runner reproduced it in one command, neither edited a file, and together they cost about
+  a tenth of that session.
+
 ## What is new in 2.1
 
 2.0 made the build loop honest. 2.1 makes the design loop honest, because a project that
@@ -181,9 +210,10 @@ developer who has not planned yet. Build Mode assumes the planning already happe
 somewhere else, with the person who could not do it alone.
 
 Build Mode resolves it in the `CLAUDE.md` it writes: skip `brainstorming` and
-`writing-plans`, keep `verification-before-completion`, `systematic-debugging` and
-`requesting-code-review`. Those three are genuinely excellent for someone who cannot
-review code, so this is a merge rather than a fight.
+`writing-plans`, keep `verification-before-completion` and `systematic-debugging`, and
+use the project's own `code-reviewer` agent in place of `requesting-code-review` so there
+is one reviewer rather than two. Those skills are genuinely excellent for someone who
+cannot review code, so this is a merge rather than a fight.
 
 If you do not have superpowers, Build Mode leaves the block out entirely.
 
@@ -259,7 +289,8 @@ It reads what you said and picks one:
 | `docs/next-prompt.md` | The current prompt, overwritten each time |
 
 It also sets up `.claude/skills/` in the repo so you get `/next`, `/checkpoint` and
-`/blocked` inside Claude Code, plus a `paths:`-scoped design rule that only loads when
+`/blocked` inside Claude Code, `.claude/agents/` with the read-only `code-reviewer` and
+the `test-debug-runner`, plus a `paths:`-scoped design rule that only loads when
 Claude Code touches a UI file.
 
 ---
@@ -277,9 +308,9 @@ Nine files. The bulk of it is not prose, it is specifics:
 - **`references/doc-pack.md`** - exact templates for every document
 - **`references/prompt-recipes.md`** - the six-part prompt shape, plus worked recipes for
   a new screen, a third-party integration, an LLM feature and a bug report
-- **`references/claude-code-setup.md`** - verified `CLAUDE.md`, `.claude/rules/` and skill
-  frontmatter syntax, permission modes, the superpowers handling, the traps that fail
-  silently
+- **`references/claude-code-setup.md`** - verified `CLAUDE.md`, `.claude/rules/`, skill and
+  subagent frontmatter syntax, the two subagent templates, permission modes, the
+  superpowers handling, the traps that fail silently
 - **`references/tooling.md`** - the capability scan and the skill-visibility gap
 - **`references/memory.md`** - what to write down and what to leave out
 
@@ -303,7 +334,7 @@ Tell it you read code fluently and it dials back the explaining.
   JavaScript.
 - Costs are quoted in pounds per month. Change that line in `SKILL.md` if you want
   another currency.
-- Verified against Claude Code as of August 2026. It moves fast, so check the live docs at
+- Verified against Claude Code as of September 2026 (v2.1.274). It moves fast, so check the live docs at
   [code.claude.com](https://code.claude.com/docs) if something behaves differently to the
   `claude-code-setup.md` reference.
 

@@ -89,7 +89,8 @@ The superpowers plugin is installed and loads every session. For this project:
   `docs/next-prompt.md`. Do not write plans into `docs/superpowers/`.
 - **Do use `verification-before-completion`** on every task. Evidence before claims.
 - **Do use `systematic-debugging`** for any bug. Root cause before fixes.
-- **Do use `requesting-code-review`** before anything touching auth, payments or user data.
+- **Run the project's `code-reviewer` agent** before `/checkpoint` on any task that changes
+  more than one file. Do not also run `requesting-code-review`; one reviewer, not two.
 - Skip `using-git-worktrees` and `subagent-driven-development`. One task, one branch here.
 
 ## The person you are working with
