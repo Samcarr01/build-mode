@@ -37,17 +37,19 @@ Loaded into every Claude Code session, so every line costs tokens forever. Under
 | Build | `npm run build` |
 | Lint | `npm run lint` |
 | Typecheck | `npx tsc --noEmit` |
-| Deploy | <or "push to main, Vercel deploys automatically"> |
+| Deploy | <e.g. "push to main, Vercel deploys automatically", "push to main, Railway deploys web and worker", or `fly deploy` (a push alone deploys nothing)> |
 
 ## Deploying
 <!-- /checkpoint reads this before it pushes anything. Be exact. -->
 Pushing `main`: <does it deploy? does it run migrations? does it reach real users?>
 Who decides: <"ask me first" or "push freely, deploys are manual">
 
-<e.g. "Pushing main auto-deploys both services and runs migrations against the
-production database first. Never push without asking." or "Vercel builds a preview
-per branch. Pushing main deploys, but there is no database, so it is cheap to get
-wrong. Push freely.">
+<e.g. "Railway deploys the web and worker services on every push to main, and the
+pre-deploy command runs migrations against the production database first. Never push
+without asking." or "Vercel builds a preview per branch. Pushing main deploys, but
+there is no database, so it is cheap to get wrong. Push freely." or "Pushing deploys
+nothing. Deploys are `fly deploy`, run by the user. Push freely; never run the deploy
+command yourself.">
 
 <!-- Add a Test row only once tests actually exist. A command listed here that does
      not run is worse than no row: /checkpoint will try it and report a false failure. -->
@@ -120,9 +122,9 @@ person you are working with** changes how Claude Code reports back for the whole
 |---|---|---|
 | Frontend | <e.g. Next.js 15, App Router> | <one line> |
 | Styling | <e.g. Tailwind + shadcn/ui> | <one line> |
-| Database | <e.g. Supabase Postgres> | <one line> |
-| Auth | <e.g. Supabase Auth, email + Google> | <one line> |
-| Hosting | <e.g. Vercel> | <one line> |
+| Database | <e.g. Supabase Postgres, or Railway Postgres + Drizzle> | <one line> |
+| Auth | <e.g. Supabase Auth, email + Google, or Better Auth> | <one line> |
+| Hosting | <e.g. Vercel, or Railway project `<name>` with services web/worker, or Netlify> | <one line: why this host, and "user's choice" if they named it> |
 | Payments | <e.g. Stripe, or "none yet"> | <one line> |
 
 Running cost: about £<n> a month at launch. <What starts costing money and when.>
@@ -137,7 +139,10 @@ this is the thing most expensive to change later, so it is worth being explicit.
 | id | uuid | primary key |
 | ... | | |
 
-Access rules: <who can read and write what. For Supabase, the RLS policy in words.>
+Access rules: <who can read and write what. Supabase: the RLS policy in words.
+Postgres without RLS (Railway Postgres, most other hosts): name the one helper or
+middleware that scopes every query by the signed-in user or organisation, and the
+rule that nothing queries around it.>
 
 ## Routes and screens
 | Path | What it is | Auth |
@@ -149,7 +154,12 @@ Access rules: <who can read and write what. For Supabase, the RLS policy in word
 | Name | What it is | Where it comes from |
 |---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | Supabase dashboard, Settings > API |
+| `DATABASE_URL` | Postgres connection string (Railway Postgres) | Railway reference variable `${{Postgres.DATABASE_URL}}`, private network |
 | ... | | |
+
+Set every value in the host's dashboard or CLI, never in a committed file. Say
+where in the third column, because "where do I put this key" is the question that
+stalls a project for a day.
 
 ## Decisions
 Newest first. Record anything you would otherwise be asked to re-justify.
@@ -188,9 +198,11 @@ Status key: [ ] not started, [~] in progress, [?] built but not verified,
 Goal: something deployed and reachable on the internet.
 
 - [x] `M0-T1` Repo, Next.js app, pushed to GitHub
-- [@] `M0-T2` **Needs you:** create the Vercel account and connect the GitHub repo
-- [ ] `M0-T3` Deployed to Vercel, custom domain pointing at it
-- [ ] `M0-T4` Supabase project connected, one test read working
+- [@] `M0-T2` **Needs you:** create the <host> account and project, and connect the
+      GitHub repo
+- [ ] `M0-T3` Deployed to <host>, `/version` on the live URL shows the pushed commit
+- [@] `M0-T4` **Needs you:** point the custom domain at it (skip until there is one)
+- [ ] `M0-T5` Database connected, one test read working
 
 ## Phase 1 - <the smallest useful version>
 Goal: <what a user can do at the end of this phase>.
@@ -212,11 +224,27 @@ Not scheduled. Here so they stop taking up space in conversation.
 - ~~`M1-T5` <task>~~ - <why it went>
 ```
 
+Phase 0 changes shape with the host, so write it for the one in `docs/ARCHITECTURE.md`:
+
+- **Vercel**: as above. `M0-T2` is "create the Vercel project from the GitHub repo".
+- **Railway with Supabase**: `M0-T2` is "create the Railway project, add a service
+  from the GitHub repo, generate a domain". Migrations stay with Supabase, as on Vercel.
+- **Railway with Railway Postgres**: add `[@]` **Needs you:** add a Postgres service
+  to the Railway project and set `DATABASE_URL` on the web service to
+  `${{Postgres.DATABASE_URL}}`. Then the database build task adds Drizzle, the first
+  migration, and `"deploy": { "preDeployCommand": [...] }` in `railway.json` so
+  migrations run on every deploy, and records that in the Deploying section of
+  `CLAUDE.md`. Then `[@]` **Needs you:** switch on scheduled backups for the Postgres
+  volume, before any real data exists.
+- **A host that deploys by command** (Fly.io, a VPS): the Deploying section of
+  `CLAUDE.md` carries the exact deploy command, `/checkpoint` pushes but never runs it,
+  and the user deploys before each Sync.
+
 Rules that keep this useful:
 
 - **IDs are permanent.** `M1-T3` means the same task forever. Never renumber. PROGRESS entries and old prompts point at these.
 - **`[?]` is the honest default** when there is no evidence yet. `/checkpoint` writes `[x]` only after it has built the project and walked the flow in a browser, and `[!]` when either fails. If you are looking at a `[x]` with no build result and no click recorded in PROGRESS.md, treat it as `[?]` and check.
-- **`[@]` is for the steps only the user can do**: creating an account, pasting an API key into Vercel, pointing a domain, approving something in a dashboard. Give these their own task IDs rather than burying them inside a build task, because a build task that secretly needs the user is the most common way a project stalls for a week. Say exactly what they have to do and where.
+- **`[@]` is for the steps only the user can do**: creating an account, pasting an API key into the host's dashboard, pointing a domain, approving something in a dashboard. Give these their own task IDs rather than burying them inside a build task, because a build task that secretly needs the user is the most common way a project stalls for a week. Say exactly what they have to do and where.
 - **Every phase that adds a screen ends with a polish task.** It is the scheduled home for the design review in `design-review.md`. If the screens already scored 4 or 5 in Sync, tick it with a note; it costs nothing when the work was right first time.
 - **The three lines at the top** are what the user reads on their phone. Keep them current.
 - Tasks are one session each. If the Definition of Done needs more than four ticks, split it.
