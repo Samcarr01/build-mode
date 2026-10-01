@@ -33,6 +33,8 @@ Never write a check into `/checkpoint` that the machine cannot run. A command th
 
 **What is connected here.** `ListSkills` for the skills on their account, `ListConnectors` for the MCP servers wired into this session. If a job needs a connector they do not have, `SearchMcpRegistry` then `SuggestConnectors` rather than working around the gap.
 
+**The host gets checked specifically**, because Sync and Unblock lean on it more than on anything else. Is the host from the interview connected here (Vercel and Railway both have Claude connectors)? Does Claude Code have its MCP or CLI? For a host other than those two, search its docs for "Claude Code" and "MCP"; many now publish both. Whatever you find goes in the Hosting section below, and whatever is missing goes in **Not available** with the fallback.
+
 **What the project already has.** If the project folder is connected, list it:
 
 ```bash
@@ -56,7 +58,7 @@ Write what you found into the project so both sides can read it. Keep it short; 
 |---|---|---|
 | Playwright | Claude Code | Driving a real browser. This is how `/checkpoint` proves a task is done. |
 | Supabase | Both | Schema, migrations, RLS advisors, logs. Ask it rather than guessing at the database. |
-| Vercel | Both | Deploys, build logs, runtime errors. Check here first when a deploy fails. |
+| <Host: Vercel / Railway / yours> | <Both / Cowork / none> | Deploys, build logs, runtime errors. Check here first when a deploy fails. Keep the row for this project's host and delete the others. |
 | GitHub | Both | Commits, PRs, issues. |
 | context7 | Claude Code | Current docs for any third-party library. |
 
@@ -74,9 +76,21 @@ every session, and it will re-open design questions this skill already settled u
 | <e.g. design> | yes | no - mockups rendered to docs/design/*.png, which Claude Code reads |
 Name the both-sides ones directly in prompts. No hedging.
 
+## Hosting
+<!-- Sync and Unblock read this. /checkpoint reads the Deploying section of CLAUDE.md
+     instead, so keep the two saying the same thing. Fill every line; "unknown" is a finding. -->
+Host: <Vercel project `<name>` | Railway project `<name>`, services web/worker/postgres | Netlify site `<name>` | ...>
+Live URL: <https://...> (Sync opens this, and `/version` on it)
+Deploys when: <push to main | push to main, after GitHub Actions pass | `fly deploy`, run by the user>
+Runs on deploy: <nothing | migrations, via the pre-deploy command, against production>
+Deploy status and build logs: <Vercel MCP `list_deployments`, `list_deployment_events` | Railway MCP `list-deployments`, `get-deployment-diagnosis` | `<host>` CLI on the Claude Code side | dashboard only, user pastes>
+Runtime logs and errors: <Vercel MCP `get_runtime_errors` | Railway MCP `get-logs`, `http-error-rate` | ...>
+Live commit: <`/version` shows `VERCEL_GIT_COMMIT_SHA` | `RAILWAY_GIT_COMMIT_SHA` | `COMMIT_REF` baked in at build | ...>
+Variables set in: <host dashboard | `railway variables` | ...>. Never in a committed file.
+
 ## Accounts
 Supabase: project `<ref>`, free tier
-Vercel: hobby, connected to the GitHub repo
+<Host>: <plan>, connected to the GitHub repo
 Domain: <where it is registered>
 
 ## Not available
@@ -107,7 +121,10 @@ Rough mapping from task type to what to name:
 | Stat tiles, sparklines, progress rings | `ui-ux-pro-max` chart patterns, plus the chart tokens in `docs/DESIGN.md` (designed in Cowork with `dataviz` where installed) |
 | Forms, onboarding, empty states, error copy | `ux-designer` |
 | Reviewing UI that already exists | `web-design-guidelines` |
-| Database, auth, RLS, migrations | `supabase`, `supabase-postgres-best-practices`, Supabase MCP |
+| Database, auth, RLS, migrations on Supabase | `supabase`, `supabase-postgres-best-practices`, Supabase MCP |
+| Database on Railway Postgres (Drizzle, Better Auth) | `supabase-postgres-best-practices` (it is Postgres advice), `context7` for current Drizzle and Better Auth docs, Railway MCP for the service wiring |
+| A failed deploy, a service that will not start, errors in production | The host's MCP tools from the Hosting section of `docs/TOOLING.md`; failing that, its CLI |
+| Anything Railway-specific: services, variables, domains, volumes | `use-railway` skill and Railway MCP, where the Railway plugin is installed |
 | React or Next.js structure and performance | `vercel-react-best-practices`, `vercel-composition-patterns` |
 | Page transitions and animation | `vercel-react-view-transitions` |
 | Native iOS or macOS | `apple-hig` |
@@ -119,7 +136,9 @@ For MCP work, name the tool, not just the server: "use the Supabase MCP `get_adv
 
 ## Wiring MCP servers into Claude Code
 
-A `.mcp.json` in the project root makes servers available to Claude Code the way they are to you here. Worth setting up at kickoff for Supabase and Vercel - it is the difference between Claude Code reading the real schema and Claude Code guessing at it.
+A `.mcp.json` in the project root makes servers available to Claude Code the way they are to you here. Worth setting up at kickoff for the database and the host - Supabase, Vercel, Railway, or whatever the host publishes - because it is the difference between Claude Code reading the real schema and Claude Code guessing at it.
+
+Some hosts ship a Claude Code plugin that does this wiring for them. Railway's is `/plugin install railway@claude-plugins-official`: its hosted MCP server plus the `use-railway` skill, signed in with OAuth. Prefer a host's own plugin over a hand-written `.mcp.json` entry when one exists.
 
 The user has to add the credentials themselves. Give them the file and tell them which environment variables to fill in; never write a key into a file that gets committed. Check the current config shape at `/docs/en/mcp` before generating one, since this format has changed before.
 

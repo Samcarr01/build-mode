@@ -19,6 +19,43 @@ on trust.
 
 ---
 
+## What is new in 2.3
+
+Up to 2.2, Build Mode quietly assumed Vercel. Railway only appeared as the place a
+background worker went, and Sync and Unblock read the Vercel MCP whatever the project
+ran on. 2.3 makes hosting your call.
+
+- **The interview asks where it should run.** Vercel, Railway, anything else you name,
+  or "you decide". If you name a host, that is the host. Build Mode only pushes back
+  when the host cannot run the thing, and then with the smallest change that fixes it.
+- **Railway is a full path.** One project per app, one service per deployable, what a
+  push does (it deploys, and the pre-deploy command runs migrations against
+  production), reference variables, the cost (no free tier that runs a live app), and
+  the Railway connector and Claude Code plugin. It also covers where the data lives:
+  Supabase alongside Railway by default, or Railway Postgres in the same project with
+  Drizzle, Better Auth, a private bucket, API-layer scoping and scheduled backups when
+  you want one bill.
+- **Any other host works too.** Netlify, Cloudflare, Render, Fly.io, your own server.
+  Build Mode answers five questions from the host's docs at kickoff (what triggers a
+  deploy, does it touch real data, where the build logs and runtime errors are, which
+  variable carries the commit) and writes them into a new **Hosting** section of
+  `docs/TOOLING.md`, which Sync and Unblock read instead of assuming. What a push does
+  goes into `CLAUDE.md`, where `/checkpoint` reads it.
+- **The live site says which commit it is running.** The first deploy task adds a
+  `/version` route. Sync compares it with the SHA in `PROGRESS.md`, which works on every
+  host, with or without an MCP, and catches "deployed fine, but the old commit".
+- **A first-deploy prompt recipe**, written per host, including hosts that deploy by
+  command (`fly deploy`), where `/checkpoint` pushes but never runs the deploy itself.
+- **Moving host is a Replan.** It becomes its own short milestone: new project, deploy
+  with variables copied, domain, then switch the old one off. Never in the same task as
+  moving the database.
+- **Vercel MCP names updated.** Build logs are now `list_deployment_events`;
+  `get_deployment_build_logs` no longer exists.
+- **Upgrade mode adds the Hosting section** to an older project, written from what is
+  actually there rather than from the template.
+- **Smaller fixes.** The data-model recipe has a variant for Postgres without Supabase,
+  and the debugging recipe's nested code block no longer breaks the markdown.
+
 ## What is new in 2.2
 
 2.1 made the design loop honest. 2.2 gives the build loop a second pair of eyes, in the
@@ -157,6 +194,11 @@ Vercel and Supabase, all of which have free tiers that cover a project until it 
 users. Build Mode asks which you already have during the interview and plans around what
 is missing.
 
+Hosting is your choice. Vercel and Railway have full paths; anything else (Netlify,
+Cloudflare, Render, Fly.io, your own server) works once Build Mode has looked up how it
+deploys and where its logs are. Railway has no free tier that will run a live app, so
+expect a small monthly bill from the start there.
+
 ### Skills that make it better
 
 None are required. Build Mode degrades gracefully where they are absent and writes the
@@ -189,7 +231,7 @@ values into your docs instead. Install them in **Cowork**, alongside Build Mode.
 | Connector | Where | What it unlocks |
 |---|---|---|
 | **Playwright** | Claude Code | The verification loop above. The highest-value thing on this page |
-| **Vercel** | Cowork | Deploy status, build logs, runtime errors. Sync uses these first |
+| **Your host's**: Vercel, Railway, or whatever it publishes | Both | Deploy status, build logs, runtime errors. Sync and Unblock use these first. On Railway, the Claude connector in Cowork and `/plugin install railway@claude-plugins-official` in Claude Code |
 | **Supabase** | Both | Real schema, migrations, RLS advisors and logs, instead of guessing |
 | **GitHub** | Both | Commits, PRs, issues |
 | **context7** | Claude Code | Current docs for third-party libraries, instead of working from memory |
@@ -268,7 +310,7 @@ It reads what you said and picks one:
 | "done", "it built it", "check this", "where am I" | **Sync** |
 | "it's stuck", "this error", "it built the wrong thing" | **Unblock** |
 | "put it back", "undo that", "it was working yesterday" | **Undo** |
-| "I want to add", "actually let's change", "drop that" | **Replan** |
+| "I want to add", "actually let's change", "drop that", "move it to Railway" | **Replan** |
 | "make this look better", "the UI is generic", "it's boring" | **Design pass** |
 | "upgrade my project files", "refresh the setup" | **Upgrade** |
 
@@ -300,14 +342,17 @@ Claude Code touches a UI file.
 Nine files. The bulk of it is not prose, it is specifics:
 
 - **`SKILL.md`** - the eight modes, the memory rules, the folder discipline
-- **`references/stack-picker.md`** - default stack and when to deviate, with costs
+- **`references/stack-picker.md`** - default stack and when to deviate, with costs, and
+  hosting: Vercel, Railway (including Railway Postgres), and the five questions that
+  make any other host work
 - **`references/design-brief.md`** - the two ways AI-built apps all look the same, and the
   full `DESIGN.md` template with layout, hierarchy, copy budget and screens
 - **`references/design-review.md`** - the five-check design score Sync runs, and the
   diagnosis table a design pass starts from
 - **`references/doc-pack.md`** - exact templates for every document
 - **`references/prompt-recipes.md`** - the six-part prompt shape, plus worked recipes for
-  a new screen, a third-party integration, an LLM feature and a bug report
+  the first deploy, a new screen, a third-party integration, an LLM feature and a bug
+  report
 - **`references/claude-code-setup.md`** - verified `CLAUDE.md`, `.claude/rules/`, skill and
   subagent frontmatter syntax, the two subagent templates, permission modes, the
   superpowers handling, the traps that fail silently

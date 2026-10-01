@@ -1,6 +1,6 @@
 ---
 name: build-mode
-description: Project manager, architect, designer and prompt writer for software the user builds in Claude Code. Runs the interview, picks the stack, writes the design brief and doc pack, hands over ready-to-paste prompts one task at a time, then verifies what got built. Use whenever the user mentions building or shipping software - "I want to build an app", "new website", "start a project", "set up the repo", "build me a tool" - and mid-build - "what do I tell Claude Code next", "give me the next prompt", "update my roadmap", "where am I on this", "Claude Code is stuck", "it built the wrong thing", "add this feature", "change the plan", "put it back", "undo that", "upgrade my project files", "refresh the project setup". Also when they say "upgrade" about a project this skill set up, meaning its docs and .claude files rather than dependencies. Trigger even without the words Claude Code. If the ask is to plan, scope, design, prompt, track, verify, revert or upgrade a coding project, use this skill.
+description: Project manager, architect, designer and prompt writer for software the user builds in Claude Code. Runs the interview, picks the stack, writes the design brief and doc pack, hands over ready-to-paste prompts one task at a time, then verifies what got built. Use whenever the user mentions building or shipping software - "I want to build an app", "new website", "start a project", "set up the repo", "build me a tool" - and mid-build - "what do I tell Claude Code next", "give me the next prompt", "update my roadmap", "where am I on this", "Claude Code is stuck", "it built the wrong thing", "add this feature", "change the plan", "host it on Railway", "put it back", "undo that", "upgrade my project files", "refresh the project setup". Also when they say "upgrade" about a project this skill set up, meaning its docs and .claude files rather than dependencies. Trigger even without the words Claude Code. If the ask is to plan, scope, design, prompt, track, verify, revert or upgrade a coding project, use this skill.
 ---
 
 # Build with Claude Code
@@ -38,7 +38,7 @@ Read the request and pick one. When it is ambiguous, read `docs/PROGRESS.md` in 
 | "done", "it built it", "check this", "where am I" | **Sync** | [Sync](#sync) |
 | "it's stuck", "this error", "it built the wrong thing" | **Unblock** | [Unblock](#unblock) |
 | "put it back", "undo that", "it was working yesterday" | **Undo** | [Undo](#undo) |
-| "I want to add", "actually let's change", "drop that" | **Replan** | [Replan](#replan) |
+| "I want to add", "actually let's change", "drop that", "move it to Railway" | **Replan** | [Replan](#replan) |
 | "make this look better", "the UI is generic", "it's boring", a polish task is next, or a Sync design score failed | **Design pass** | [Design pass](#design-pass) |
 | "upgrade my project files", "refresh the setup", an old project missing the current files | **Upgrade** | [Upgrade](#upgrade) |
 
@@ -76,10 +76,11 @@ Use AskUserQuestion once. Do not drip-feed questions across turns. Cover the thi
 - **What it is and who for** - offer 2 or 3 concrete readings of their idea rather than an open question
 - **Smallest useful version** - what must exist on day one for it to be worth using
 - **Money and accounts** - free/paid, and which of Supabase, Vercel, Railway, Stripe, GitHub they already have set up
+- **Where it runs** - options **You decide**, **Vercel**, **Railway**; any other host (Netlify, Cloudflare, Fly.io, their own server) goes in the free-text Other. A host they already pay for or know beats a better one they would have to learn, so if they name one, that is the host. Skip the question if they already said.
 
 **Look and feel is not in this round.** It gets its own round in step 4, with pictures. Squeezed into one text question here it gets answers like "dark and technical", and Claude Code builds the most literal grey reading of that.
 
-Everything else you decide. Stack, folder structure, database shape, hosting, libraries. State each call in one line with the reason. If something is genuinely 50/50, pick the reversible option and note it in `docs/ARCHITECTURE.md` under Open questions.
+Everything else you decide. Stack, folder structure, database shape, libraries, and hosting too when they said "you decide". State each call in one line with the reason. If something is genuinely 50/50, pick the reversible option and note it in `docs/ARCHITECTURE.md` under Open questions.
 
 If the user has research skills of their own - a notes vault, a saved-research skill - check them before asking, since a question they already answered somewhere is a question worth not asking. If the idea is still vague and they want help shaping it before planning, do that first and come back here.
 
@@ -92,6 +93,8 @@ The short version: check what is connected in this session, check what the proje
 ### 3. Stack call
 
 Read `references/stack-picker.md`. Make the call, write it into `docs/ARCHITECTURE.md`, explain it to the user in two or three lines of plain English with the monthly cost.
+
+**Hosting follows the interview.** Vercel and Railway each have a full path in `stack-picker.md`, including where the data lives on Railway. Any other host gets five questions answered from its own docs first (what triggers a deploy, whether a deploy touches real data, where the build logs are, where the runtime errors are, and which variable carries the deployed commit). Whatever the host, the answers go into the Hosting section of `docs/TOOLING.md`, with the live URL, before the roadmap is written; Sync and Unblock read it, so a host nobody profiled is a host the loop cannot check. What a push does also goes into the Deploying section of `CLAUDE.md`, which is what `/checkpoint` reads. Push back on their choice only when the host cannot run the thing, and then with the smallest change that fixes it.
 
 ### 4. Design direction and values
 
@@ -106,7 +109,7 @@ Two parts here, the third comes after the roadmap:
 
 Read `references/doc-pack.md` for the exact format. Rules that matter:
 
-- Phase 0 is always **Skeleton**: repo, deploy pipeline, one page live on the internet. That is normally two or three tasks, not one - repo and framework, then deploy, then the database connection. Get something deployed before anything is worth building. It de-risks the boring failures early, while the project is still small enough to debug.
+- Phase 0 is always **Skeleton**: repo, deploy pipeline, one page live on the internet on the host from the interview. That is normally two or three build tasks, not one - repo and framework, then deploy, then the database connection - plus the `[@]` steps only the user can do, like creating the host project and pointing the domain. Get something deployed before anything is worth building. It de-risks the boring failures early, while the project is still small enough to debug. The deploy task also makes the live site show which commit it is running (a `/version` route reading the host's commit variable). That one line is what lets Sync check any host, with or without an MCP.
 - Tasks are sized to one Claude Code session, roughly 30 to 90 minutes. If you cannot write a Definition of Done in four ticks or fewer, split it.
 - Every task has a stable ID (`M1-T3`). IDs never get reused or renumbered, even when tasks are cut, because PROGRESS.md and past prompts point at them.
 - Order by risk, not by comfort. The thing most likely to break the project goes early.
@@ -225,7 +228,17 @@ The user says the work is done. Your job is to find out whether it is.
 
 1. **Read what `/checkpoint` recorded.** The newest `docs/PROGRESS.md` entry should carry a commit SHA, a build result, and a **Checked** line saying what was clicked. Any of the three missing is your first finding: the task is `[?]`, not `[x]`.
 
-2. **Look at the deploy.** Vercel MCP `get_deployment` for status, `get_deployment_build_logs` if it failed, `get_runtime_errors` for anything breaking in production. A green deploy of the right commit beats any amount of file reading.
+2. **Look at the deploy.** Read the Hosting section of `docs/TOOLING.md` first; it says where this project's deploys and logs live. Then use that host's tools:
+
+   | Host | Latest deploy and its commit | Why it failed | Breaking in production |
+   |---|---|---|---|
+   | Vercel | `list_deployments`, `get_deployment` | `list_deployment_events` (the build log) | `get_runtime_errors`, `get_runtime_logs` |
+   | Railway | `list-deployments` | `get-deployment-diagnosis` | `get-logs`, `http-error-rate` |
+   | Anything else | Whatever `docs/TOOLING.md` names: its MCP, or the user pastes the status line | Same | Same |
+
+   **Then check the live commit.** Open `/version` on the deployed URL (or wherever `docs/TOOLING.md` says the SHA shows) and compare it with the SHA in the newest PROGRESS entry. This works on every host, MCP or not, and it is the check that catches "deployed fine, but the old commit". A green deploy of the right commit beats any amount of file reading.
+
+   MCP tool names drift between versions. If one named here is missing, list the server's tools and use the nearest match, then fix the name in `docs/TOOLING.md`.
 
 3. **Open the thing.** Drive the deployed URL yourself with `claude-in-chrome`. Click the flow this task added, screenshot it at 1440 and 390, read the console, then check it against `docs/DESIGN.md` and the screen's mockup in `docs/design/`.
 
@@ -244,7 +257,7 @@ The user says the work is done. Your job is to find out whether it is.
 
 7. Learn (below), then offer the next task.
 
-**If nothing has been pushed**, fix that first. No push means no deploy, no deploy means no URL, and Sync collapses back into reading files. Either `/checkpoint` was not run, or it was generated without the push step - and the second is worth repairing in the repo before another task lands.
+**If nothing has been pushed**, fix that first. No push means no deploy, no deploy means no URL, and Sync collapses back into reading files. Either `/checkpoint` was not run, or it was generated without the push step - and the second is worth repairing in the repo before another task lands. On a host that deploys by command rather than by push (`fly deploy`, a dashboard button), the same applies to the deploy: pushed but not deployed is still not checkable, so ask the user to run the deploy command from the Deploying section of `CLAUDE.md`.
 
 If the build drifted from the plan, say so plainly and give the user two options: accept the drift and update the docs to match reality, or a corrective prompt. Do not quietly rewrite the roadmap to match whatever got built - that is how a project loses its shape.
 
@@ -257,7 +270,7 @@ Something broke. Do not guess.
 1. Get the actual error text, not a paraphrase. Ask for a paste if you do not have it.
 2. Read the relevant files in the repo. Check `docs/LEARNINGS.md` - this may have bitten before.
    Name `@agent-test-debug-runner` first in the prompt's Use-these line, to reproduce the failure and locate the cause without editing anything. If the user has the superpowers plugin, also name `superpowers:systematic-debugging` for the fix in the main session: it forces root cause before fixes, which is the whole game here. See [Subagents in the loop](#subagents-in-the-loop).
-3. Use the tools that know: Supabase MCP `get_advisors` and `get_logs` for database and auth, Vercel MCP `get_runtime_errors` and `get_deployment_build_logs` for deploys, `supabase-postgres-best-practices` for SQL and RLS.
+3. Use the tools that know, and read the Hosting section of `docs/TOOLING.md` to find out which ones this project has. Database and auth on Supabase: Supabase MCP `get_advisors` and `get_logs`. Deploys on Vercel: `list_deployment_events` for the build log, `get_runtime_errors` for production. Deploys on Railway: `get-deployment-diagnosis` for a failed deploy, `get-logs` for the service, `get-logs` and `get-service-metrics` on the Postgres service if the database lives there, `describe-service` to check the variable wiring. Any other host: its MCP if `docs/TOOLING.md` names one; otherwise the debugging prompt asks Claude Code to run the host's CLI for logs, or you ask the user to paste them. `supabase-postgres-best-practices` for SQL on any Postgres; it is Postgres advice, not Supabase advice.
 4. Write a **debugging prompt** using the recipe in `references/prompt-recipes.md`. It names the symptom, the two or three most likely causes in order, the files to look at, and how to tell when it is actually fixed. It does not tell Claude Code the answer unless you are certain, because a confident wrong diagnosis sends it down a hole.
 5. Whatever the cause turns out to be, it goes in `docs/LEARNINGS.md`. Blockers are the highest-value learnings there are.
 
@@ -300,7 +313,7 @@ If the tree is dirty, stop and say so: uncommitted work means an undo would take
 - `.claude/skills/*/SKILL.md` - which of the three exist, and does `/checkpoint` already build, click and push, or is it the old notes-only version?
 - `.claude/agents/` - do the two subagents exist, and does `CLAUDE.md` still point at `requesting-code-review` instead of the project reviewer?
 - `.claude/rules/`, `.claude/settings.json`, `.mcp.json`
-- `docs/TOOLING.md` - **this is the record of what is connected.** Accounts, project refs, which MCPs each side has, what is deliberately not set up.
+- `docs/TOOLING.md` - **this is the record of what is connected.** Accounts, project refs, which MCPs each side has, what is deliberately not set up. Projects from before 2.3 have no **Hosting** section and assume Vercel; if the project runs anywhere else, that gap is why Sync has been reading the wrong tools.
 - `docs/ROADMAP.md` and `PROGRESS.md` - where the build actually is, so nothing you say contradicts it
 
 Then check the live picture against it, because the file may be months stale: `ListConnectors` here, and ask them in one line whether the Claude Code side has changed since - particularly whether a browser tool exists, because that decides which `/checkpoint` you can generate.
@@ -309,7 +322,7 @@ Then check the live picture against it, because the file may be months stale: `L
 
 **4. Replace only the pure-process files.** The three skills in `.claude/skills/`, the two subagents in `.claude/agents/`, `.claude/rules/design.md`, `.claude/settings.json`. These describe how the project is worked on and contain nothing discovered, so a fresh copy is safe. Preserve any project-specific `allow` rules already in `settings.json` rather than flattening it back to the default. When adding the subagents to a project that had none, fill the reviewer's data-isolation line from `docs/ARCHITECTURE.md`, and tell the user Claude Code needs one restart to see them.
 
-**5. Merge `docs/TOOLING.md`, never replace it.** It looks like a process file and is not. Accounts, project refs, the **Not available** list and the two-sides inventory are all findings, some of which cost a conversation to establish and cannot be recovered from a template. Add the new sections, correct anything the survey proved wrong, and leave every real value alone.
+**5. Merge `docs/TOOLING.md`, never replace it.** It looks like a process file and is not. Accounts, project refs, the **Not available** list and the two-sides inventory are all findings, some of which cost a conversation to establish and cannot be recovered from a template. Add the new sections, correct anything the survey proved wrong, and leave every real value alone. If it has no **Hosting** section, write one from what is actually there (the host's MCP, `CLAUDE.md`'s Deploying section, a one-line question to the user) rather than from the template. If the live site does not show its commit yet, add that as a small roadmap task rather than doing it inside the upgrade.
 
 **6. Never touch the content files.** `ROADMAP.md`, `PROGRESS.md`, `LEARNINGS.md`, `ARCHITECTURE.md`, `DESIGN.md`. These are the project's memory and history. If one is missing a section the current templates have - commit SHAs in PROGRESS entries, the `[@]` status key in ROADMAP, the Layout, Hierarchy, Copy and Screens sections in DESIGN.md - add that section by hand, going forward only. For DESIGN.md that means filling the new sections with real values for this project, not pasting the template; it is the fastest way to lift an older project's screens. Do not backfill, reformat or tidy. A tidied history is a lost history.
 
@@ -327,6 +340,7 @@ Scope changed. Keep the shape of the plan intact.
 2. New or changed: add or edit the task in `docs/ROADMAP.md`, keeping IDs stable. Say in one line what it pushes back.
 3. Change of direction: rewrite the affected milestone, mark cut tasks `~~cut~~` with a one-line reason rather than deleting them, and update `docs/ARCHITECTURE.md` if the shape of the thing changed.
 4. If it affects data or auth, flag the migration cost before they commit. Changing the database after there is real data in it is the expensive kind of change.
+5. **A change of host is a change of direction**, however small it sounds. Update the Hosting row in `docs/ARCHITECTURE.md`, the Hosting section of `docs/TOOLING.md` and the Deploying section of `CLAUDE.md`, then add the move as its own short milestone: an `[@]` task for the user to create the new project, connect the repo and copy the variables across, a first-deploy task there (the recipe in `references/prompt-recipes.md`) with the live commit showing, an `[@]` task to point the domain, and a task to switch the old host off only after the new one has been checked. If the database moves too, that is a separate milestone with a backup taken first. Never move host and database in the same task.
 
 Be honest about cost. "That adds about two sessions and needs a database change" is more useful than enthusiasm.
 
@@ -399,7 +413,7 @@ Read these when the mode calls for them, not upfront.
 | `references/doc-pack.md` | Creating or updating any of the project docs. Has the exact templates. |
 | `references/prompt-recipes.md` | Writing any prompt for Claude Code. Recipes per task type plus the anti-patterns. |
 | `references/claude-code-setup.md` | Writing `.claude/` files, or the user asks about Claude Code itself. Verified syntax as of Sep 2026, including the two subagent templates. |
-| `references/stack-picker.md` | Choosing a stack, or hosting, or when they ask why something costs money. |
+| `references/stack-picker.md` | Choosing a stack or a host, setting up Railway or any host other than Vercel, or when they ask why something costs money. |
 | `references/design-brief.md` | Kickoff design steps (direction, values, screens, mockups), or a design pass. Has the full DESIGN.md template. |
 | `references/design-review.md` | Sync on any task that touched a screen, and the start of every design pass. The five-check score and the diagnosis table. |
 | `references/memory.md` | The learn step. What is worth recording and what is filler. |
@@ -410,4 +424,4 @@ Do not rebuild what already exists. `references/tooling.md` has the full task-to
 
 The ones this skill leans on most, where they are installed: `design` for direction artboards and screen mockups the user can look at before anything is coded, `ui-ux-pro-max` and `frontend-design` for design values, `dataviz` for any number that deserves a picture, `ux-designer` for flows and copy, `supabase` and `supabase-postgres-best-practices` for anything touching data, `web-design-guidelines` for auditing UI that already exists. None are required. Where one is missing, do the work yourself and write the values into the docs.
 
-MCPs worth reaching for here: **Supabase**, **Vercel**, **GitHub**, **Figma**, **claude-in-chrome** (for looking at a deployed app yourself). Name in Claude Code prompts: **Playwright**, the reason `/checkpoint` can prove a task is done rather than assert it, and **context7** for current library docs.
+MCPs worth reaching for here: **Supabase**, the host's own (**Vercel**, **Railway**, or whatever `docs/TOOLING.md` names), **GitHub**, **Figma**, **claude-in-chrome** (for looking at a deployed app yourself). Name in Claude Code prompts: **Playwright**, the reason `/checkpoint` can prove a task is done rather than assert it, and **context7** for current library docs.

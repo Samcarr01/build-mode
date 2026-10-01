@@ -217,6 +217,9 @@ Read the **Deploying** section of `CLAUDE.md` before you push anything.
 - **A push that deploys**, especially one that runs migrations or reaches real users:
   **stop**. The work is committed and safe. Say so in one line and ask whether to push.
   Do not push and mention it afterwards.
+- **A deploy command** rather than a push (`fly deploy`, `railway up`,
+  `netlify deploy --prod`, a script): never part of `/checkpoint`. Push if the push
+  itself is safe, then say the work is ready to deploy and stop. The user runs it.
 - **`CLAUDE.md` does not say**: treat it as deploying. Ask.
 
 Never push a failed build.
@@ -355,7 +358,7 @@ step. No raw logs beyond a 10-line excerpt.
 
 Both files were tested on a planted bug (a lookup that took a tenant id and never used it): the reviewer named the function and line and called it critical; the runner reproduced it with one command and pointed at the same line; neither edited a file. Together they cost about a tenth of that session.
 
-**Permission backstop, optional.** A prompt saying "read-only" is a request; the tool lists above are the enforcement. For a project that deploys from Claude Code, also add `permissions.deny` rules in `settings.json` for the deploy, migration and delete commands (for example `Bash(vercel --prod *)`, `Bash(supabase db push *)`, `Bash(git push *)`) and for any MCP tool that deploys or spends money, written as a bare tool name because Claude Code skips `mcp__` deny rules that carry parentheses. Deny rules apply inside subagents as well as the main session.
+**Permission backstop, optional.** A prompt saying "read-only" is a request; the tool lists above are the enforcement. For a project that deploys from Claude Code, also add `permissions.deny` rules in `settings.json` for the deploy, migration and delete commands (for example `Bash(vercel --prod *)`, `Bash(railway up *)`, `Bash(supabase db push *)`, `Bash(git push *)`) and for any MCP tool that deploys or spends money, written as a bare tool name because Claude Code skips `mcp__` deny rules that carry parentheses. Deny rules apply inside subagents as well as the main session.
 
 ---
 
@@ -474,7 +477,7 @@ Suggest these when the user is comfortable, not at kickoff. Each one is a thing 
 
 **Hooks** in `settings.json` under a `hooks` key - shell commands at lifecycle events (`PreToolUse`, `PostToolUse`, `SessionStart`, `UserPromptSubmit`, `Stop`, `InstructionsLoaded`). Unlike CLAUDE.md instructions, hooks always run. Good for auto-formatting on edit or a `SessionStart` that prints the current task. Check the exact JSON shape at `/docs/en/hooks` before writing one; it is fiddly and a malformed hook fails quietly.
 
-**`.mcp.json`** in the project root for project-scoped MCP servers, so Supabase and Vercel are available to Claude Code the way they are here.
+**`.mcp.json`** in the project root for project-scoped MCP servers, so the database and the host (Supabase, Vercel, Railway or whichever) are available to Claude Code the way they are here. Where the host ships a Claude Code plugin, as Railway does, that is the simpler route.
 
 **`/doctor`** runs a setup checkup: unused skills, colliding MCP servers, and a proposed trim for a bloated CLAUDE.md. Worth running when a project has been going a while.
 
