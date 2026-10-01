@@ -76,8 +76,8 @@ One thing to check before you finalise them: does any tick depend on something a
 
 ## Context
 New project: <one line on what it is>. The planning docs are already in the folder,
-nothing else is. This task creates the app and gets an empty page deployed, so the
-deploy pipeline is proven before there is anything complicated to debug.
+nothing else is. This task creates the app and pushes it, so the deploy task that
+follows can prove the pipeline before there is anything complicated to debug.
 
 ## Build
 1. **First, get the folder out of the scaffolder's way.** `create-next-app` refuses to
@@ -118,6 +118,64 @@ Step 1 is not fussiness. It is a verified failure: with `CLAUDE.md` in the folde
 `create-next-app` prints *"The directory contains files that could conflict"* and exits.
 Without that line, the very first prompt of every project stalls, and Claude Code
 improvises around a collision the plan created.
+
+### First deploy - getting it live on the chosen host
+
+The task that proves the pipeline, usually `M0-T3`. Write it for the host in the Hosting section of `docs/TOOLING.md`. The `[@]` task before it (account created, project made, repo connected) must be ticked first, because Claude Code cannot create accounts or click through a host's sign-up.
+
+This is the one prompt that pre-approves a push, because nothing is live yet and there is no real data. Every later task goes back to whatever the Deploying section of `CLAUDE.md` says.
+
+```markdown
+# M0-T3 First deploy to <host>
+
+## Context
+The app exists and is on GitHub (M0-T1). The user has created the <host> project and
+connected the repo (M0-T2). This task gets the empty app live and makes it say which
+commit it is running, so every later check can confirm the right code is deployed.
+
+## Build
+1. Add a `/version` route that returns the deployed commit SHA from
+   `<the host's commit variable, from docs/TOOLING.md>`, or "local" when it is unset.
+   Plain text, no styling, no auth. If the variable only exists at build time
+   (Netlify, Cloudflare), bake it in during the build.
+2. Add only the config this host needs to build and start the app.
+   <Vercel: none. Railway: usually none, but the app must listen on the `PORT` Railway
+   provides. Fly.io: `fly.toml`, from `fly config save -a <app>` if the user already
+   created the app, or `fly launch --no-deploy` if not. Anything else: what the host's
+   docs say for this framework.>
+3. List every environment variable the app needs in `.env.example`, names only, and
+   tell me which ones I must set in <host> before the deploy works. Do not set them.
+4. Read the Deploying section of `CLAUDE.md` and check it against the host's docs:
+   what a push does, and whether anything runs against real data on deploy. Correct it
+   if it is wrong, and say what you changed.
+
+## Constraints
+- No features. No database unless the roadmap puts it in this task.
+- Never commit a secret, a `.env` file or a host token.
+- Do not change settings in the host's dashboard. If something there needs changing,
+  tell me what and where.
+
+## Done when
+- [ ] `/version` on localhost returns "local"
+- [ ] `.env.example` lists every variable the app reads, with no values
+- [ ] The Deploying section of `CLAUDE.md` matches what this host actually does
+- [ ] `npm run build` completes without errors
+
+## Before you finish
+- Run `@agent-code-reviewer` on the files you changed. Fix anything it marks critical
+  or warning, say what you changed, then run `/checkpoint`.
+- Run `/checkpoint`. The push is pre-approved for this task only.
+- <Host deploys on push:> Once pushed, watch the deploy with <the host's MCP or CLI,
+  from docs/TOOLING.md> until it finishes, then open `/version` on the live URL.
+  <Host deploys by command:> Once pushed, give me the exact deploy command and wait.
+  When I say it is deployed, open `/version` on the live URL.
+- If the live SHA matches the commit `/checkpoint` pushed, add the live URL to that
+  PROGRESS entry and commit the one-line change without pushing it. If the deploy
+  failed or the SHA is different, change the task to `[!]` and say what you saw.
+- Do not start the next task.
+```
+
+The `/version` route looks like a nicety and is not. It is the one check Sync can run against any host, with or without an MCP: open the URL, read the SHA, compare it with `PROGRESS.md`. Without it, "the deploy is green" and "the deploy is running the code we just wrote" are two different claims that look the same.
 
 ### Feature
 
@@ -211,6 +269,8 @@ what is already there.
 
 Schema is the most expensive thing to change later, so it gets the most careful prompt. Always inspect before writing.
 
+**On Postgres without Supabase** (Railway Postgres, or any other host's), the shape is the same and four lines change. **Use these:** `supabase-postgres-best-practices` for the schema, `context7` for the current Drizzle docs, and the host's MCP to confirm the database service and its `DATABASE_URL`. Step 2 becomes "every query for this table goes through the scoping helper named in `CLAUDE.md`", because there is no RLS. Step 3 becomes a Drizzle migration generated with `drizzle-kit`, run by the pre-deploy command, never `drizzle-kit push` against production. And the `get_advisors` tick becomes "every new query for this table goes through the scoping helper; `@agent-code-reviewer` finds none that skip it".
+
 ### Integration with a third-party service
 
 ```markdown
@@ -295,7 +355,7 @@ And note the done-checks: none of them says "returns the right answer", because 
 
 Different shape. The goal is a good diagnosis, not a fast fix.
 
-```markdown
+~~~markdown
 # Fix: <symptom in plain words>
 
 ## What happens
@@ -319,7 +379,8 @@ Different shape. The goal is a good diagnosis, not a fast fix.
 **Use these:** `@agent-test-debug-runner` first, to reproduce the failure with the
 narrowest command and report the cause without editing anything. Then
 `superpowers:systematic-debugging` if installed - root cause before fixes.
-<Plus Supabase MCP get_logs / Vercel MCP get_runtime_errors / etc.>
+<Plus the database and host tools from docs/TOOLING.md: Supabase MCP get_logs,
+Vercel MCP get_runtime_errors, Railway MCP get-logs, or the host's CLI logs command.>
 
 ## How to approach it
 Find the cause before changing anything. Say what you think is wrong and why,
@@ -331,7 +392,7 @@ reason about than one clean failure.
 - [ ] <The original symptom is gone, described as something to click>
 - [ ] <Nothing else broke: name the thing most likely to have been affected>
 - [ ] The cause is written into docs/LEARNINGS.md, not just the fix
-```
+~~~
 
 Do not put your suspected answer in the Build section unless you are genuinely confident. A confident wrong diagnosis is worse than none - Claude Code will pursue it well past the point where it should have stopped.
 
