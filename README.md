@@ -19,6 +19,21 @@ on trust.
 
 ---
 
+## What is new in 2.4
+
+Build Mode now keeps a record of where it got things wrong, so it can be fixed in one
+batch rather than rediscovered on every project.
+
+- **`[skill]` notes.** When Sync, Unblock or Undo finds that the problem is in Build Mode
+  itself (a template, a recipe, a missing rule, a tool name that changed), it logs a
+  one-line note under `## Skill issues` in that project's `docs/LEARNINGS.md` and tells
+  you it has.
+- **Skill review mode.** Say "any skill issues?" in a session connected to a project and
+  it gathers the notes, groups them by file and proposes one update. Anything seen in two
+  projects goes first.
+- **Reporting upstream.** If a note would affect anyone using the skill, it offers to
+  draft a GitHub issue for you using the new "Skill problem" template. You file it.
+
 ## What is new in 2.3
 
 Up to 2.2, Build Mode quietly assumed Vercel. Railway only appeared as the place a
@@ -276,6 +291,21 @@ It triggers on its own. You do not need to type `/build-mode`.
 **One session per project.** Everything the project knows lives in that repo, so a
 session pointed at a different folder cannot see any of it.
 
+### Updating
+
+In Cowork, install from the repo URL again to pick up a new version. In Claude Code,
+`/plugin marketplace update samcarr`. Then, in each project already under way, say
+"upgrade my project files" so the project's `.claude/` files catch up. Your roadmap,
+progress log and design are never touched by an upgrade.
+
+### Found a problem?
+
+Open an issue with the **Skill problem** template:
+[github.com/Samcarr01/build-mode/issues/new/choose](https://github.com/Samcarr01/build-mode/issues/new/choose).
+The most useful reports say which file was wrong, what it made Claude Code do, and the
+version from `plugin.json`. If you are using 2.4 or later, the skill will draft it for
+you from a `[skill]` note. Please leave out your project's code, names and keys.
+
 ---
 
 ## How it works
@@ -299,7 +329,7 @@ you get one judgement question rather than a test plan.
 
 Nothing in that loop depends on you remembering anything. The repo carries the state.
 
-### Eight modes
+### Nine modes
 
 It reads what you said and picks one:
 
@@ -313,6 +343,7 @@ It reads what you said and picks one:
 | "I want to add", "actually let's change", "drop that", "move it to Railway" | **Replan** |
 | "make this look better", "the UI is generic", "it's boring" | **Design pass** |
 | "upgrade my project files", "refresh the setup" | **Upgrade** |
+| "any skill issues?", "skill review" | **Skill review** |
 
 ---
 
@@ -341,7 +372,7 @@ Claude Code touches a UI file.
 
 Nine files. The bulk of it is not prose, it is specifics:
 
-- **`SKILL.md`** - the eight modes, the memory rules, the folder discipline
+- **`SKILL.md`** - the nine modes, the memory rules, the folder discipline
 - **`references/stack-picker.md`** - default stack and when to deviate, with costs, and
   hosting: Vercel, Railway (including Railway Postgres), and the five questions that
   make any other host work

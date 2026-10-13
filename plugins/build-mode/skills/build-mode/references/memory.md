@@ -35,7 +35,15 @@ Structure it so it can be skimmed. Headings matter more than completeness.
 ## Commands
 - Reset local DB: `npx supabase db reset`
 - Regenerate types: `npx supabase gen types typescript --local > types/db.ts`
+
+## Skill issues
+<!-- Problems with build-mode itself, not this project. Read by the skill review. -->
+- [skill] 2026-10-13 - prompt-recipes.md: the debugging recipe did not name the
+  test-debug-runner agent, so Claude Code ran the whole suite. Name it in Use these.
+- ~~[skill] 2026-09-20 - tooling.md: Vercel tool name changed.~~ Fixed in 2.3.0.
 ```
+
+The **Skill issues** section is the only part of this file that is about the skill rather than the project. Keep it at the bottom so it never crowds out the project's own lessons, and only use it when the fix belongs in build-mode rather than in this repo.
 
 **What does not go in:** anything sensitive. No keys, no tokens, no customer data. This file gets committed. If a lesson involves a credential, write the shape of the problem: "the Stripe webhook secret differs between test and live mode, which broke it once" rather than the secret.
 
