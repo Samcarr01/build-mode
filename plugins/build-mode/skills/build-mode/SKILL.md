@@ -41,6 +41,7 @@ Read the request and pick one. When it is ambiguous, read `docs/PROGRESS.md` in 
 | "I want to add", "actually let's change", "drop that", "move it to Railway" | **Replan** | [Replan](#replan) |
 | "make this look better", "the UI is generic", "it's boring", a polish task is next, or a Sync design score failed | **Design pass** | [Design pass](#design-pass) |
 | "upgrade my project files", "refresh the setup", an old project missing the current files | **Upgrade** | [Upgrade](#upgrade) |
+| "any skill issues?", "skill review", "what needs fixing in build mode" | **Skill review** | [Skill issues](#skill-issues-get-a-skill-tag) |
 
 Every mode starts the same way: **load memory** (below). Sync, Unblock and Undo end with **learn** (below); the others do not, because nothing was found out.
 
@@ -370,6 +371,21 @@ The filter: **would this change a decision next time?** If not, leave it out. A 
 Do this after the three modes where something was actually discovered. Skip it after Next task, Replan and Design pass, where nothing has been learnt yet - you handed over a prompt, you did not find anything out. A learn step that fires when there is nothing to learn trains you to write filler, and filler is what makes the file stop being read.
 
 Say in one line what you added, so the user can correct it. Memory they cannot see is memory they cannot trust.
+
+### Skill issues get a `[skill]` tag
+
+Most learnings are about the project. Some are about this skill: a template that produced the wrong file, a prompt recipe that sent Claude Code the wrong way, a rule that was missing, a tool name that no longer exists, a host or Claude Code change the references have not caught up with. The test: **would the fix belong in build-mode rather than in this repo?** If yes, write it in `docs/LEARNINGS.md` under a `## Skill issues` heading, tagged so it can be found across projects:
+
+```
+- [skill] 2026-10-13 - prompt-recipes.md: the first-deploy recipe did not set the
+  start command, so the host ran the dev server in production. Add it to Build.
+```
+
+Date, the skill file it points at, what went wrong, and the change you would make. One line each. Tell the user in the same breath: "logged a [skill] note: <one line>." Do not edit the skill itself from inside a project session; the tags get batched into one release, which is the point.
+
+**Skill review.** When the user asks for a skill review ("any skill issues?", "what needs fixing in build mode"), search every connected project's `docs/LEARNINGS.md` for `[skill]`, group the entries by skill file, and propose one batched update. Anything that turned up in two or more projects goes first. Entries that have been fixed in a release get struck through with the release date, not deleted, so the next review does not re-raise them.
+
+**If it would affect anyone using the skill**, not just this user's setup, offer to draft a GitHub issue for https://github.com/Samcarr01/build-mode/issues using the "Skill problem" template, with the `[skill]` line, the version from `plugin.json`, and no project code, names or secrets. The user files it; do not file it for them.
 
 ---
 
