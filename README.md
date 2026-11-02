@@ -19,6 +19,22 @@ on trust.
 
 ---
 
+## What is new in 2.5
+
+A maintenance release. Claude Code and the hosts moved, and the loop's safety rails moved
+with them.
+
+- **Pushes ask, even in auto mode.** Claude Code now starts every session in auto mode,
+  where leaving `git push` off the allow list no longer means a prompt. The generated
+  `settings.json` carries an `ask` rule for `git push`, so a push that deploys still waits
+  for you. Projects set up before 2.5 can get it with an upgrade.
+- **Point-in-time recovery on Railway Postgres.** The Phase 0 backups task now switches on
+  PITR as well as scheduled snapshots, so a bad migration can be rolled back to the minute.
+- **Upgrade never duplicates your docs.** Before writing anything it looks for an existing
+  roadmap, progress log or learnings file anywhere in the repo and uses that.
+- **Smaller fixes.** Supabase's log tool is now `query_logs`; `/checkpoint` wording no longer
+  says it always pushes; the architecture template has a Files row.
+
 ## What is new in 2.4
 
 Build Mode now keeps a record of where it got things wrong, so it can be fixed in one
@@ -316,7 +332,8 @@ Your idea
    -> Cowork      : writes docs/next-prompt.md into the repo
    -> You         : in Claude Code, type  /next
    -> Claude Code : plans, builds, then /checkpoint - builds it, clicks through it
-                    in a browser, commits and pushes. Ticks it off only if that passed
+                    in a browser, commits. Ticks it off only if that passed, and
+                    pushes only where a push does not deploy or you say yes
    -> You         : back in Cowork, "done" / "it broke" / "next"
    -> Cowork      : checks the deploy, opens the app, verifies against DESIGN.md and
                     the mockup, scores the design, learns, writes the next prompt
@@ -410,7 +427,7 @@ Tell it you read code fluently and it dials back the explaining.
   JavaScript.
 - Costs are quoted in pounds per month. Change that line in `SKILL.md` if you want
   another currency.
-- Verified against Claude Code as of September 2026 (v2.1.274). It moves fast, so check the live docs at
+- Verified against Claude Code as of November 2026 (v2.1.316). It moves fast, so check the live docs at
   [code.claude.com](https://code.claude.com/docs) if something behaves differently to the
   `claude-code-setup.md` reference.
 
