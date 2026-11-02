@@ -17,7 +17,8 @@ Your idea
    -> Cowork      : writes docs/next-prompt.md into the repo
    -> The user   : in Claude Code, types  /next
    -> Claude Code : plans, builds, then /checkpoint - builds it, clicks through it
-                    in a real browser, commits and pushes. Ticks it off only if that passed.
+                    in a real browser, commits. Ticks it off only if that passed.
+                    Pushes only where a push does not deploy, and asks first where it does.
    -> The user   : back in Cowork, "done" / "it broke" / "next"
    -> Cowork      : checks the live deploy, opens it in a browser, verifies against
                 DESIGN.md and the mockup, scores the design, learns, writes the next prompt
@@ -258,7 +259,7 @@ The user says the work is done. Your job is to find out whether it is.
 
 7. Learn (below), then offer the next task.
 
-**If nothing has been pushed**, fix that first. No push means no deploy, no deploy means no URL, and Sync collapses back into reading files. Either `/checkpoint` was not run, or it was generated without the push step - and the second is worth repairing in the repo before another task lands. On a host that deploys by command rather than by push (`fly deploy`, a dashboard button), the same applies to the deploy: pushed but not deployed is still not checkable, so ask the user to run the deploy command from the Deploying section of `CLAUDE.md`.
+**If nothing has been pushed**, check why before assuming it is a fault. On a project where a push deploys, `/checkpoint` is supposed to stop and ask, so confirm the work is committed, then ask the user whether to push and deploy now. Only if the project pushes freely and still has nothing pushed is something broken: either `/checkpoint` was not run, or it was generated without the push step, and the second is worth repairing in the repo before another task lands. Until it is pushed and deployed there is no URL, and Sync collapses back into reading files. On a host that deploys by command rather than by push (`fly deploy`, a dashboard button), the same applies to the deploy: pushed but not deployed is still not checkable, so ask the user to run the deploy command from the Deploying section of `CLAUDE.md`.
 
 If the build drifted from the plan, say so plainly and give the user two options: accept the drift and update the docs to match reality, or a corrective prompt. Do not quietly rewrite the roadmap to match whatever got built - that is how a project loses its shape.
 
@@ -271,7 +272,7 @@ Something broke. Do not guess.
 1. Get the actual error text, not a paraphrase. Ask for a paste if you do not have it.
 2. Read the relevant files in the repo. Check `docs/LEARNINGS.md` - this may have bitten before.
    Name `@agent-test-debug-runner` first in the prompt's Use-these line, to reproduce the failure and locate the cause without editing anything. If the user has the superpowers plugin, also name `superpowers:systematic-debugging` for the fix in the main session: it forces root cause before fixes, which is the whole game here. See [Subagents in the loop](#subagents-in-the-loop).
-3. Use the tools that know, and read the Hosting section of `docs/TOOLING.md` to find out which ones this project has. Database and auth on Supabase: Supabase MCP `get_advisors` and `get_logs`. Deploys on Vercel: `list_deployment_events` for the build log, `get_runtime_errors` for production. Deploys on Railway: `get-deployment-diagnosis` for a failed deploy, `get-logs` for the service, `get-logs` and `get-service-metrics` on the Postgres service if the database lives there, `describe-service` to check the variable wiring. Any other host: its MCP if `docs/TOOLING.md` names one; otherwise the debugging prompt asks Claude Code to run the host's CLI for logs, or you ask the user to paste them. `supabase-postgres-best-practices` for SQL on any Postgres; it is Postgres advice, not Supabase advice.
+3. Use the tools that know, and read the Hosting section of `docs/TOOLING.md` to find out which ones this project has. Database and auth on Supabase: Supabase MCP `get_advisors` and `query_logs`. Deploys on Vercel: `list_deployment_events` for the build log, `get_runtime_errors` for production. Deploys on Railway: `get-deployment-diagnosis` for a failed deploy, `get-logs` for the service, `get-logs` and `get-service-metrics` on the Postgres service if the database lives there, `describe-service` to check the variable wiring. Any other host: its MCP if `docs/TOOLING.md` names one; otherwise the debugging prompt asks Claude Code to run the host's CLI for logs, or you ask the user to paste them. `supabase-postgres-best-practices` for SQL on any Postgres; it is Postgres advice, not Supabase advice. If a tool named here is missing, list the server's tools and use the nearest match.
 4. Write a **debugging prompt** using the recipe in `references/prompt-recipes.md`. It names the symptom, the two or three most likely causes in order, the files to look at, and how to tell when it is actually fixed. It does not tell Claude Code the answer unless you are certain, because a confident wrong diagnosis sends it down a hole.
 5. Whatever the cause turns out to be, it goes in `docs/LEARNINGS.md`. Blockers are the highest-value learnings there are.
 
@@ -309,7 +310,15 @@ cd "/sessions/<session>/mnt/<project>" && git status --short && git log --onelin
 
 If the tree is dirty, stop and say so: uncommitted work means an undo would take their own changes with it. Ask them to commit or stash first, or to tell you to go ahead knowing that. If it is clean, note the current SHA in chat before you start. That one line is what makes every step below reversible.
 
-**2. Survey what is actually there.** Read, do not assume:
+**2. Survey what is actually there, and never write a file whose job is already done.**
+
+This is the guardrail that matters. The failure mode is not that the layout differs, it is that you look for `docs/ROADMAP.md`, do not find it, and helpfully create one - beside the real 400-line roadmap sitting at the repo root. Now there are two, and the project has quietly lost its single source of truth.
+
+So before creating anything, look for it anywhere: `ROADMAP.md`, `PROGRESS.md`, `LEARNINGS.md`, `ARCHITECTURE.md`, `DESIGN.md`, `TOOLING.md` and prompt files at any depth, not just where this skill would have put them. If you find something doing that job, **use that path**. If the layout does not match what you expect and you cannot tell which file plays which role, **stop and ask**. Do not create, do not migrate, do not tidy.
+
+A project that grew its own sensible shape is not wrong. It is the one you are visiting.
+
+Read, do not assume:
 
 - `.claude/skills/*/SKILL.md` - which of the three exist, and does `/checkpoint` already build, click and push, or is it the old notes-only version?
 - `.claude/agents/` - do the two subagents exist, and does `CLAUDE.md` still point at `requesting-code-review` instead of the project reviewer?
@@ -428,7 +437,7 @@ Read these when the mode calls for them, not upfront.
 | `references/tooling.md` | Kickoff capability scan, or before naming tools in a prompt. Current inventory of both sides plus the task-to-skill mapping. |
 | `references/doc-pack.md` | Creating or updating any of the project docs. Has the exact templates. |
 | `references/prompt-recipes.md` | Writing any prompt for Claude Code. Recipes per task type plus the anti-patterns. |
-| `references/claude-code-setup.md` | Writing `.claude/` files, or the user asks about Claude Code itself. Verified syntax as of Sep 2026, including the two subagent templates. |
+| `references/claude-code-setup.md` | Writing `.claude/` files, or the user asks about Claude Code itself. Verified syntax as of Sep 2026, including the two subagent templates, with skills, rules, settings.json and permission modes re-checked Nov 2026. |
 | `references/stack-picker.md` | Choosing a stack or a host, setting up Railway or any host other than Vercel, or when they ask why something costs money. |
 | `references/design-brief.md` | Kickoff design steps (direction, values, screens, mockups), or a design pass. Has the full DESIGN.md template. |
 | `references/design-review.md` | Sync on any task that touched a screen, and the start of every design pass. The five-check score and the diagnosis table. |
