@@ -124,6 +124,7 @@ person you are working with** changes how Claude Code reports back for the whole
 | Styling | <e.g. Tailwind + shadcn/ui> | <one line> |
 | Database | <e.g. Supabase Postgres, or Railway Postgres + Drizzle> | <one line> |
 | Auth | <e.g. Supabase Auth, email + Google, or Better Auth> | <one line> |
+| Files | <e.g. Supabase Storage, or a Railway bucket via signed URLs> | <one line, or "none"> |
 | Hosting | <e.g. Vercel, or Railway project `<name>` with services web/worker, or Netlify> | <one line: why this host, and "user's choice" if they named it> |
 | Payments | <e.g. Stripe, or "none yet"> | <one line> |
 
@@ -234,8 +235,8 @@ Phase 0 changes shape with the host, so write it for the one in `docs/ARCHITECTU
   `${{Postgres.DATABASE_URL}}`. Then the database build task adds Drizzle, the first
   migration, and `"deploy": { "preDeployCommand": [...] }` in `railway.json` so
   migrations run on every deploy, and records that in the Deploying section of
-  `CLAUDE.md`. Then `[@]` **Needs you:** switch on scheduled backups for the Postgres
-  volume, before any real data exists.
+  `CLAUDE.md`. Then `[@]` **Needs you:** on the Postgres service's Backups tab, switch on
+  scheduled backups and enable point-in-time recovery, before any real data exists.
 - **A host that deploys by command** (Fly.io, a VPS): the Deploying section of
   `CLAUDE.md` carries the exact deploy command, `/checkpoint` pushes but never runs it,
   and the user deploys before each Sync.
