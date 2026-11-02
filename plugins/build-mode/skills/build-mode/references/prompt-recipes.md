@@ -31,7 +31,8 @@ Every prompt has the same six parts, in this order. The order matters: context b
 ## Before you finish
 - Run `@agent-code-reviewer` on the files you changed. Fix anything it marks critical
   or warning, say what you changed, then run `/checkpoint`.
-- Run `/checkpoint`. It builds, clicks through what you made, then commits and pushes.
+- Run `/checkpoint`. It builds, clicks through what you made, then commits. It pushes
+  only if this project's Deploying rules say that is safe, and asks first otherwise.
 - Do not start the next task.
 ```
 
@@ -164,7 +165,8 @@ commit it is running, so every later check can confirm the right code is deploye
 ## Before you finish
 - Run `@agent-code-reviewer` on the files you changed. Fix anything it marks critical
   or warning, say what you changed, then run `/checkpoint`.
-- Run `/checkpoint`. The push is pre-approved for this task only.
+- Run `/checkpoint`. The push is pre-approved for this task only; Claude Code will still
+  show its push prompt, because of the `ask` rule in settings.json, and I will approve it.
 - <Host deploys on push:> Once pushed, watch the deploy with <the host's MCP or CLI,
   from docs/TOOLING.md> until it finishes, then open `/version` on the live URL.
   <Host deploys by command:> Once pushed, give me the exact deploy command and wait.
@@ -379,7 +381,7 @@ Different shape. The goal is a good diagnosis, not a fast fix.
 **Use these:** `@agent-test-debug-runner` first, to reproduce the failure with the
 narrowest command and report the cause without editing anything. Then
 `superpowers:systematic-debugging` if installed - root cause before fixes.
-<Plus the database and host tools from docs/TOOLING.md: Supabase MCP get_logs,
+<Plus the database and host tools from docs/TOOLING.md: Supabase MCP query_logs,
 Vercel MCP get_runtime_errors, Railway MCP get-logs, or the host's CLI logs command.>
 
 ## How to approach it
