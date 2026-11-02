@@ -1,6 +1,6 @@
 # Claude Code setup - verified syntax
 
-Checked against the live docs at code.claude.com on 7 August 2026, and the subagents section on 17 September 2026. Claude Code moves fast, so if something below does not behave as described, check the docs rather than assuming the user has done something wrong. The four pages that matter: `/docs/en/memory`, `/docs/en/skills`, `/docs/en/sub-agents`, `/docs/en/permission-modes`.
+Checked against the live docs at code.claude.com on 7 August 2026, the subagents section on 17 September 2026, and the skills, rules, settings.json and permission-modes sections on 1 November 2026 (v2.1.316). Claude Code moves fast, so if something below does not behave as described, check the docs rather than assuming the user has done something wrong. The five pages that matter: `/docs/en/memory`, `/docs/en/skills`, `/docs/en/sub-agents`, `/docs/en/permissions`, `/docs/en/permission-modes`.
 
 Wrong syntax here fails silently. They will not notice a skill that never loads. Copy the shapes exactly.
 
@@ -57,7 +57,7 @@ Claude Code reads it when it needs it. That is the difference between a lean ses
 
 ## Project rules
 
-`.claude/rules/*.md`. Each file one topic. Without frontmatter they load every session, same as `CLAUDE.md`. With a `paths:` list they load only when Claude Code touches a matching file, which is how you get design rules that cost nothing on a backend task:
+`.claude/rules/*.md`. Each file one topic. Without frontmatter they load every session, same as `CLAUDE.md`. With a `paths:` list they load only when Claude Code reads, writes or edits a matching file, which is how you get design rules that cost nothing on a backend task:
 
 ```markdown
 ---
@@ -77,7 +77,7 @@ No grey-on-grey at 13px, no text-only stat tiles, no content in a narrow centred
 
 That is the short form for illustration. The full rule file this skill generates is in `design-brief.md` under "The paired rule file"; use that one.
 
-Glob patterns support `*`, `**` and brace expansion `{a,b}`. Rules with `paths:` do not survive `/compact` - they reload next time a matching file is read.
+Glob patterns support `*`, `**` and brace expansion `{a,b}`. Rules with `paths:` do not survive `/compact` - they reload next time a matching file is read, written or edited.
 
 ---
 
@@ -85,7 +85,7 @@ Glob patterns support `*`, `**` and brace expansion `{a,b}`. Rules with `paths:`
 
 Custom commands have been merged into skills. `.claude/commands/deploy.md` and `.claude/skills/deploy/SKILL.md` both give you `/deploy`; skills are the recommended form because they can carry supporting files. **Use `.claude/skills/<name>/SKILL.md`.**
 
-**The command name comes from the directory name.** In a project or personal skill the `name` field is only a display label. So `/next` needs to live at `.claude/skills/next/SKILL.md` - naming the directory something else and setting `name: next` will not work.
+**The command name comes from the directory name, so leave `name` out.** `/next` lives at `.claude/skills/next/SKILL.md`. A `name` field also sets the command, so a `name` that differs from the folder gives one skill two names and makes every prompt that says `/next` ambiguous. One name, taken from the folder.
 
 **Frontmatter that matters here:**
 
@@ -358,7 +358,7 @@ step. No raw logs beyond a 10-line excerpt.
 
 Both files were tested on a planted bug (a lookup that took a tenant id and never used it): the reviewer named the function and line and called it critical; the runner reproduced it with one command and pointed at the same line; neither edited a file. Together they cost about a tenth of that session.
 
-**Permission backstop, optional.** A prompt saying "read-only" is a request; the tool lists above are the enforcement. For a project that deploys from Claude Code, also add `permissions.deny` rules in `settings.json` for the deploy, migration and delete commands (for example `Bash(vercel --prod *)`, `Bash(railway up *)`, `Bash(supabase db push *)`, `Bash(git push *)`) and for any MCP tool that deploys or spends money, written as a bare tool name because Claude Code skips `mcp__` deny rules that carry parentheses. Deny rules apply inside subagents as well as the main session.
+**Permission backstop, optional.** A prompt saying "read-only" is a request; the tool lists above are the enforcement. For a project that deploys from Claude Code, also add `permissions.deny` rules in `settings.json` for the deploy, migration and delete commands (for example `Bash(vercel --prod *)`, `Bash(railway up *)`, `Bash(supabase db push *)`) and for any MCP tool that deploys or spends money, written as a bare tool name because Claude Code skips `mcp__` rules that carry parentheses. Leave `git push` as the `ask` rule in the settings.json template rather than a deny, so `/checkpoint` can still push once the user says yes. Deny and ask rules apply inside subagents as well as the main session, and hooks cannot override them.
 
 ---
 
@@ -381,6 +381,9 @@ Permission rules **merge** across scopes rather than overriding, and `deny` beat
       "Bash(git diff *)",
       "Bash(git log *)"
     ],
+    "ask": [
+      "Bash(git push *)"
+    ],
     "deny": [
       "Read(./.env)",
       "Read(./.env.*)",
@@ -392,11 +395,12 @@ Permission rules **merge** across scopes rather than overriding, and `deny` beat
 }
 ```
 
-Three things to know before adding more:
+Four things to know before adding more:
 
-- **`git push` is deliberately not in the allow list.** On a project where a push deploys, that prompt is the last gate before production. Leave it asking.
-- **Do not set `defaultMode` in project settings.** `auto` is ignored there by design, so a repo cannot grant itself auto mode. If the user wants a default mode it goes in `~/.claude/settings.json`.
-- **`.claude/` is a protected path.** Writes to it are never auto-approved except in `bypassPermissions`, and `allow` rules do not change that. The user will get a prompt when Claude Code edits its own config. That is intentional; do not try to engineer around it.
+- **`git push` always asks.** Sessions start in auto mode now (see Permission modes), and in auto mode leaving a command out of `allow` no longer means a prompt: the classifier decides. An `ask` rule prompts in every mode, auto included, outranks any `allow` rule or skill `allowed-tools`, and applies as soon as the repo is cloned, without the workspace-trust step `allow` rules wait for. On a project where a push deploys, that prompt is the last gate before production. Delete the rule only where a push deploys nothing (a host that deploys by command, or no host yet), and say so in the Deploying section of `CLAUDE.md`. It matches `git push` and `git push origin main`, which is how Claude Code pushes; a contorted form like `git -C . push` slips past it, so the auto-mode classifier and the Deploying section are still the second and third lines of defence.
+- **Do not set `defaultMode` in project settings.** `auto` and `bypassPermissions` are both ignored there by design, so a repo cannot grant itself either. If the user wants a different starting mode it goes in `~/.claude/settings.json`.
+- **`.claude/` is a protected path.** Writes to it are never auto-approved except in `bypassPermissions` and some plan-mode sessions, and `allow` rules do not change that. The user will get a prompt when Claude Code edits its own config. That is intentional; do not try to engineer around it.
+- **The deploy backstop** for projects that could deploy from Claude Code is under Project subagents above; its deny rules sit beside the `ask` rule here.
 
 ---
 
@@ -408,18 +412,18 @@ Six modes. The config value is on the left, the label the user sees on the right
 |---|---|---|
 | `default` | Manual | Reads only |
 | `acceptEdits` | Edit automatically | Reads, file edits, `mkdir`/`mv`/`cp`/`rm` etc. in the working directory |
-| `plan` | Plan | Reads, plus classifier-approved commands when auto mode is on |
+| `plan` | Plan | Reads, plus classifier-approved commands when auto mode is available |
 | `auto` | Auto | Everything, with a safety classifier checking each action |
-| `dontAsk` | - | Only pre-approved tools. For CI. |
+| `dontAsk` | - | File reads in the working directory and pre-approved tools; anything else is denied. For CI. |
 | `bypassPermissions` | Bypass permissions | Everything, no checks. Containers only. |
 
-`Shift+Tab` cycles `default` -> `acceptEdits` -> `plan`. Auto and bypass slot in after plan when enabled.
+**New sessions start in auto** (v2.1.283 and later, in the terminal and VS Code) unless `permissions.defaultMode` in `~/.claude/settings.json` says otherwise. From auto, the first `Shift+Tab` goes to `default`, then the cycle runs `default` -> `acceptEdits` -> `plan`.
 
-**Plan mode is the single most useful habit for the user.** Claude Code researches and proposes, and does not touch source until they approve. For someone who cannot review a diff, the plan is the review. Recommend it for any task touching more than a couple of files.
+**Plan mode is the single most useful habit for the user.** Claude Code researches and proposes, and does not touch source until they approve. For someone who cannot review a diff, the plan is the review. Because sessions start in auto, a plan only happens when something asks for one: the first line of every prompt and the `/next` skill both do, so do not drop either.
 
 Enter it with `Shift+Tab`, or prefix one prompt with `/plan`, or start with `claude --permission-mode plan`. `Ctrl+G` opens the proposed plan in an editor. On approval they pick "use auto mode" or "manually approve edits".
 
-**On auto mode:** it makes long tasks much less annoying, and the classifier blocks the genuinely dangerous things - production deploys, migrations, force push, secrets leaving the repo. It is a reasonable default for the user once a project is past the risky early stage. It is not a substitute for reading the plan. Note the classifier also treats boundaries stated in conversation as blocks: "don't deploy until I say" actually holds.
+**On auto mode:** it is now where every session starts. It makes long tasks much less annoying, and the classifier blocks the genuinely dangerous things - production deploys, migrations, force push, secrets leaving the repo. It is not a substitute for reading the plan, and it is not a push gate: whether a given `git push` counts as a production deploy is the classifier's guess, which is why settings.json carries an `ask` rule for it. The classifier also treats boundaries stated in conversation as blocks: "don't deploy until I say" actually holds.
 
 ---
 
@@ -430,7 +434,7 @@ The most common reason a Claude Code session goes bad is a context window full o
 - `/clear` between unrelated tasks. Cheap, and the single highest-value habit. The doc pack means nothing is lost.
 - `/compact <instruction>` to summarise mid-task, e.g. `/compact keep the API changes, drop the debugging`.
 - `/context` to see what is loaded.
-- `/rewind`, or `Esc` twice, to roll back code, conversation, or both. 100 checkpoints kept per session.
+- `/rewind`, or `Esc` twice, to roll back code, conversation, or both. 100 checkpoints kept per session. It restores Claude's own file edits, not files only a shell command changed, so the commit SHA is still the real undo.
 - Auto-compaction happens on its own when the window fills. Project-root `CLAUDE.md` is re-read from disk afterwards; nested rules and `paths:`-scoped rules are not, and reload on next match.
 
 Build the habit into the workflow: one task, then `/checkpoint`, then `/clear`, then `/next`.
@@ -491,7 +495,7 @@ Worth holding in your head when you decide where to put something.
 |---|---|
 | `CLAUDE.md` and its `@imports` | Every session, in full |
 | `.claude/rules/*.md` without `paths:` | Every session |
-| `.claude/rules/*.md` with `paths:` | When a matching file is read |
+| `.claude/rules/*.md` with `paths:` | When a matching file is read, written or edited |
 | Skill `description` | Every session |
 | Skill body | When invoked, then stays for the session |
 | Subagent `description` | Every session |
