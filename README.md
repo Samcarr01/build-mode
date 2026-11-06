@@ -19,6 +19,29 @@ on trust.
 
 ---
 
+## What is new in 2.6
+
+Tools that act on their own, and plans you can judge at a glance.
+
+- **A recipe for automations.** Scheduled jobs, webhooks, anything that runs without a
+  click or reaches outside the app. Every job is safe to run twice, logs every run, has
+  an off switch and gets the time zone right, including the UTC trap in Railway cron and
+  Vercel's older Cron Jobs.
+- **Approval, enforced in code.** When the app can send, post, pay or delete, Build Mode
+  asks once whether a person approves each item first, and recommends yes. If so, one
+  helper is the only way out, the code reviewer checks it on every task, and the phase
+  ends with an approval audit that tries to get round it.
+- **Plans name the risky bits.** Every plan now opens with anything that deletes data,
+  changes the database, sends something, costs money or cannot be undone, or "Nothing
+  risky".
+- **AI features keep their prompt in a file**, with a version and a samples test, so a
+  model upgrade or a stray edit shows up before anyone's numbers change.
+- **Worked if, and the riskiest assumption**, written at the top of every roadmap.
+- **Smaller fixes.** Mockups use the Design artifact type where a session has no `design`
+  skill, marketing pages get named image slots, and the Claude Code reference covers
+  `/goal`, mods and `/design`, with why none is in the default loop yet. Projects set up
+  before 2.6 get the new `/next` wording and reviewer check with an upgrade.
+
 ## What is new in 2.5
 
 A maintenance release. Claude Code and the hosts moved, and the loop's safety rails moved
@@ -399,8 +422,8 @@ Nine files. The bulk of it is not prose, it is specifics:
   diagnosis table a design pass starts from
 - **`references/doc-pack.md`** - exact templates for every document
 - **`references/prompt-recipes.md`** - the six-part prompt shape, plus worked recipes for
-  the first deploy, a new screen, a third-party integration, an LLM feature and a bug
-  report
+  the first deploy, a new screen, a third-party integration, an LLM feature, an
+  automation, an approval audit and a bug report
 - **`references/claude-code-setup.md`** - verified `CLAUDE.md`, `.claude/rules/`, skill and
   subagent frontmatter syntax, the two subagent templates, permission modes, the
   superpowers handling, the traps that fail silently
@@ -427,7 +450,8 @@ Tell it you read code fluently and it dials back the explaining.
   JavaScript.
 - Costs are quoted in pounds per month. Change that line in `SKILL.md` if you want
   another currency.
-- Verified against Claude Code as of November 2026 (v2.1.316). It moves fast, so check the live docs at
+- Verified against Claude Code as of November 2026 (v2.1.316), with `/goal`, mods and
+  `/design` checked on 6 November 2026. It moves fast, so check the live docs at
   [code.claude.com](https://code.claude.com/docs) if something behaves differently to the
   `claude-code-setup.md` reference.
 
