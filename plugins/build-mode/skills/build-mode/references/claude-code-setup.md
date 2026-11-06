@@ -143,6 +143,10 @@ Work in plan mode by default. Show the plan and wait for approval before editing
 anything. The user cannot review a diff, so the plan is the only review this gets - skip it
 only for a one-file change that is obviously safe.
 
+At the top of the plan, list in plain English anything that deletes data, changes the
+database, sends or posts anything, costs money to run, or cannot be undone. If there is
+none, say "Nothing risky".
+
 If any step of the task looks wrong to you, or conflicts with something in the docs,
 say so before you build rather than after.
 
@@ -313,8 +317,11 @@ Check, in this order:
    client code.
    Single-user app: no tenant check applies. Check for exposed secrets only.
 3. Input validation on every route and server action, and error paths that leak data.
-4. Missing tests for the changed behaviour.
-5. Maintainability only where it creates a real defect risk.
+4. Outbound actions. If CLAUDE.md names an approved-action helper, no new code path
+   sends, posts, pays or deletes outside the app except through it. Any job or webhook
+   handler checks its run key before acting.
+5. Missing tests for the changed behaviour.
+6. Maintainability only where it creates a real defect risk.
 
 Report, under 400 words: a one-line summary; findings by severity (critical,
 warning, suggestion), each with file and line, the quoted evidence, the impact and
@@ -484,6 +491,14 @@ Suggest these when the user is comfortable, not at kickoff. Each one is a thing 
 **`.mcp.json`** in the project root for project-scoped MCP servers, so the database and the host (Supabase, Vercel, Railway or whichever) are available to Claude Code the way they are here. Where the host ships a Claude Code plugin, as Railway does, that is the simpler route.
 
 **`/doctor`** runs a setup checkup: unused skills, colliding MCP servers, and a proposed trim for a bloated CLAUDE.md. Worth running when a project has been going a while.
+
+The three below were checked against code.claude.com on 6 November 2026. None is part of the doc pack. Know what each is so you can answer the user, and so a future change adopts them on purpose rather than by accident.
+
+**`/goal <condition>`** keeps Claude Code working without being prompted. After every turn a small model reads the conversation and judges whether the condition holds; if not, it starts another turn. It does not change the permission mode, it can be bounded with a clause such as "or stop after 20 turns", and `/goal clear` ends it. **Not in the default loop**, for two reasons. It starts turns on its own, which is the opposite of the stop-and-wait that plan approval depends on. And its judge only reads the transcript, whereas `/checkpoint` builds and clicks. Where it fits: a long, mechanical task after the user has approved the plan, such as a refactor or "every type error fixed", with the Done-when ticks as the condition and a turn cap. The user types it themselves after approving. Never put it inside `/next`.
+
+**Mods** are JavaScript or TypeScript plugins that run inside Claude Code: they can draw a pane or a band above the prompt, add a command, and hold, change or refuse a tool call. Terminal v2.1.287 or later, the Desktop Code tab v2.1.286 or later, and the VS Code extension. They run with the user's full permissions and are not sandboxed, so only install one from a source they trust, and run `claude plugin validate <folder>` first, which lists what it does without running it. Anthropic's sample `blast-radius` mod holds risky shell commands for a yes or no, which overlaps the deny and ask rules in `settings.json` above; those stay the enforcement.
+
+**`/design`** (research preview, v2.1.234 or later) drafts editable artboards from inside Claude Code. Mockups stay a Cowork step in this loop, because design approval belongs before the prompt is written, not inside the session building it.
 
 ---
 
