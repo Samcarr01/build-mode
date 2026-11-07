@@ -105,6 +105,8 @@ Read `references/design-brief.md`. This is the step that stops the app looking l
 Two parts here, the third comes after the roadmap:
 
 - **Design interview, its own `AskUserQuestion` round, three questions max.** A reference URL or two they like the look of (then open them and write down why they work), density (operator console or one thing per screen), and mood chosen from three direction artboards you draft with the `design` skill rather than three adjectives. They pick a picture.
+
+  Wherever this skill says the `design` skill, a session that has no such skill but offers the **Design artifact type** uses that instead: it is the same artboard canvas. Check what this session has before falling back to anything else.
 - **Values and rules.** `ui-ux-pro-max` for the palette, type pairing and product-type patterns, `frontend-design` for the aesthetic direction, `apple-hig` when it is a native Apple app. Write `docs/DESIGN.md` with the Layout, Hierarchy and Copy sections filled in, not just the tokens. Those three sections are what a token sheet misses.
 
 ### 5. Roadmap
@@ -116,6 +118,8 @@ Read `references/doc-pack.md` for the exact format. Rules that matter:
 - Every task has a stable ID (`M1-T3`). IDs never get reused or renumbered, even when tasks are cut, because PROGRESS.md and past prompts point at them.
 - Order by risk, not by comfort. The thing most likely to break the project goes early.
 - Every milestone that adds a screen ends with a **polish task** (`Mx-Tn Design polish: <screens>`). It gives the design review a scheduled home. If the screens already score well in Sync it is ticked with a note and costs nothing.
+- The first time a task reaches outside the app (sends, posts, pays, deletes, or writes into someone else's software), ask the user once whether a person approves each item before it goes, and recommend yes for anything that lands in someone else's inbox, feed or bank account. If yes, it goes in `CLAUDE.md` as a standing rule, and every milestone that adds a way to send, post, pay or delete ends with an **approval audit task** (`Mx-Tn Approval audit`), recipe in `references/prompt-recipes.md`. A written rule is a request; the audit proves the code cannot do it. A scheduled job whose schedule lives in the host's dashboard also gets an `[@]` task for the user, directly before the task that builds it.
+- **Worked if, and the riskiest assumption.** Two lines at the top of the roadmap: what is true for the user if this succeeded, in their own units ("a booking goes from enquiry to calendar without a phone call"), and the one belief that sinks the project if it is wrong, with how it gets checked. A technical one ("the booking system has a usable API") becomes a Phase 0 task before any feature. One about people ("staff will approve drafts every morning") becomes a question for the user before Phase 1. Ordering by risk only works if the biggest risk is written down.
 
 ### 6. Screens and mockups
 
@@ -123,7 +127,7 @@ Now the roadmap says which screens Phase 1 builds, so design them. Read the Scre
 
 For each core screen (three to five, never more): write its entry in the Screens section of `docs/DESIGN.md` (job, hero element, layout, word budget), then draft it with the `design` skill at 1440 wide using the real tokens and real words. The user looks, tweaks if they want, says yes. That yes is the design approval. Render the approved artboards to PNG with Playwright in the workspace and put them in the repo at `docs/design/<screen>.png` with the artboard source beside them.
 
-Every UI prompt from now on names the mockup. A picture in the prompt is what Claude Code follows; a token table is what it fills gaps from. If the `design` skill is unavailable, an ASCII wireframe in the Screens section is the fallback.
+Every UI prompt from now on names the mockup. A picture in the prompt is what Claude Code follows; a token table is what it fills gaps from. If neither the `design` skill nor the Design artifact type is available, an ASCII wireframe in the Screens section is the fallback.
 
 ### 7. Write the doc pack
 
@@ -436,8 +440,8 @@ Read these when the mode calls for them, not upfront.
 |---|---|
 | `references/tooling.md` | Kickoff capability scan, or before naming tools in a prompt. Current inventory of both sides plus the task-to-skill mapping. |
 | `references/doc-pack.md` | Creating or updating any of the project docs. Has the exact templates. |
-| `references/prompt-recipes.md` | Writing any prompt for Claude Code. Recipes per task type plus the anti-patterns. |
-| `references/claude-code-setup.md` | Writing `.claude/` files, or the user asks about Claude Code itself. Verified syntax as of Sep 2026, including the two subagent templates, with skills, rules, settings.json and permission modes re-checked Nov 2026. |
+| `references/prompt-recipes.md` | Writing any prompt for Claude Code. Recipes per task type, including automations (scheduled jobs and webhooks) and the approval audit, plus the anti-patterns. |
+| `references/claude-code-setup.md` | Writing `.claude/` files, or the user asks about Claude Code itself, including `/goal`, mods and `/design`. Verified syntax as of Sep 2026, including the two subagent templates, with skills, rules, settings.json and permission modes re-checked Nov 2026. |
 | `references/stack-picker.md` | Choosing a stack or a host, setting up Railway or any host other than Vercel, or when they ask why something costs money. |
 | `references/design-brief.md` | Kickoff design steps (direction, values, screens, mockups), or a design pass. Has the full DESIGN.md template. |
 | `references/design-review.md` | Sync on any task that touched a screen, and the start of every design pass. The five-check score and the diagnosis table. |

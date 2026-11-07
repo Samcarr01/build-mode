@@ -42,9 +42,14 @@ And a plan-mode line at the top of every prompt except a trivial one-file change
 
 ```
 Start in plan mode. Show me the plan and wait for approval before editing anything.
+In the plan, list in plain English anything that deletes data, changes the database,
+sends or posts anything, costs money to run, or cannot be undone. If there is none,
+say "Nothing risky".
 ```
 
 Default this on rather than off. The user cannot read a diff, so the plan is the only review the work gets. A minute spent reading a plan is the cheapest possible place to catch a wrong direction.
+
+The second half matters as much as the first. A plan is mostly file names and steps, and a migration or a new send call sits in that list looking like everything else. Asking for the risky steps in plain words puts the one part the user can judge at the top, and "Nothing risky" is a line they can check in two seconds.
 
 ## Writing each part
 
@@ -321,11 +326,19 @@ calorie number and a confidence. This is the feature the app exists for.
    Use the provider's structured output mode, not a "reply in JSON" instruction.
 2. Validate the response against the schema before using it. If it does not parse,
    retry once, then return a clear error. Never show unvalidated model output as a number.
-3. **Store the result on the entry**, do not recompute on read. <Or the reverse, with
-   the reason.>
-4. Show the confidence in the UI: <how>. A low-confidence estimate must not look like
+3. The instructions the model gets live in `prompts/calorie-estimate.md`, not in a
+   string inside the route. Sections: the job in one line, always, never, what to
+   return when the input is not food, and one worked example of an input and its
+   output. A `PROMPT_VERSION` line at the top.
+4. **Store the result on the entry**, do not recompute on read, with the model name and
+   prompt version beside it. <Or the reverse, with the reason.>
+5. Show the confidence in the UI: <how>. A low-confidence estimate must not look like
    a measured fact.
-5. Loading state while it thinks. Error state when it fails.
+6. Loading state while it thinks. Error state when it fails.
+7. `prompts/calorie-estimate.samples.json`: eight inputs, two ordinary, two awkward,
+   two that are not food at all, two empty or nonsense, each with the shape its answer
+   must have. A test runs them against the real model with a low token cap and checks
+   the shape and confidence, not the exact wording.
 
 ## Constraints
 - API key server-side only. It must never reach the browser.
@@ -333,17 +346,19 @@ calorie number and a confidence. This is the feature the app exists for.
   no automatic retries beyond the single reparse.
 - Do not let a failed estimate block saving the entry. The log is the point;
   the number is an enhancement.
+- If anything the model writes goes to someone outside the app, decide whether a
+  person approves it first. See the Automation recipe.
 
 ## Done when
 - [ ] Typing "two eggs and toast" returns a number in under 5 seconds
-- [ ] Typing nonsense returns low confidence or a clear "could not estimate",
-      not a confident wrong number
+- [ ] The samples test passes, and the not-food and nonsense samples come back as low
+      confidence or a clear "could not estimate", not a confident wrong number
 - [ ] With the API key removed, the entry still saves and the UI explains why
       there is no estimate
 - [ ] The stored number does not change when the page is reloaded
 ```
 
-The three decisions to force in every AI prompt:
+The four decisions to force in every AI prompt:
 
 **Store or recompute.** The most consequential and the easiest to get wrong. If you recompute on read, every historical number silently changes when the model updates, and the user's totals from last month are no longer what they saw. Store the result and the model version. Recompute only when the user asks.
 
@@ -351,7 +366,121 @@ The three decisions to force in every AI prompt:
 
 **Cost.** Name the model, cap the tokens, one call per action. Tell the user roughly what a thousand uses costs and suggest a spend limit on the provider dashboard on day one. This is the only line in a project that can run away while they are asleep.
 
+**Where the app's own prompt lives, and how it is tested.** A prompt written as a string inside a route gets edited in passing by an unrelated task, and nobody notices the answers changed. In its own file, with a version and a samples test, changing it is a deliberate act that shows up in the plan, and the stored version says which prompt produced last month's numbers. The samples are also the cheapest way to check a model upgrade: run them before switching, not after someone notices. If the build is for a client, write the samples from their real inputs, with names and amounts changed, because the awkward ones are what the tool will actually meet.
+
 And note the done-checks: none of them says "returns the right answer", because it cannot. They check the shape, the failure path, the honesty of the UI and the stability of the stored value. That is what a verifiable done-check looks like for non-deterministic output.
+
+### Automation: scheduled jobs, webhooks, anything that acts on its own
+
+Use this for any task where the app does something nobody clicked (a schedule, a webhook from another system, a queue) or reaches outside itself (sends, posts, pays, deletes, writes into someone else's software). Judge by what the task does, not by what the app is: a booking tool, a CRM add-on and a personal habit tracker can each have one.
+
+Nobody is watching when one of these goes wrong. A bug on a screen shows one person a wrong page. A bug here sends forty customers the same message twice at three in the morning. Four decisions go in the prompt, or they get made badly by default.
+
+The example below is one illustration. Swap in the project's own job, systems and timings; keep the shape.
+
+```markdown
+# M2-T3 Draft the overdue invoice reminders
+
+## Context
+Every weekday at 9am London time the app finds invoices more than 7 days overdue and
+drafts a reminder for each. A person approves them in the review screen before anything
+is sent. This task builds the job that finds and drafts. It does not send.
+
+**Read first:** CLAUDE.md (§Standing rules), docs/ARCHITECTURE.md (§Jobs and outbound
+actions, §Data model)
+**Use these:** <the host's MCP for the job's deploys and logs>, `context7` for the current
+<provider> API docs.
+
+## Build
+1. One function, `draftOverdueReminders(runDate)`, that does the whole job and can be run
+   by hand, by the schedule, or by a test. The schedule only ever calls it.
+2. Every item it acts on gets a run key: <invoice id + reminder number>. Before acting,
+   look the key up and skip the item if it is there.
+3. A `job_runs` table: one row per run with started, finished, found, drafted, skipped
+   and any error. Every run writes one, including runs that find nothing.
+4. Drafts go into the approval queue with status `waiting`. Nothing in this task calls
+   the provider's send endpoint.
+5. The schedule, in local time. <If the host's scheduler only runs in UTC:> schedule it
+   at both UTC hours that can be 9am in London (`0 8,9 * * 1-5`); the function checks the
+   London clock, exits on the run that is not 9am locally, and the run key stops a double
+   run. <If the scheduler takes a time zone:> set `Europe/London` there instead. Put the
+   reason in a comment by the schedule. If the schedule is a setting in the host's
+   dashboard, end your reply by telling me exactly what to paste there. The process
+   exits when the job ends.
+6. `JOBS_ENABLED` environment variable. Unless it is `true`, the function writes a
+   skipped row to `job_runs` and does nothing else.
+
+## Constraints
+- <If outbound actions need approval:> The only code that sends, posts, pays or deletes
+  anything outside the app is `<the approved-action helper named in CLAUDE.md>`, and it
+  refuses any item not marked approved by a named person. Do not call the provider from
+  anywhere else.
+- Respect <provider>'s rate limit of <n per minute>: back off on a 429, at most 3 retries.
+- After downtime, run once for today. Never once per missed day.
+- `JOBS_ENABLED` stays unset locally and in preview environments.
+- No scheduling library when the host's own scheduler does the job.
+
+## Done when
+- [ ] Running the function twice for the same date drafts each reminder once, not twice
+- [ ] A run with nothing overdue still writes a `job_runs` row saying 0 found
+- [ ] With `JOBS_ENABLED` unset, a run writes "skipped" and drafts nothing
+- [ ] <If approval applies:> A search of the repo finds the provider's send call only
+      inside the approved-action helper
+```
+
+The four decisions to force in every automation prompt:
+
+**Run it twice and nothing changes.** Schedulers fire twice, a deploy restarts a job halfway, and a retry after a timeout repeats work that half succeeded. Providers resend webhooks the same way. A key per item, checked before acting, turns all of those into nothing happening instead of a duplicate email. For a webhook coming in, the key is the provider's event id, and the signature is checked before anything else.
+
+**Decide who presses send.** The first time a roadmap task reaches outside the app, ask the user once whether a person should approve each item before it goes, and recommend yes for anything that lands in someone else's inbox, feed or bank account. Write the answer in CLAUDE.md under Standing rules and in docs/ARCHITECTURE.md §Jobs and outbound actions. If the answer is yes, enforce it in code: one helper that refuses unapproved items, and no other path to the provider. A line in CLAUDE.md is a request; the helper holds even when a later task forgets the rule. The code reviewer checks it on every task, and the approval audit proves it at the end of the phase.
+
+**A record of every run.** When someone asks "did it go out on Tuesday?", the run table answers in ten seconds. Without it the answer is a log search that may have rotated away. It is also the proof a job ran: the newest row says what happened, where a green deploy only says the code started. `/checkpoint` reads it after a manual run, and a Done-when tick can name it.
+
+**An off switch and a clock.** `JOBS_ENABLED` stops a misbehaving job without a deploy, which is the difference at 3am. And name the time zone in the code. Railway cron and Vercel's older Cron Jobs both run in UTC, so a "9am" job moves by an hour at every clock change unless the code handles it. On Vercel, use Schedules rather than `crons` in `vercel.json`: a schedule takes a `timezone`, and on Hobby it can run as often as every 15 minutes rather than once a day, though each run can start up to 15 minutes after the time set. A schedule that calls a `path` is a public URL, so the route checks `CRON_SECRET` before doing anything. On any other host, find out before writing the task which time zone its scheduler uses and what it does with a run that is still going (Railway skips the next one).
+
+**The `[@]` task before it.** If the schedule has to be created in the host's dashboard (a Railway cron service does), that is the user's step. Give it its own `[@]` task directly before the job's build task, and say exactly where the setting is.
+
+### Approval audit
+
+The last task of any phase that added a way to send, post, pay or delete, in a project where a person approves outbound actions. It earns its own task because the failure it looks for does not show up when everything works: it shows up the first time a retry, an admin route or a forgotten script acts without anyone approving it.
+
+```markdown
+# M2-T7 Approval audit
+
+## Context
+This phase added <the reminder job and the send step>. This project's rule (CLAUDE.md,
+Standing rules) is that nothing sends, posts, pays or deletes outside the app without a
+named person approving it. This task proves the code makes that impossible, not just
+unlikely.
+
+**Read first:** CLAUDE.md (§Standing rules), docs/ARCHITECTURE.md (§Jobs and outbound actions)
+**Use these:** `@agent-code-reviewer` on every file that reaches outside the app, once
+the list in step 1 exists.
+
+## Build
+1. List every place the code reaches the outside world: provider SDK calls, outbound
+   HTTP, email, outgoing webhooks, file deletes, payments. Search the whole repo, not
+   only this phase's files.
+2. For each one, trace whether it can run without passing through the approved-action
+   helper. Include scheduled jobs, retries, admin routes, seed scripts and anything a
+   webhook coming in can trigger.
+3. Try to get round it, each as a test: call the send route directly with an item that
+   is not approved, replay an item that was already sent, approve as a user from a
+   different tenant.
+4. Fix anything that gets through, one finding at a time.
+
+## Constraints
+- No new features. Findings and fixes only.
+- If a path is meant to act without approval because the user decided it should, stop
+  and say which one. Do not decide it is fine.
+
+## Done when
+- [ ] Every outbound path is in docs/ARCHITECTURE.md §Jobs and outbound actions, with what gates it
+- [ ] Each attempt in step 3 has a test, and every one is refused
+- [ ] Nothing found is left unfixed, or it is marked `[!]` on the roadmap with the reason
+```
+
+If the project has nothing that reaches outside the app, the task is ticked with "nothing outbound" and the ARCHITECTURE section says "none".
 
 ### Debugging
 

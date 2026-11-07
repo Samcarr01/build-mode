@@ -28,7 +28,7 @@ Do not fold design into the kickoff interview. It gets squeezed to one text ques
 
 - **A reference.** "Paste one or two URLs of apps you like the look of." Then open them in the browser (`claude-in-chrome` or the built-in browser), screenshot them, and write down what actually makes them work: how much of the screen they use, what the eye lands on first, how many words are on a screen, where colour appears. That becomes the Direction paragraph. Taste they already have beats a name you guess.
 - **Density.** Operator console (dense, lots visible at once, small type, keyboard-first) or one thing per screen (spacious, large type, one action). Most dashboards want the first; most consumer apps want the second. The wrong choice here is the single most common reason a screen feels off.
-- **Mood, from pictures.** Draft three direction artboards with the `design` skill, each a rough version of the same core screen in a different direction, and let them pick. Three adjectives in a text question do not work; three pictures do. If the `design` skill is unavailable, fall back to named anchors: Linear (dense, neutral, precise), Stripe (editorial, generous whitespace, confident type), Notion (warm, soft, approachable), Vercel (stark, monochrome, high contrast). Pick one and commit; a design that hedges between two looks like neither.
+- **Mood, from pictures.** Draft three direction artboards with the `design` skill, each a rough version of the same core screen in a different direction, and let them pick. Three adjectives in a text question do not work; three pictures do. If neither the `design` skill nor the Design artifact type is available, fall back to named anchors: Linear (dense, neutral, precise), Stripe (editorial, generous whitespace, confident type), Notion (warm, soft, approachable), Vercel (stark, monochrome, high contrast). Pick one and commit; a design that hedges between two looks like neither.
 
 Use `frontend-design` for the aesthetic thinking while you draft the artboards.
 
@@ -98,16 +98,17 @@ Once `docs/ROADMAP.md` exists you know which screens Phase 1 builds. Write a sho
 - **Layout.** Which shell, what the grid does on this screen, what is above the fold at 1440 and at 390.
 - **Words.** A budget for the whole screen, usually under 60 outside the data itself.
 - **Picture.** The mockup filename in `docs/design/`.
+- **Image slots, marketing and landing pages only.** The rules above assume data does the visual work. A marketing page has no data, so pictures carry it, and good type next to a grey placeholder box still reads as AI-made. For each slot (the hero, each section that needs one) write what it shows and where it comes from: the owner's own photos first (their premises, their work, their people, with permission), then generated images with the prompt written into DESIGN.md so they can be regenerated, and generic stock last. The files go in `public/images/` before the UI task that uses them, through an `[@]` task if the user has to supply or generate them.
 
 ### 9. Mockups, before code
 
-For each core screen, draft an artboard with the `design` skill at 1440 wide (and 390 for anything mobile-first), using the real tokens and real words, on the real layout. The user looks at it on the canvas, tweaks it if they want, and says yes. That yes is the design approval; nothing else in the loop asks them to judge design in the abstract.
+For each core screen, draft an artboard with the `design` skill (or the Design artifact type, in a session that offers that instead) at 1440 wide (and 390 for anything mobile-first), using the real tokens and real words, on the real layout. The user looks at it on the canvas, tweaks it if they want, and says yes. That yes is the design approval; nothing else in the loop asks them to judge design in the abstract.
 
 Once approved, render each artboard to PNG and put it in the repo at `docs/design/<screen>.png`, alongside the artboard source as `docs/design/<screen>.html` so a later pass can re-render it. Render with Playwright in the Cowork workspace (Chromium is installed there), or ask the user to export from the canvas if that fails. Commit them with the rest of the doc pack.
 
 Every UI prompt from then on says "Match `docs/design/dashboard.png`. Where the picture and the token table disagree, the picture wins on layout and the table wins on values."
 
-If the `design` skill is unavailable, write an ASCII wireframe into the Screens section instead. Worse than a picture, far better than nothing.
+If neither the `design` skill nor the Design artifact type is available, write an ASCII wireframe into the Screens section instead. Worse than a picture, far better than nothing.
 
 ## docs/DESIGN.md
 

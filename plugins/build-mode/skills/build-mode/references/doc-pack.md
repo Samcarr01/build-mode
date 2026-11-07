@@ -75,6 +75,10 @@ command yourself.">
 ## Standing rules
 - <Project-specific conventions Claude Code cannot infer from the code.>
 - Never commit secrets. Environment variables go in `.env.local`, which is gitignored.
+- <If outbound actions need approval: nothing sends, posts, pays or deletes anything
+  outside the app except through `<the approved-action helper>`, which refuses any item
+  a named person has not approved. Do not call a provider's send, post or payment
+  endpoint from anywhere else.>
 - Ask before adding a dependency that does something the stack already does.
 - <Naming conventions, folder layout, anything that differs from the framework default.>
 
@@ -151,6 +155,20 @@ rule that nothing queries around it.>
 | `/` | Landing | public |
 | ... | | |
 
+## Jobs and outbound actions
+Everything the app does that nobody clicked, and every way it reaches outside itself.
+Write "none" if there is nothing, so a later session knows it was checked.
+
+| What | Trigger | When (local time) | Reaches | Gated by |
+|---|---|---|---|---|
+| <Draft overdue reminders> | <schedule> | <09:00 weekdays, Europe/London> | <nothing, drafts only> | <n/a> |
+| <Send approved reminders> | <a person approves> | <on approval> | <the email provider> | <the approved-action helper> |
+| <Inbound payment webhook> | <provider call> | <any time> | <updates invoice status> | <signature check, event id dedupe> |
+
+Approval: <does a person approve outbound actions, yes or no, and the date it was decided>.
+Run log: <the table every job writes one row to per run>.
+Off switch: `JOBS_ENABLED`. Unset means every job logs a skipped run and does nothing.
+
 ## Environment variables
 | Name | What it is | Where it comes from |
 |---|---|---|
@@ -189,6 +207,10 @@ Built in the design step. Full guidance and the template in `design-brief.md`. T
 **Now:** M1-T3 - <task name>
 **Next:** M1-T4 - <task name>
 **Shipped:** <one line on what currently works>
+
+**Worked if:** <what is true for the user if this succeeded, in their own units>
+**Riskiest assumption:** <the one belief that sinks the project if it is wrong> -
+checked by <`M0-Tn`, or a question for the user, and the answer once known>
 
 Status key: [ ] not started, [~] in progress, [?] built but not verified,
 [x] done and verified, [!] blocked, [@] waiting on the user, ~~cut~~
@@ -247,6 +269,8 @@ Rules that keep this useful:
 - **`[?]` is the honest default** when there is no evidence yet. `/checkpoint` writes `[x]` only after it has built the project and walked the flow in a browser, and `[!]` when either fails. If you are looking at a `[x]` with no build result and no click recorded in PROGRESS.md, treat it as `[?]` and check.
 - **`[@]` is for the steps only the user can do**: creating an account, pasting an API key into the host's dashboard, pointing a domain, approving something in a dashboard. Give these their own task IDs rather than burying them inside a build task, because a build task that secretly needs the user is the most common way a project stalls for a week. Say exactly what they have to do and where.
 - **Every phase that adds a screen ends with a polish task.** It is the scheduled home for the design review in `design-review.md`. If the screens already scored 4 or 5 in Sync, tick it with a note; it costs nothing when the work was right first time.
+- **Every phase that adds a way to send, post, pay or delete ends with an approval audit task** (`Mx-Tn Approval audit`), in a project where a person approves outbound actions. Recipe in `prompt-recipes.md`. The rule is written in CLAUDE.md, but a written rule is a request. The audit is what proves the code cannot act without a person.
+- **Worked if and Riskiest assumption** are written at kickoff and only change through Replan. If the riskiest assumption is technical ("the booking system has a usable API"), it is a Phase 0 task before any feature. If it is about people ("staff will approve drafts every morning"), it is a question for the user before Phase 1 starts.
 - **The three lines at the top** are what the user reads on their phone. Keep them current.
 - Tasks are one session each. If the Definition of Done needs more than four ticks, split it.
 
