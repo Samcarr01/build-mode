@@ -68,6 +68,8 @@ they can paste it. **obra/superpowers** matters most: it is common, it loads its
 every session, and it will re-open design questions this skill already settled unless
 `CLAUDE.md` tells it not to. See `claude-code-setup.md` for the full handling.
 
+Also look for **GreenSock's `gsap-skills`**. It is the right tool for Showcase builds, but installed at user scope it is active in every project, and its React skill recommends GSAP for any React animation unless a library has been chosen. That is why non-Showcase UI prompts say "Animation: CSS and Motion only, not GSAP". See `motion.md`.
+
 ## Skills
 | Skill | Cowork | Claude Code |
 |---|---|---|
@@ -126,7 +128,9 @@ Rough mapping from task type to what to name:
 | A failed deploy, a service that will not start, errors in production | The host's MCP tools from the Hosting section of `docs/TOOLING.md`; failing that, its CLI |
 | Anything Railway-specific: services, variables, domains, volumes | `use-railway` skill and Railway MCP, where the Railway plugin is installed |
 | React or Next.js structure and performance | `vercel-react-best-practices`, `vercel-composition-patterns` |
-| Page transitions and animation | `vercel-react-view-transitions` |
+| Anything that moves on an app screen | `docs/DESIGN.md` §Motion and the craft rules from `motion.md` in the Constraints, with "Animation: CSS and Motion only, not GSAP"; `context7` for Motion's docs |
+| Page transitions | `vercel-react-view-transitions` |
+| Showcase pages: scroll scenes, split text, 3D | `gsap-skills:gsap-react`, `gsap-skills:gsap-scrolltrigger`, `gsap-skills:gsap-plugins` where GreenSock's plugin is installed (full list in `motion.md`); `context7` for React Three Fiber |
 | Native iOS or macOS | `apple-hig` |
 | Checking it works before saying done | Playwright MCP, `webapp-testing` |
 | Any third-party library or API | `context7` MCP for the current docs |

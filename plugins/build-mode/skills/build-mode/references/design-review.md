@@ -18,7 +18,7 @@ Five checks, one point each. Be strict; a generous four is how the flat clone ge
 | 2 | **Five-second test** | Look at it fresh for five seconds. Say what the screen is for and what you would do first. | Both come easily. Fail: you had to read to find out. |
 | 3 | **Space** | Measure the main content area against the viewport at 1440. Count the empty vertical space below the last element. | Main area uses the width the layout section allows. No centred column with empty sides on an app screen. Content or a deliberate empty state fills the height. Fail: 40 percent of the width empty, or the bottom half blank. |
 | 4 | **Words** | Count the words on the screen that are not data (labels, helper text, explanations, status lines). | Within the DESIGN.md copy budget, normally under 60. Fail: helper text under every field, a paragraph per list item. |
-| 5 | **Picture and motion** | Count the non-text elements: icons, sparklines, rings, bars, images, colour used for meaning. Hover one thing. | At least one hero visual, icons where the brief says, status carried by colour, and something responds to hover. Fail: numbers with labels and nothing else, and a static page. |
+| 5 | **Picture and motion** | Count the non-text elements: icons, sparklines, rings, bars, images, colour used for meaning. Then run the three motion checks in `motion.md`: states, probe and code. | At least one hero visual, icons where the brief says, status carried by colour, and all three motion checks pass. Fail: numbers with labels and nothing else, a static page, a reveal that never fired, or `transition-all`. |
 
 Then compare against the mockup: same layout, same hierarchy, same hero. Small drift in values is fine; a different layout is not.
 
@@ -44,4 +44,4 @@ Say which one it is in one line, fix the document first where the table says to,
 
 ## Polish tasks
 
-Every milestone in `docs/ROADMAP.md` ends with a polish task (`Mx-Tn Design polish: <screens>`). It exists so the review has a scheduled home rather than only running when something looks wrong. The prompt for it is the UI recipe with the whole milestone's screens in scope, and its done-checks are the five checks above scoring four or better on each screen. If the screens already score four or five in Sync, the polish task is ticked with a note and costs nothing.
+Every milestone in `docs/ROADMAP.md` ends with a polish task (`Mx-Tn Design polish: <screens>`). It exists so the review has a scheduled home rather than only running when something looks wrong. The prompt for it is the UI recipe with the whole milestone's screens in scope, and its done-checks are the five checks above scoring four or better on each screen. If the screens already score four or five in Sync, the polish task is ticked with a note and costs nothing. Polish tasks also carry the Lighthouse gate and the GIF for the user described in `motion.md`.

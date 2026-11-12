@@ -59,7 +59,7 @@ A screen with no hierarchy is a list. Rules for every screen:
 - **Cards are not all equal.** The hero stat is wider or taller. Secondary stats are smaller. A grid of identical boxes tells the reader nothing about what matters.
 - **Name an icon set** (Lucide or Phosphor) and where icons appear: nav items, stat tile labels, empty states, status pills. Icons are the cheapest visual anchor there is and the flat clone has none.
 - **Accent colour does one job.** Primary action and active state. If the accent is on more than three things on a screen, it is not an accent.
-- **Something moves.** Hover states, a number counting in, a pill that fades in when status changes. Two or three motion rules, not zero. Zero is what makes a screen feel like a PDF.
+- **Something moves.** Hover states, a number counting in, a pill that fades in when status changes. Two or three motion rules, not zero. Zero is what makes a screen feel like a PDF. `motion.md` says which, and how Sync checks them.
 
 ### 5. The copy budget
 
@@ -85,9 +85,9 @@ Bake it into the values now and it costs nothing; retrofit it after every screen
 
 Dark themes fail this differently: `text-muted` at `#71717A` on `#0A0A0A` passes, but the same grey on a `#1C1C1C` card does not. Compute against every surface, not just the page background.
 
-### 7. Motion, briefly
+### 7. Motion
 
-Two or three rules. Durations, easing, what animates and what does not. `ui-ux-pro-max` has GSAP presets, and `vercel-react-view-transitions` covers page transitions in React.
+Read `motion.md`. Pick one motion personality, one curve, three durations and at most three moments, and write them into the Motion section of the template below. It also covers which tool does which job, the craft rules, the ban list, how Sync checks motion, and Showcase mode for sites meant to impress.
 
 ### 8. Screens, after the roadmap
 
@@ -199,9 +199,14 @@ Error: danger border with the message below in 13px.
 **Empty states** - heading, one line, one primary action. Never a bare blank page.
 
 ## Motion
-Durations 150ms for hover, 250ms for entrances. Easing `cubic-bezier(0.4, 0, 0.2, 1)`.
-Numbers count in on first paint. Pills fade when status changes. Rows lift 1px on hover.
-Animate opacity and transform only. Respect `prefers-reduced-motion`.
+Mode: <Calm | Showcase>   (Showcase only for sites meant to impress; see motion.md)
+Personality: <Corporate | Premium | Playful | Energetic>   (apps default to Corporate)
+Curve: `cubic-bezier(0.16, 1, 0.3, 1)` for entering and leaving; `cubic-bezier(0.4, 0, 0.2, 1)` for things moving on screen.
+Durations: fast 150ms (hover, press, toggles), base 200ms (pills, toasts, cards), slow 300ms (modals, drawers). Exits about a third faster.
+Entrance: <one pattern, e.g. fade plus 8px rise>, first paint only, stagger 30 to 50ms, under 400ms in total.
+Moments, three at most: <1. ... 2. ... 3. ...>
+Animate opacity and transform only. Never `transition-all`.
+Reduced motion: remove parallax, large slides, zooms and loops; other movement becomes a 150ms fade; keep colour, focus rings and spinners.
 
 ## Screens
 ### <Screen name> - `docs/design/<screen>.png`
