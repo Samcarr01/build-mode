@@ -19,6 +19,31 @@ on trust.
 
 ---
 
+## What is new in 2.7
+
+Motion you can check, and a mode for sites that need to impress.
+
+- **Motion is decided at kickoff.** Each project picks a motion personality (calm
+  Corporate for apps, Premium for marketing pages), one curve, three durations and at
+  most three signature moments, chosen when you approve the mockups. All of it lives in
+  the new `references/motion.md`.
+- **Which tool does which job.** Plain CSS through Tailwind first, Motion only for exits,
+  layout changes and springs, GSAP only on Showcase pages, Reanimated on Expo. Pages
+  never become client components just to animate.
+- **Craft rules and a ban list.** Nothing on an app screen over 300ms, transform and
+  opacity only, nothing hidden while it waits to animate in, a pause control on long
+  loops. Fade-up on every section, glowing beams and bouncing cards are banned as the
+  current AI look.
+- **Motion gets checked, not assumed.** A screenshot cannot see motion, so check 5 now
+  compares settled states, reads the real transition timings in the browser, flags any
+  reveal that never fired, and checks the code. Polish tasks add a Lighthouse gate and a
+  short GIF for you to judge.
+- **Showcase mode.** For sites whose job is to impress: one signature moment drawn from
+  the client's own world, up to four supporting effects from a menu (split-text
+  headlines, pinned scroll scenes, 3D, video heroes, image reveals), a three-frame
+  storyboard you approve first, and guardrails for phones, reduced motion and page
+  weight. It uses GreenSock's official `gsap-skills` plugin where installed.
+
 ## What is new in 2.6
 
 Tools that act on their own, and plans you can judge at a glance.
@@ -313,6 +338,13 @@ cannot review code, so this is a merge rather than a fight.
 
 If you do not have superpowers, Build Mode leaves the block out entirely.
 
+**[greensock/gsap-skills](https://github.com/greensock/gsap-skills)** is GreenSock's
+official GSAP plugin, and the right tool for Showcase builds. Install it once in Claude
+Code with `/plugin marketplace add greensock/gsap-skills`, then
+`/plugin install gsap-skills@gsap-skills`. Its React skill recommends GSAP for any React
+animation unless a library has been chosen, so on ordinary builds Build Mode's prompts
+say "CSS and Motion only, not GSAP" and it stands down.
+
 ---
 
 ## Using it
@@ -369,7 +401,7 @@ you get one judgement question rather than a test plan.
 
 Nothing in that loop depends on you remembering anything. The repo carries the state.
 
-### Nine modes
+### Ten modes
 
 It reads what you said and picks one:
 
@@ -382,6 +414,7 @@ It reads what you said and picks one:
 | "put it back", "undo that", "it was working yesterday" | **Undo** |
 | "I want to add", "actually let's change", "drop that", "move it to Railway" | **Replan** |
 | "make this look better", "the UI is generic", "it's boring" | **Design pass** |
+| "make it flashy", "wow", "award-winning" | **Showcase** |
 | "upgrade my project files", "refresh the setup" | **Upgrade** |
 | "any skill issues?", "skill review" | **Skill review** |
 
@@ -410,9 +443,9 @@ Claude Code touches a UI file.
 
 ## What is actually in here
 
-Nine files. The bulk of it is not prose, it is specifics:
+Ten files. The bulk of it is not prose, it is specifics:
 
-- **`SKILL.md`** - the nine modes, the memory rules, the folder discipline
+- **`SKILL.md`** - the ten modes, the memory rules, the folder discipline
 - **`references/stack-picker.md`** - default stack and when to deviate, with costs, and
   hosting: Vercel, Railway (including Railway Postgres), and the five questions that
   make any other host work
@@ -420,6 +453,8 @@ Nine files. The bulk of it is not prose, it is specifics:
   full `DESIGN.md` template with layout, hierarchy, copy budget and screens
 - **`references/design-review.md`** - the five-check design score Sync runs, and the
   diagnosis table a design pass starts from
+- **`references/motion.md`** - motion personality, which tool does which job, craft rules,
+  the ban list, how Sync checks motion, and Showcase mode
 - **`references/doc-pack.md`** - exact templates for every document
 - **`references/prompt-recipes.md`** - the six-part prompt shape, plus worked recipes for
   the first deploy, a new screen, a third-party integration, an LLM feature, an
