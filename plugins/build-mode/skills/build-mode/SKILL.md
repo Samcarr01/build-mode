@@ -41,6 +41,7 @@ Read the request and pick one. When it is ambiguous, read `docs/PROGRESS.md` in 
 | "put it back", "undo that", "it was working yesterday" | **Undo** | [Undo](#undo) |
 | "I want to add", "actually let's change", "drop that", "move it to Railway" | **Replan** | [Replan](#replan) |
 | "make this look better", "the UI is generic", "it's boring", a polish task is next, or a Sync design score failed | **Design pass** | [Design pass](#design-pass) |
+| "make it flashy", "wow", "award-winning", "cool effects", a launch or marketing site meant to impress | **Showcase** | Showcase mode in `references/motion.md` |
 | "upgrade my project files", "refresh the setup", an old project missing the current files | **Upgrade** | [Upgrade](#upgrade) |
 | "any skill issues?", "skill review", "what needs fixing in build mode" | **Skill review** | [Skill issues](#skill-issues-get-a-skill-tag) |
 
@@ -104,10 +105,10 @@ Read `references/design-brief.md`. This is the step that stops the app looking l
 
 Two parts here, the third comes after the roadmap:
 
-- **Design interview, its own `AskUserQuestion` round, three questions max.** A reference URL or two they like the look of (then open them and write down why they work), density (operator console or one thing per screen), and mood chosen from three direction artboards you draft with the `design` skill rather than three adjectives. They pick a picture.
+- **Design interview, its own `AskUserQuestion` round, three questions max.** A reference URL or two they like the look of (then open them and write down why they work, including what moves on them, how fast and how often), density (operator console or one thing per screen; for a marketing site, ask instead whether it is a calm build or a Showcase build, see `references/motion.md`), and mood chosen from three direction artboards you draft with the `design` skill rather than three adjectives. They pick a picture.
 
   Wherever this skill says the `design` skill, a session that has no such skill but offers the **Design artifact type** uses that instead: it is the same artboard canvas. Check what this session has before falling back to anything else.
-- **Values and rules.** `ui-ux-pro-max` for the palette, type pairing and product-type patterns, `frontend-design` for the aesthetic direction, `apple-hig` when it is a native Apple app. Write `docs/DESIGN.md` with the Layout, Hierarchy and Copy sections filled in, not just the tokens. Those three sections are what a token sheet misses.
+- **Values and rules.** `ui-ux-pro-max` for the palette, type pairing and product-type patterns, `frontend-design` for the aesthetic direction, `apple-hig` when it is a native Apple app. Write `docs/DESIGN.md` with the Layout, Hierarchy and Copy sections filled in, not just the tokens. Those three sections are what a token sheet misses. Fill the Motion section from `references/motion.md`: a personality, one curve, three durations and at most three moments.
 
 ### 5. Roadmap
 
@@ -248,7 +249,7 @@ The user says the work is done. Your job is to find out whether it is.
 
 3. **Open the thing.** Drive the deployed URL yourself with `claude-in-chrome`. Click the flow this task added, screenshot it at 1440 and 390, read the console, then check it against `docs/DESIGN.md` and the screen's mockup in `docs/design/`.
 
-   **If the task touched a screen, score it** with `references/design-review.md`: squint test, five-second test, space used, word count, picture and motion. One point each. Four or five passes. Three or under is a design fail: the task stays `[?]`, you say which checks failed, and the next prompt is a Design pass, not a new feature. Token compliance alone is not a pass; a screen can use every hex value in the file and still be a grey column of text. Nothing else in the system performs this check, and generic-looking UI is exactly the defect the user struggles to name, so do not wait for them to name it.
+   **If the task touched a screen, score it** with `references/design-review.md`: squint test, five-second test, space used, word count, picture and motion. One point each. Check 5 runs as described in `references/motion.md`, because a screenshot cannot see motion. Four or five passes. Three or under is a design fail: the task stays `[?]`, you say which checks failed, and the next prompt is a Design pass, not a new feature. Token compliance alone is not a pass; a screen can use every hex value in the file and still be a grey column of text. Nothing else in the system performs this check, and generic-looking UI is exactly the defect the user struggles to name, so do not wait for them to name it.
 
 4. **Then read the repo**, to fill gaps rather than as the main event. `device_bash` sees connected folders at `/sessions/<session>/mnt/<folder-name>`, not the real path on their machine. Run `ls mnt/` if unsure of the name.
    ```bash
@@ -367,7 +368,7 @@ Either the UI looks generic, a Sync design score failed, a polish task is due, o
 1. **Score and diagnose first.** Screenshot the screen at 1440 and 390 and run the five checks in `references/design-review.md`. Its diagnosis table says which of five causes you are looking at: no mockup, no hierarchy spec, the centred-column layout, the copy budget ignored, or vague tokens. Each has a different fix and "make it look better" fixes none of them. Say which one it is in one line.
 2. **Fix the document before the screen.** Read `docs/DESIGN.md`. If it does not exist, or lacks the Layout, Hierarchy, Copy or Screens sections, bring it up to `references/design-brief.md` first. A screen built from a vague file will drift back.
 3. **Mock it up.** If the screen has no mockup in `docs/design/`, draft one with the `design` skill using the real tokens and real words, get the user's yes on the canvas, and commit the PNG. This is the step that was skipped whenever a screen came out wrong.
-4. Use `ui-ux-pro-max` for concrete values and product-type patterns, `ux-designer` for flows, forms and accessibility, `web-design-guidelines` to audit existing UI code, `dataviz` for anything with numbers that deserve a picture, `apple-hig` for native Apple apps.
+4. Use `references/motion.md` for anything that moves, `ui-ux-pro-max` for concrete values and product-type patterns, `ux-designer` for flows, forms and accessibility, `web-design-guidelines` to audit existing UI code, `dataviz` for anything with numbers that deserve a picture, `apple-hig` for native Apple apps.
 5. If Figma is connected, `get_design_context` on a Figma URL turns their design into buildable spec, and `use_figma` pushes a built screen back into Figma.
 6. Output a **UI prompt** (recipe in `references/prompt-recipes.md`) that names the mockup, the hero element, the layout rule and the copy budget, with real values. "Make it look premium" produces nothing. "Match `docs/design/dashboard.png`. Main area fills the viewport on a 12-column grid. Hero stat spans 2 columns at 40px with a sparkline. Cards at 12px radius, 1px `#27272A` border, no shadow, 24px padding. Under 60 words outside the data" produces the thing.
 
@@ -445,12 +446,13 @@ Read these when the mode calls for them, not upfront.
 | `references/stack-picker.md` | Choosing a stack or a host, setting up Railway or any host other than Vercel, or when they ask why something costs money. |
 | `references/design-brief.md` | Kickoff design steps (direction, values, screens, mockups), or a design pass. Has the full DESIGN.md template. |
 | `references/design-review.md` | Sync on any task that touched a screen, and the start of every design pass. The five-check score and the diagnosis table. |
+| `references/motion.md` | Kickoff design values, any UI prompt that adds motion, check 5 in Sync, and Showcase builds. Motion personality, which tool does which job, craft rules, the ban list, how to check motion, and Showcase mode. |
 | `references/memory.md` | The learn step. What is worth recording and what is filler. |
 
 ## Other skills to pull in
 
 Do not rebuild what already exists. `references/tooling.md` has the full task-to-skill mapping and the current inventory of both sides; use it rather than a second copy here.
 
-The ones this skill leans on most, where they are installed: `design` for direction artboards and screen mockups the user can look at before anything is coded, `ui-ux-pro-max` and `frontend-design` for design values, `dataviz` for any number that deserves a picture, `ux-designer` for flows and copy, `supabase` and `supabase-postgres-best-practices` for anything touching data, `web-design-guidelines` for auditing UI that already exists. None are required. Where one is missing, do the work yourself and write the values into the docs.
+The ones this skill leans on most, where they are installed: `design` for direction artboards and screen mockups the user can look at before anything is coded, `ui-ux-pro-max` and `frontend-design` for design values, `dataviz` for any number that deserves a picture, `ux-designer` for flows and copy, `supabase` and `supabase-postgres-best-practices` for anything touching data, `web-design-guidelines` for auditing UI that already exists, and GreenSock's `gsap-skills` plugin for Showcase builds. None are required. Where one is missing, do the work yourself and write the values into the docs.
 
 MCPs worth reaching for here: **Supabase**, the host's own (**Vercel**, **Railway**, or whatever `docs/TOOLING.md` names), **GitHub**, **Figma**, **claude-in-chrome** (for looking at a deployed app yourself). Name in Claude Code prompts: **Playwright**, the reason `/checkpoint` can prove a task is done rather than assert it, and **context7** for current library docs.
