@@ -64,7 +64,7 @@ A screenshot cannot see motion, so check 5 in `design-review.md` ("Picture and m
 2. **Probe.** With the browser's JavaScript tool, read `getComputedStyle(el).transitionProperty` and `transitionDuration` on what you hovered: no `all`, durations from DESIGN.md, nothing over 300ms on an app screen. Then reload, wait two seconds, and list anything in the first screen still at `opacity: 0`. A hit is a reveal that never fired, and it fails the check.
 3. **Code.** `rg` the changed files for `transition-all`, for `"use client"` added to a `page.tsx`, and, if Motion is installed, for `MotionConfig` with `reducedMotion="user"`.
 
-**Polish tasks add two things.** Claude Code runs Lighthouse on the live URL as a Done-when tick (`npx lighthouse <url> --only-categories=performance --output=json --quiet`, mobile defaults): layout shift under 0.1, largest paint under 2.5s, blocking time under 200ms. Screens behind a sign-in skip it and say so in the PROGRESS entry. And Cowork records a GIF of page load plus one hover with `claude-in-chrome` and sends it to the user: "does this feel right?" is the one judgement question for that Sync.
+**Polish tasks add two things.** Claude Code runs Lighthouse on the live URL as a Done-when tick (`npx lighthouse <url> --only-categories=performance,seo --output=json --quiet`, mobile defaults): layout shift under 0.1, largest paint under 2.5s, blocking time under 200ms, and on public pages an SEO score of 90 or more. Screens behind a sign-in skip it and say so in the PROGRESS entry. And Cowork records a GIF of page load plus one hover with `claude-in-chrome` and sends it to the user: "does this feel right?" is the one judgement question for that Sync.
 
 ## Showcase mode
 
@@ -107,6 +107,7 @@ Pick by what the brand is about, not by what looks impressive in a demo.
 - **Reduced motion gets the calm version:** no smooth scroll, no pinning, the 3D scene swaps for its poster image, text appears whole.
 - **Phones:** under 768px, 3D and pinned scenes become a still or a short video, and Lenis is off on touch.
 - **Weight:** GSAP plugins, Three.js and video load only on the page that uses them, by dynamic import, never in the root layout. The Lighthouse gate still runs on mobile: largest paint under 2.5s, layout shift under 0.1; blocking time may go to 300ms.
+- Every effect decorates words already in the server HTML. A 3D or video hero sits beside a real h1, never instead of one. See `references/findability.md`.
 - Split text stays readable to screen readers, loops can be paused, and fade-up on every section is still banned.
 
 ### Tools and the check

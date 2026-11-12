@@ -19,6 +19,33 @@ on trust.
 
 ---
 
+## What is new in 2.8
+
+Sites that get found, by Google and by AI answers.
+
+- **SEO, GEO and AIO treated as one job.** Google's own guidance says AI Overviews and
+  AI Mode come from the normal Search index, so good SEO is most of it. The one extra
+  rule for ChatGPT, Claude and Perplexity: their crawlers do not run JavaScript, so the
+  words must be in the first HTML the server sends. All of it lives in the new
+  `references/findability.md`.
+- **Decided at kickoff.** Each project is marked public, private or mixed. Public builds
+  get crawl basics in Phase 0 (robots, sitemap, canonicals, noindex on preview
+  addresses, a redirect map when replacing an old site), a page plan built from real
+  customer questions before pages are designed, and a findability task in every
+  milestone that adds public pages.
+- **What every public page carries.** Title and description, one h1 in the customer's
+  words, structured data that matches what is on the page, answer-first copy, internal
+  links. A thin page fails even if it looks good.
+- **Blogs fed by another tool.** If a writing pipeline or agent publishes posts into the
+  site, the contract lives in one place, the site validates exactly that contract at
+  build, and every post is server-rendered with its sources and Article markup.
+- **Checked, not assumed.** Sync reads the raw HTML the way an AI crawler does, checks
+  the title, the single h1 and every JSON-LD block, and runs the Rich Results Test.
+  Polish tasks add an SEO score to the Lighthouse gate. Uses the SearchFit SEO plugin
+  where installed; none of it requires it.
+- **What not to bother with.** llms.txt, separate pages for bots and "chunking" are
+  named and skipped, with the reason.
+
 ## What is new in 2.7
 
 Motion you can check, and a mode for sites that need to impress.
@@ -443,9 +470,9 @@ Claude Code touches a UI file.
 
 ## What is actually in here
 
-Ten files. The bulk of it is not prose, it is specifics:
+Eleven files. The bulk of it is not prose, it is specifics:
 
-- **`SKILL.md`** - the ten modes, the memory rules, the folder discipline
+- **`SKILL.md`** - the eleven modes, the memory rules, the folder discipline
 - **`references/stack-picker.md`** - default stack and when to deviate, with costs, and
   hosting: Vercel, Railway (including Railway Postgres), and the five questions that
   make any other host work
@@ -455,6 +482,9 @@ Ten files. The bulk of it is not prose, it is specifics:
   diagnosis table a design pass starts from
 - **`references/motion.md`** - motion personality, which tool does which job, craft rules,
   the ban list, how Sync checks motion, and Showcase mode
+- **`references/findability.md`** - SEO, GEO and AIO as one job: content in the first
+  HTML, crawl basics, what every public page carries, blogs fed by another tool, and the
+  check Sync runs
 - **`references/doc-pack.md`** - exact templates for every document
 - **`references/prompt-recipes.md`** - the six-part prompt shape, plus worked recipes for
   the first deploy, a new screen, a third-party integration, an LLM feature, an
