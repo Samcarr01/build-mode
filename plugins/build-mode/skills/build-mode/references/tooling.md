@@ -132,6 +132,7 @@ Rough mapping from task type to what to name:
 | Page transitions | `vercel-react-view-transitions` |
 | Showcase pages: scroll scenes, split text, 3D | `gsap-skills:gsap-react`, `gsap-skills:gsap-scrolltrigger`, `gsap-skills:gsap-plugins` where GreenSock's plugin is installed (full list in `motion.md`); `context7` for React Three Fiber |
 | Native iOS or macOS | `apple-hig` |
+| Public pages, metadata, schema, sitemap | `references/findability.md`; SearchFit SEO's `schema-markup`, `on-page-seo` and `internal-linking` where `docs/TOOLING.md` says it is installed in Claude Code |
 | Checking it works before saying done | Playwright MCP, `webapp-testing` |
 | Any third-party library or API | `context7` MCP for the current docs |
 | Charts, dashboards, KPI tiles | `ui-ux-pro-max`, plus the chart values already in `docs/DESIGN.md` |
