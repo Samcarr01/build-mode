@@ -42,6 +42,7 @@ Read the request and pick one. When it is ambiguous, read `docs/PROGRESS.md` in 
 | "I want to add", "actually let's change", "drop that", "move it to Railway" | **Replan** | [Replan](#replan) |
 | "make this look better", "the UI is generic", "it's boring", a polish task is next, or a Sync design score failed | **Design pass** | [Design pass](#design-pass) |
 | "make it flashy", "wow", "award-winning", "cool effects", a launch or marketing site meant to impress | **Showcase** | Showcase mode in `references/motion.md` |
+| "SEO", "GEO", "AIO", "get it on Google", "show up in ChatGPT", a public page is next | **Findability** | `references/findability.md` |
 | "upgrade my project files", "refresh the setup", an old project missing the current files | **Upgrade** | [Upgrade](#upgrade) |
 | "any skill issues?", "skill review", "what needs fixing in build mode" | **Skill review** | [Skill issues](#skill-issues-get-a-skill-tag) |
 
@@ -120,6 +121,7 @@ Read `references/doc-pack.md` for the exact format. Rules that matter:
 - Order by risk, not by comfort. The thing most likely to break the project goes early.
 - Every milestone that adds a screen ends with a **polish task** (`Mx-Tn Design polish: <screens>`). It gives the design review a scheduled home. If the screens already score well in Sync it is ticked with a note and costs nothing.
 - The first time a task reaches outside the app (sends, posts, pays, deletes, or writes into someone else's software), ask the user once whether a person approves each item before it goes, and recommend yes for anything that lands in someone else's inbox, feed or bank account. If yes, it goes in `CLAUDE.md` as a standing rule, and every milestone that adds a way to send, post, pay or delete ends with an **approval audit task** (`Mx-Tn Approval audit`), recipe in `references/prompt-recipes.md`. A written rule is a request; the audit proves the code cannot do it. A scheduled job whose schedule lives in the host's dashboard also gets an `[@]` task for the user, directly before the task that builds it.
+- On a public build (`Findability: public` or `mixed` in `docs/ARCHITECTURE.md`), Phase 0 gets crawl basics, public pages get a page plan before they are designed, and every milestone that adds public pages ends with a **findability task** (`Mx-Tn Findability: <pages>`) next to its polish task. A site that receives posts from another tool also gets its blog tasks. All of it is in `references/findability.md`.
 - **Worked if, and the riskiest assumption.** Two lines at the top of the roadmap: what is true for the user if this succeeded, in their own units ("a booking goes from enquiry to calendar without a phone call"), and the one belief that sinks the project if it is wrong, with how it gets checked. A technical one ("the booking system has a usable API") becomes a Phase 0 task before any feature. One about people ("staff will approve drafts every morning") becomes a question for the user before Phase 1. Ordering by risk only works if the biggest risk is written down.
 
 ### 6. Screens and mockups
@@ -250,6 +252,8 @@ The user says the work is done. Your job is to find out whether it is.
 3. **Open the thing.** Drive the deployed URL yourself with `claude-in-chrome`. Click the flow this task added, screenshot it at 1440 and 390, read the console, then check it against `docs/DESIGN.md` and the screen's mockup in `docs/design/`.
 
    **If the task touched a screen, score it** with `references/design-review.md`: squint test, five-second test, space used, word count, picture and motion. One point each. Check 5 runs as described in `references/motion.md`, because a screenshot cannot see motion. Four or five passes. Three or under is a design fail: the task stays `[?]`, you say which checks failed, and the next prompt is a Design pass, not a new feature. Token compliance alone is not a pass; a screen can use every hex value in the file and still be a grey column of text. Nothing else in the system performs this check, and generic-looking UI is exactly the defect the user struggles to name, so do not wait for them to name it.
+
+   **If the task touched a public page**, run the Cowork check in `references/findability.md` as well. A miss keeps the task `[?]`, the same as a design fail.
 
 4. **Then read the repo**, to fill gaps rather than as the main event. `device_bash` sees connected folders at `/sessions/<session>/mnt/<folder-name>`, not the real path on their machine. Run `ls mnt/` if unsure of the name.
    ```bash
@@ -447,6 +451,7 @@ Read these when the mode calls for them, not upfront.
 | `references/design-brief.md` | Kickoff design steps (direction, values, screens, mockups), or a design pass. Has the full DESIGN.md template. |
 | `references/design-review.md` | Sync on any task that touched a screen, and the start of every design pass. The five-check score and the diagnosis table. |
 | `references/motion.md` | Kickoff design values, any UI prompt that adds motion, check 5 in Sync, and Showcase builds. Motion personality, which tool does which job, craft rules, the ban list, how to check motion, and Showcase mode. |
+| `references/findability.md` | Kickoff on any public site, roadmap and prompts for public pages, findability tasks, and Sync on any task that touched a public page. SEO, GEO and AIO as one job: content in the first HTML, crawl basics, what every public page carries, receiving posts from another tool, what not to bother with, and the check. |
 | `references/memory.md` | The learn step. What is worth recording and what is filler. |
 
 ## Other skills to pull in
