@@ -19,6 +19,32 @@ on trust.
 
 ---
 
+## What is new in 2.9
+
+Branches and previews once something is live.
+
+- **Branch mode after launch.** Before launch, tasks still commit straight to `main`.
+  Once the build has real users, every task gets its own branch and a pull request,
+  you check a preview, and your merge is the one moment it goes live. A pushed branch
+  cannot break production, and an unmerged pull request is the cheapest undo there is.
+  All of it lives in the new `references/branch-mode.md`.
+- **A live line, planned at kickoff.** The roadmap says where the build goes live: from
+  day one, after the first useful milestone, or at the end. Cowork makes the call and
+  shows the other two. The Go live tasks finish just before the line, so the switch is
+  done before real users arrive, and until then Claude Code flags anything that would
+  make something real early rather than deciding for you.
+- **Go live mode.** Four one-off tasks: find out which database a preview would touch
+  and whether it would run migrations there, block emails, posts and payments outside
+  production, switch previews on for your host, and prove it on the first pull request.
+- **Per host.** Vercel previews are already on. Railway needs PR environments switched
+  on, and it copies production's variables into them, so a pasted database URL would
+  point the preview at live data. Hosts without previews still get the merge as the
+  single go-live moment.
+- **Sync, Next task and Undo know about it.** Prompts start on a fresh branch and end
+  with a pull request. Sync checks the preview, not production, and ends with "Merge it"
+  or a fix. Undo is closing the pull request, or GitHub's Revert button once merged.
+  Only you merge, with a merge commit, so the SHAs in PROGRESS stay valid.
+
 ## What is new in 2.8
 
 Sites that get found, by Google and by AI answers.
@@ -428,7 +454,7 @@ you get one judgement question rather than a test plan.
 
 Nothing in that loop depends on you remembering anything. The repo carries the state.
 
-### Ten modes
+### Twelve modes
 
 It reads what you said and picks one:
 
@@ -439,9 +465,11 @@ It reads what you said and picks one:
 | "done", "it built it", "check this", "where am I" | **Sync** |
 | "it's stuck", "this error", "it built the wrong thing" | **Unblock** |
 | "put it back", "undo that", "it was working yesterday" | **Undo** |
+| "it's live", "we've launched", "switch to branches" | **Go live** |
 | "I want to add", "actually let's change", "drop that", "move it to Railway" | **Replan** |
 | "make this look better", "the UI is generic", "it's boring" | **Design pass** |
 | "make it flashy", "wow", "award-winning" | **Showcase** |
+| "SEO", "get it on Google", "show up in ChatGPT" | **Findability** |
 | "upgrade my project files", "refresh the setup" | **Upgrade** |
 | "any skill issues?", "skill review" | **Skill review** |
 
@@ -470,9 +498,9 @@ Claude Code touches a UI file.
 
 ## What is actually in here
 
-Eleven files. The bulk of it is not prose, it is specifics:
+Twelve files. The bulk of it is not prose, it is specifics:
 
-- **`SKILL.md`** - the eleven modes, the memory rules, the folder discipline
+- **`SKILL.md`** - the twelve modes, the memory rules, the folder discipline
 - **`references/stack-picker.md`** - default stack and when to deviate, with costs, and
   hosting: Vercel, Railway (including Railway Postgres), and the five questions that
   make any other host work
@@ -485,6 +513,9 @@ Eleven files. The bulk of it is not prose, it is specifics:
 - **`references/findability.md`** - SEO, GEO and AIO as one job: content in the first
   HTML, crawl basics, what every public page carries, blogs fed by another tool, and the
   check Sync runs
+- **`references/branch-mode.md`** - going live: the live line, what a preview touches, blocking outside
+  actions outside production, previews per host, the branch and pull-request lines every
+  task gets, and who merges
 - **`references/doc-pack.md`** - exact templates for every document
 - **`references/prompt-recipes.md`** - the six-part prompt shape, plus worked recipes for
   the first deploy, a new screen, a third-party integration, an LLM feature, an
