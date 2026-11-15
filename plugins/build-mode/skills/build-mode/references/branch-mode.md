@@ -4,11 +4,33 @@ Before launch, every task commits straight to `main`. That is right while nobody
 
 What that buys: a pushed branch cannot break production, so `/checkpoint` pushes every task without a decision to make; Sync checks the change on a preview before any real user sees it; and an unmerged pull request is the cheapest undo there is.
 
-The user triggers it ("it's live", "we've launched", "switch to branches"), or Sync notices a launch (a custom domain, real sign-ups) and offers it in one line. The roadmap's launch milestone ends with the Go live tasks below.
+## The live line
+
+Planned at kickoff, not discovered afterwards. Waiting for the user to say "it's live" means the first real users can arrive while tasks still go straight to `main`.
+
+**Set it in the roadmap step.** Make the call and show the other two options in the same line, so a yes is all it needs:
+
+- **Live from day one** when the build replaces something people already use, such as an existing site or system. The Go live tasks follow the first deploy in Phase 0, and branch mode starts at M1.
+- **Live after the first useful milestone** when the user or their client wants to start early. More feedback sooner, but branch mode, and any preview costs, run for longer.
+- **Live at the end** for internal tools and personal builds, and whenever nothing points elsewhere.
+
+It sits at the top of the roadmap beside Worked if:
+
+```
+Live line: after M2 (client starts using it)
+Now: Building - commits go straight to main
+```
+
+- **The Go live tasks are the last tasks of the milestone before the line**, each with a normal ID (`M2-T6 Go live: preview wiring`), so the switch is finished before anyone real arrives. Every milestone after the line carries `(live)` in its heading.
+- **Before the line, Claude Code flags and never decides.** The Deploying section of `CLAUDE.md` carries one extra rule: `Before the live line (<milestone>): if a task would make something real early - point the real domain, send to a real address, take a real payment, invite a real user - stop and say so before doing it.` The roadmap belongs to Cowork, and the call is the user's.
+- **Sync watches it.** Two tasks from the line, say so in the Sync note and the handover. If Sync sees real use before the line (the domain pointed, real sign-ups, a client already relying on it), offer to move the line forward in one line.
+- **Moving the line is a Replan.** Mark the old Go live tasks `~~cut~~ (moved)` and add them again with new IDs in the new milestone, because IDs never move or get reused. Update the `Live line` row.
+- **When the Go live tasks are done,** the `Now:` line becomes `Live - branch mode since <date>`.
+- **A project from before this has no live line.** Offer one in a single line at its next Sync. Until it has one, "it's live" or "we've launched" still triggers the Go live tasks straight away.
 
 ## Going live, once per project
 
-Four roadmap tasks under a `Go live` heading, in this order. Previews do not get switched on until steps 1 and 2 are done and live.
+The last four tasks of the milestone before the live line, in this order. Previews do not get switched on until steps 1 and 2 are done and live.
 
 1. **Find out what a preview will touch (Cowork).** Read the Hosting section of `docs/TOOLING.md` and the database row of `docs/ARCHITECTURE.md`, then answer two questions and write the answers in the Hosting section.
    - **Which database does a preview use?**

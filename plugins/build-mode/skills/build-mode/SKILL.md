@@ -122,7 +122,7 @@ Read `references/doc-pack.md` for the exact format. Rules that matter:
 - Order by risk, not by comfort. The thing most likely to break the project goes early.
 - Every milestone that adds a screen ends with a **polish task** (`Mx-Tn Design polish: <screens>`). It gives the design review a scheduled home. If the screens already score well in Sync it is ticked with a note and costs nothing.
 - The first time a task reaches outside the app (sends, posts, pays, deletes, or writes into someone else's software), ask the user once whether a person approves each item before it goes, and recommend yes for anything that lands in someone else's inbox, feed or bank account. If yes, it goes in `CLAUDE.md` as a standing rule, and every milestone that adds a way to send, post, pay or delete ends with an **approval audit task** (`Mx-Tn Approval audit`), recipe in `references/prompt-recipes.md`. A written rule is a request; the audit proves the code cannot do it. A scheduled job whose schedule lives in the host's dashboard also gets an `[@]` task for the user, directly before the task that builds it.
-- The milestone that launches (first real user, a client relying on it, or the real domain pointed at it) ends with the Go live tasks in `references/branch-mode.md`. Until then every task commits straight to `main`.
+- **The live line.** Decide in this step where the build goes live, and put it at the top of the roadmap beside Worked if: live from day one, after the first useful milestone, or at the end. Make the call and show the other two in the same line, so a yes is all it needs. The milestone before the line ends with the Go live tasks, every milestone after it carries `(live)` in its heading, and until the line every task commits straight to `main`. All of it is in The live line in `references/branch-mode.md`.
 - On a public build (`Findability: public` or `mixed` in `docs/ARCHITECTURE.md`), Phase 0 gets crawl basics, public pages get a page plan before they are designed, and every milestone that adds public pages ends with a **findability task** (`Mx-Tn Findability: <pages>`) next to its polish task. A site that receives posts from another tool also gets its blog tasks. All of it is in `references/findability.md`.
 - **Worked if, and the riskiest assumption.** Two lines at the top of the roadmap: what is true for the user if this succeeded, in their own units ("a booking goes from enquiry to calendar without a phone call"), and the one belief that sinks the project if it is wrong, with how it gets checked. A technical one ("the booking system has a usable API") becomes a Phase 0 task before any feature. One about people ("staff will approve drafts every morning") becomes a question for the user before Phase 1. Ordering by risk only works if the biggest risk is written down.
 
@@ -269,7 +269,7 @@ The user says the work is done. Your job is to find out whether it is.
 
 5. **Ask the user only what the tools cannot settle** - a judgement call, not "does it work", because you just looked. One question, never a checklist.
 
-6. Update `docs/ROADMAP.md` and add a Cowork note to `docs/PROGRESS.md` saying what you checked and how.
+6. Update `docs/ROADMAP.md` and add a Cowork note to `docs/PROGRESS.md` saying what you checked and how. If the roadmap has a live line, say how many tasks are left before it, and flag any real use that has started early (see `references/branch-mode.md`).
 
 7. Learn (below), then offer the next task.
 
@@ -361,7 +361,7 @@ Then check the live picture against it, because the file may be months stale: `L
 Scope changed. Keep the shape of the plan intact.
 
 1. Work out whether this is a new task, a changed task, or a change of direction.
-2. New or changed: add or edit the task in `docs/ROADMAP.md`, keeping IDs stable. Say in one line what it pushes back.
+2. New or changed: add or edit the task in `docs/ROADMAP.md`, keeping IDs stable. Say in one line what it pushes back. If it changes when the build goes live, move the live line as `references/branch-mode.md` says.
 3. Change of direction: rewrite the affected milestone, mark cut tasks `~~cut~~` with a one-line reason rather than deleting them, and update `docs/ARCHITECTURE.md` if the shape of the thing changed.
 4. If it affects data or auth, flag the migration cost before they commit. Changing the database after there is real data in it is the expensive kind of change.
 5. **A change of host is a change of direction**, however small it sounds. Update the Hosting row in `docs/ARCHITECTURE.md`, the Hosting section of `docs/TOOLING.md` and the Deploying section of `CLAUDE.md`, then add the move as its own short milestone: an `[@]` task for the user to create the new project, connect the repo and copy the variables across, a first-deploy task there (the recipe in `references/prompt-recipes.md`) with the live commit showing, an `[@]` task to point the domain, and a task to switch the old host off only after the new one has been checked. If the database moves too, that is a separate milestone with a backup taken first. Never move host and database in the same task.
@@ -457,7 +457,7 @@ Read these when the mode calls for them, not upfront.
 | `references/design-review.md` | Sync on any task that touched a screen, and the start of every design pass. The five-check score and the diagnosis table. |
 | `references/motion.md` | Kickoff design values, any UI prompt that adds motion, check 5 in Sync, and Showcase builds. Motion personality, which tool does which job, craft rules, the ban list, how to check motion, and Showcase mode. |
 | `references/findability.md` | Kickoff on any public site, roadmap and prompts for public pages, findability tasks, and Sync on any task that touched a public page. SEO, GEO and AIO as one job: content in the first HTML, crawl basics, what every public page carries, receiving posts from another tool, what not to bother with, and the check. |
-| `references/branch-mode.md` | Go live mode, the launch milestone, and every Next task, Sync and Undo on a project whose Deploying section says branch mode. What a preview touches, blocking outside actions outside production, switching previews on per host, the per-task branch and pull-request lines, and who merges. |
+| `references/branch-mode.md` | Setting the live line in the roadmap step, Go live mode, and every Next task, Sync and Undo on a project whose Deploying section says branch mode. The live line and the pre-live flag rule, what a preview touches, blocking outside actions outside production, switching previews on per host, the per-task branch and pull-request lines, and who merges. |
 | `references/memory.md` | The learn step. What is worth recording and what is filler. |
 
 ## Other skills to pull in

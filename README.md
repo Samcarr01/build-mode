@@ -28,6 +28,11 @@ Branches and previews once something is live.
   you check a preview, and your merge is the one moment it goes live. A pushed branch
   cannot break production, and an unmerged pull request is the cheapest undo there is.
   All of it lives in the new `references/branch-mode.md`.
+- **A live line, planned at kickoff.** The roadmap says where the build goes live: from
+  day one, after the first useful milestone, or at the end. Cowork makes the call and
+  shows the other two. The Go live tasks finish just before the line, so the switch is
+  done before real users arrive, and until then Claude Code flags anything that would
+  make something real early rather than deciding for you.
 - **Go live mode.** Four one-off tasks: find out which database a preview would touch
   and whether it would run migrations there, block emails, posts and payments outside
   production, switch previews on for your host, and prove it on the first pull request.
@@ -508,7 +513,7 @@ Twelve files. The bulk of it is not prose, it is specifics:
 - **`references/findability.md`** - SEO, GEO and AIO as one job: content in the first
   HTML, crawl basics, what every public page carries, blogs fed by another tool, and the
   check Sync runs
-- **`references/branch-mode.md`** - going live: what a preview touches, blocking outside
+- **`references/branch-mode.md`** - going live: the live line, what a preview touches, blocking outside
   actions outside production, previews per host, the branch and pull-request lines every
   task gets, and who merges
 - **`references/doc-pack.md`** - exact templates for every document
