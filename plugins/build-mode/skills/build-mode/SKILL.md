@@ -39,6 +39,7 @@ Read the request and pick one. When it is ambiguous, read `docs/PROGRESS.md` in 
 | "done", "it built it", "check this", "where am I" | **Sync** | [Sync](#sync) |
 | "it's stuck", "this error", "it built the wrong thing" | **Unblock** | [Unblock](#unblock) |
 | "put it back", "undo that", "it was working yesterday" | **Undo** | [Undo](#undo) |
+| "it's live", "we've launched", "a client is using it", "switch to branches" | **Go live** | `references/branch-mode.md` |
 | "I want to add", "actually let's change", "drop that", "move it to Railway" | **Replan** | [Replan](#replan) |
 | "make this look better", "the UI is generic", "it's boring", a polish task is next, or a Sync design score failed | **Design pass** | [Design pass](#design-pass) |
 | "make it flashy", "wow", "award-winning", "cool effects", a launch or marketing site meant to impress | **Showcase** | Showcase mode in `references/motion.md` |
@@ -121,6 +122,7 @@ Read `references/doc-pack.md` for the exact format. Rules that matter:
 - Order by risk, not by comfort. The thing most likely to break the project goes early.
 - Every milestone that adds a screen ends with a **polish task** (`Mx-Tn Design polish: <screens>`). It gives the design review a scheduled home. If the screens already score well in Sync it is ticked with a note and costs nothing.
 - The first time a task reaches outside the app (sends, posts, pays, deletes, or writes into someone else's software), ask the user once whether a person approves each item before it goes, and recommend yes for anything that lands in someone else's inbox, feed or bank account. If yes, it goes in `CLAUDE.md` as a standing rule, and every milestone that adds a way to send, post, pay or delete ends with an **approval audit task** (`Mx-Tn Approval audit`), recipe in `references/prompt-recipes.md`. A written rule is a request; the audit proves the code cannot do it. A scheduled job whose schedule lives in the host's dashboard also gets an `[@]` task for the user, directly before the task that builds it.
+- The milestone that launches (first real user, a client relying on it, or the real domain pointed at it) ends with the Go live tasks in `references/branch-mode.md`. Until then every task commits straight to `main`.
 - On a public build (`Findability: public` or `mixed` in `docs/ARCHITECTURE.md`), Phase 0 gets crawl basics, public pages get a page plan before they are designed, and every milestone that adds public pages ends with a **findability task** (`Mx-Tn Findability: <pages>`) next to its polish task. A site that receives posts from another tool also gets its blog tasks. All of it is in `references/findability.md`.
 - **Worked if, and the riskiest assumption.** Two lines at the top of the roadmap: what is true for the user if this succeeded, in their own units ("a booking goes from enquiry to calendar without a phone call"), and the one belief that sinks the project if it is wrong, with how it gets checked. A technical one ("the booking system has a usable API") becomes a Phase 0 task before any feature. One about people ("staff will approve drafts every morning") becomes a question for the user before Phase 1. Ordering by risk only works if the biggest risk is written down.
 
@@ -199,8 +201,9 @@ Finish with the handover block (below).
 3. Write the prompt using `references/prompt-recipes.md`. Pick the recipe that matches the task type.
 4. **Name the tools.** Read `docs/TOOLING.md` and put a "Use these" line in the prompt listing the specific skills and MCP servers for this task. Name directly whatever `docs/TOOLING.md` confirms is on the Claude Code side, and do not hedge on those. Left to itself Claude Code will hand-roll what an installed skill already does well: write the palette from scratch instead of using `ui-ux-pro-max`, guess at a schema instead of asking the Supabase MCP, work from memory instead of pulling current docs with `context7`. A skill nobody names is a skill that never runs. One line, and it changes the output.
 5. **Add the review line.** In the prompt's Before-you-finish section, before the `/checkpoint` line, put: `Run @agent-code-reviewer on the files you changed. Fix anything it marks critical or warning, say what you changed, then run /checkpoint.` Leave it out only for the same trivial one-file change that skips plan mode, and for the scaffold task. See [Subagents in the loop](#subagents-in-the-loop).
-6. Overwrite `docs/next-prompt.md` in the repo with it, and paste the same prompt in chat inside a code block.
-7. Handover block.
+6. **Branch mode.** If the Deploying section of `CLAUDE.md` says branch mode, add the start line and the pull-request line from `references/branch-mode.md`.
+7. Overwrite `docs/next-prompt.md` in the repo with it, and paste the same prompt in chat inside a code block.
+8. Handover block.
 
 The prompt is the product here. A weak prompt costs the user an hour of Claude Code going the wrong way. `references/prompt-recipes.md` is worth reading in full every time until the shape is second nature.
 
@@ -245,6 +248,8 @@ The user says the work is done. Your job is to find out whether it is.
    | Railway | `list-deployments` | `get-deployment-diagnosis` | `get-logs`, `http-error-rate` |
    | Anything else | Whatever `docs/TOOLING.md` names: its MCP, or the user pastes the status line | Same | Same |
 
+   **In branch mode, check the preview instead** until the user has merged, then production against the head of `main`. See Every task in branch mode in `references/branch-mode.md`.
+
    **Then check the live commit.** Open `/version` on the deployed URL (or wherever `docs/TOOLING.md` says the SHA shows) and compare it with the SHA in the newest PROGRESS entry. This works on every host, MCP or not, and it is the check that catches "deployed fine, but the old commit". A green deploy of the right commit beats any amount of file reading.
 
    MCP tool names drift between versions. If one named here is missing, list the server's tools and use the nearest match, then fix the name in `docs/TOOLING.md`.
@@ -268,7 +273,7 @@ The user says the work is done. Your job is to find out whether it is.
 
 7. Learn (below), then offer the next task.
 
-**If nothing has been pushed**, check why before assuming it is a fault. On a project where a push deploys, `/checkpoint` is supposed to stop and ask, so confirm the work is committed, then ask the user whether to push and deploy now. Only if the project pushes freely and still has nothing pushed is something broken: either `/checkpoint` was not run, or it was generated without the push step, and the second is worth repairing in the repo before another task lands. Until it is pushed and deployed there is no URL, and Sync collapses back into reading files. On a host that deploys by command rather than by push (`fly deploy`, a dashboard button), the same applies to the deploy: pushed but not deployed is still not checkable, so ask the user to run the deploy command from the Deploying section of `CLAUDE.md`.
+**If nothing has been pushed**, check why before assuming it is a fault. On a project where a push deploys, `/checkpoint` is supposed to stop and ask, so confirm the work is committed, then ask the user whether to push and deploy now. Only if the project pushes freely and still has nothing pushed is something broken: either `/checkpoint` was not run, or it was generated without the push step, and the second is worth repairing in the repo before another task lands. Until it is pushed and deployed there is no URL, and Sync collapses back into reading files. On a host that deploys by command rather than by push (`fly deploy`, a dashboard button), the same applies to the deploy: pushed but not deployed is still not checkable, so ask the user to run the deploy command from the Deploying section of `CLAUDE.md`. In branch mode the branch is always pushed, so nothing pushed means `/checkpoint` did not finish.
 
 If the build drifted from the plan, say so plainly and give the user two options: accept the drift and update the docs to match reality, or a corrective prompt. Do not quietly rewrite the roadmap to match whatever got built - that is how a project loses its shape.
 
@@ -295,7 +300,7 @@ Something that worked does not any more, and going back beats going forward. The
 
 1. **Find the last good commit.** `docs/PROGRESS.md` carries a SHA on every entry. Work back to the last task the user confirms was working. If the SHAs are missing, `git log --oneline -20` and match on the task IDs in the commit messages.
 2. **Say what will be lost** before doing anything. "This puts you back to Tuesday. You lose the settings page and two bug fixes. The database is not affected." They cannot work that out from a diff.
-3. **Pick the smaller instrument.** One session old and uncommitted: `/rewind` in Claude Code, which rolls back the conversation too. Committed and pushed: a prompt to `git revert` those commits, keeping the history. `git reset --hard` only if they want the work gone, and say that it is permanent.
+3. **Pick the smaller instrument.** One session old and uncommitted: `/rewind` in Claude Code, which rolls back the conversation too. Committed and pushed: a prompt to `git revert` those commits, keeping the history. `git reset --hard` only if they want the work gone, and say that it is permanent. In branch mode it is simpler: an unmerged pull request is undone by closing it, and a merged one with the **Revert** button on the pull request in GitHub. See `references/branch-mode.md`.
 4. **Never let a revert touch the database.** Code goes back, data does not. If the bad session ran a migration, reverting the code leaves the schema ahead of it, which is worse than either state. Flag it before they agree and treat it as its own careful task.
 5. Mark the reverted tasks back to `[ ]`, and write what went wrong into `docs/LEARNINGS.md`.
 
@@ -452,6 +457,7 @@ Read these when the mode calls for them, not upfront.
 | `references/design-review.md` | Sync on any task that touched a screen, and the start of every design pass. The five-check score and the diagnosis table. |
 | `references/motion.md` | Kickoff design values, any UI prompt that adds motion, check 5 in Sync, and Showcase builds. Motion personality, which tool does which job, craft rules, the ban list, how to check motion, and Showcase mode. |
 | `references/findability.md` | Kickoff on any public site, roadmap and prompts for public pages, findability tasks, and Sync on any task that touched a public page. SEO, GEO and AIO as one job: content in the first HTML, crawl basics, what every public page carries, receiving posts from another tool, what not to bother with, and the check. |
+| `references/branch-mode.md` | Go live mode, the launch milestone, and every Next task, Sync and Undo on a project whose Deploying section says branch mode. What a preview touches, blocking outside actions outside production, switching previews on per host, the per-task branch and pull-request lines, and who merges. |
 | `references/memory.md` | The learn step. What is worth recording and what is filler. |
 
 ## Other skills to pull in
