@@ -775,8 +775,8 @@ body{margin:0;background:#0E2A52}
     $('commits').innerHTML = list.slice(0, 6).map(function (c) {
       var lines = (c.commit && c.commit.message || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
       var msg = lines[0] || '';
-      var pr = /^Merge pull request #(\d+)/.exec(msg);
-      if (pr) msg = (lines[1] ? lines[1] + ' ' : 'Merged ') + '(PR #' + pr[1] + ')';
+      var pr = /^Merge pull request #(\d+)(?: from [^\/]+\/(\S+))?/.exec(msg);
+      if (pr) msg = (lines[1] ? lines[1] : 'Merged ' + (pr[2] || 'a branch')) + ' (PR #' + pr[1] + ')';
       var when = c.commit && c.commit.author ? ago(c.commit.author.date) : '';
       return '<div class="commit"><a class="sha" href="' + esc(c.html_url) + '" target="_blank" rel="noopener">' + esc(c.sha.slice(0, 7)) + '</a><span class="cmsg">' + esc(msg) + '</span><span class="cwhen">' + esc(when) + '</span></div>';
     }).join('');
