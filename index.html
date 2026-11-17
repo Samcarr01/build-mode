@@ -1,0 +1,792 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build Mode: plan it, prompt it, prove it</title>
+<meta name="description" content="Build Mode is a free, open-source Claude skill that plans, prompts and verifies software you build in Claude Code. It interviews you once, writes the doc pack, hands over one prompt at a time and checks the live app.">
+<link rel="canonical" href="https://samcarr01.github.io/build-mode/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Build Mode: plan it, prompt it, prove it">
+<meta property="og:description" content="The planning half of building with Claude Code. One interview, one prompt at a time, and proof before anything is ticked off.">
+<meta property="og:url" content="https://samcarr01.github.io/build-mode/">
+<meta property="og:image" content="https://raw.githubusercontent.com/Samcarr01/build-mode/main/assets/build-mode-hero.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0E2A52">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect width='28' height='28' fill='%230E2A52'/%3E%3Cpath d='M5 23V5l18 18z' fill='none' stroke='%23FFD23F' stroke-width='2.4' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=Architects+Daughter&amp;display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"Build Mode","description":"A planning and prompting layer for people who build software in Claude Code but cannot read a diff.","codeRepository":"https://github.com/Samcarr01/build-mode","url":"https://samcarr01.github.io/build-mode/","license":"https://opensource.org/licenses/MIT","version":"3.0.1","author":{"@type":"Person","name":"Sam Carr","url":"https://github.com/Samcarr01"}}
+</script>
+<style>
+html{scroll-behavior:smooth}
+body{margin:0;background:#0E2A52}
+.bm{--bg:#0E2A52;--panel:#133766;--panel2:#0A2246;--ink:#EEF4FF;--muted:#A9C1E3;--accent:#FFD23F;--accent-ink:#0E2A52;--gmin:rgba(190,215,255,.055);--gmaj:rgba(190,215,255,.11);--rule:rgba(190,215,255,.26);--display:'Archivo',ui-sans-serif,system-ui,sans-serif;--stretch:125%;--ease:cubic-bezier(.2,.7,.2,1);background-color:var(--bg);color:var(--ink);font-family:'Archivo',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased;background-image:linear-gradient(var(--gmaj) 1px,transparent 1px),linear-gradient(90deg,var(--gmaj) 1px,transparent 1px),linear-gradient(var(--gmin) 1px,transparent 1px),linear-gradient(90deg,var(--gmin) 1px,transparent 1px);background-size:120px 120px,120px 120px,24px 24px,24px 24px;background-position:-1px -1px;transition:background-color .6s var(--ease);overflow-x:hidden}
+.bm.egg{--bg:#262E35;--panel:#303A44;--panel2:#1E252B;--ink:#F6F4F1;--muted:#BCC3CA;--accent:#F5883D;--accent-ink:#1E252B;--gmin:rgba(245,136,61,.05);--gmaj:rgba(245,136,61,.11);--rule:rgba(246,244,241,.24);--display:'IBM Plex Mono',ui-monospace,monospace;--stretch:100%}
+.bm *{box-sizing:border-box}
+.bm h1,.bm h2,.bm h3,.bm p{margin:0}
+.bm a{color:var(--accent)}
+.bm a:hover{color:var(--ink)}
+.bm :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.skip{position:absolute;left:-9999px;top:8px;background:var(--accent);color:var(--accent-ink);padding:10px 14px;z-index:10}
+.skip:focus{left:8px}
+.wrap{width:100%;max-width:1220px;margin:0 auto;padding:0 clamp(20px,4vw,48px)}
+.mono{font-family:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace}
+.hand{font-family:'Architects Daughter','Segoe Print','Bradley Hand',cursive}
+.disp{font-family:var(--display);font-stretch:var(--stretch);font-weight:800;letter-spacing:-.025em;line-height:.95;text-wrap:balance}
+.sheet{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.h2{font-size:clamp(38px,5.4vw,72px);margin-top:14px}
+.lede{color:var(--muted);font-size:clamp(17px,1.5vw,20px);max-width:58ch;margin-top:18px;text-wrap:pretty}
+.sec{padding:clamp(80px,10vw,136px) 0;border-top:1px solid var(--rule)}
+.tiny{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 24px;font-family:inherit;font-size:17px;font-weight:700;text-decoration:none;border-radius:2px;cursor:pointer;transition:transform .2s var(--ease),box-shadow .2s var(--ease),border-color .2s var(--ease)}
+.btn-p{background:var(--accent);color:var(--accent-ink);border:0;box-shadow:5px 5px 0 0 var(--ink)}
+.bm a.btn-p,.bm a.btn-p:hover{color:var(--accent-ink)}
+.btn-p:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 0 var(--ink)}
+.btn-g{background:transparent;color:var(--ink);border:1.5px solid var(--rule)}
+.bm a.btn-g,.bm a.btn-g:hover{color:var(--ink)}
+.btn-g:hover{border-color:var(--ink)}
+.btn-sm{min-height:44px;padding:0 16px;font-size:15px}
+.btn svg{width:18px;height:18px;flex:none}
+.ic{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.nav{border-bottom:1px solid var(--rule)}
+.navin{display:flex;align-items:center;justify-content:space-between;gap:12px 28px;flex-wrap:wrap;min-height:76px;padding-top:12px;padding-bottom:12px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.bm a.brand,.bm a.brand:hover{color:var(--ink)}
+.brand svg{width:28px;height:28px;flex:none}
+.mk{fill:none;stroke:var(--accent);stroke-width:2.2;stroke-linejoin:round}
+.brand-t{font-family:var(--display);font-stretch:var(--stretch);font-weight:900;font-size:19px;letter-spacing:.05em}
+.xfab{font-size:14px;color:var(--accent);font-weight:600;display:none}
+.egg .xfab{display:inline}
+.navlinks{display:flex;gap:4px 26px;flex-wrap:wrap}
+.bm .navlinks a{color:var(--muted);text-decoration:none;font-size:15px;min-height:44px;display:inline-flex;align-items:center}
+.bm .navlinks a:hover{color:var(--ink)}
+.navact{display:flex;align-items:center;gap:12px}
+.pill{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:600;letter-spacing:.12em;border:1.5px solid var(--accent);color:var(--accent);padding:5px 10px;border-radius:999px}
+.hero{padding:clamp(56px,7vw,96px) 0 clamp(80px,9vw,128px)}
+.hero-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(470px,100%),1fr));gap:clamp(44px,5vw,72px);align-items:center}
+.h1{font-size:clamp(52px,7.2vw,104px);margin-top:22px;line-height:.98}
+.bm.egg .h1{font-size:clamp(40px,5vw,74px)}
+.h1 span{display:block}
+.l-plan{color:transparent;-webkit-text-stroke:2px var(--ink)}
+.l-prove{color:var(--accent)}
+.hero-sub{font-size:clamp(18px,1.6vw,21px);max-width:40ch;margin-top:36px;text-wrap:pretty}
+.hero-for{font-size:16px;color:var(--muted);margin-top:14px;max-width:44ch}
+.cta{display:flex;flex-wrap:wrap;gap:16px;margin-top:34px}
+.live{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;margin-top:26px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13px;letter-spacing:.06em;color:var(--muted)}
+.live[hidden]{display:none}
+.dot{width:8px;height:8px;border-radius:50%;background:#5BE38B;box-shadow:0 0 0 3px rgba(91,227,139,.2)}
+.live b{color:var(--ink);font-weight:600}
+.psst{display:inline-block;font-size:20px;margin-top:26px;transform:rotate(-2deg)}
+.psst b{color:var(--accent);font-weight:400}
+.art{position:relative;border:1.5px solid var(--rule);background:color-mix(in srgb,var(--panel2) 55%,transparent);padding:clamp(14px,2vw,22px)}
+.art::before,.art::after{content:"";position:absolute;width:18px;height:18px;border-color:var(--accent);border-style:solid}
+.art::before{top:-8px;left:-8px;border-width:2px 0 0 2px}
+.art::after{bottom:-8px;right:-8px;border-width:0 2px 2px 0}
+.art-top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.draw-svg{width:100%;height:auto;display:block;margin-top:8px}
+.ln{fill:none;stroke:var(--ink);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ln.thin{stroke-width:1.3;opacity:.75}
+.dim{fill:none;stroke:var(--muted);stroke-width:1.2}
+.fillA{fill:var(--accent)}
+.strokeA{fill:none;stroke:var(--accent);stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
+.svgtxt{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;fill:var(--muted);letter-spacing:.1em}
+.svgnum{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:14px;font-weight:600;fill:var(--ink)}
+.svghand{font-family:'Architects Daughter','Segoe Print',cursive;font-size:17px;fill:var(--ink)}
+.btntxt{font-family:'Archivo',sans-serif;font-size:13px;font-weight:700;fill:var(--accent-ink)}
+.mid{text-anchor:middle}
+.stamp{transform-box:fill-box;transform-origin:center;transform:rotate(-12deg)}
+.stampbg{fill:var(--bg);opacity:.92}
+.stampbox{fill:none;stroke:var(--accent);stroke-width:3}
+.stampbox.thin{stroke-width:1.4}
+.stamptxt{font-family:'Archivo',sans-serif;font-weight:900;font-size:27px;letter-spacing:.08em;fill:var(--accent);text-anchor:middle}
+.egg .stamptxt{font-size:22px}
+.stampsub{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9.5px;letter-spacing:.2em;fill:var(--accent)}
+.phases{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:10px;padding-top:14px;border-top:1px dashed var(--rule)}
+.ph-row{display:flex;align-items:center;gap:10px;font-family:var(--display);font-stretch:var(--stretch);font-weight:800;font-size:clamp(14px,1.4vw,18px);letter-spacing:.08em}
+.ph3{color:var(--accent)}
+.arr{color:var(--muted);font-weight:400}
+.pause{min-height:44px;min-width:44px;display:inline-flex;align-items:center;gap:8px;padding:0 14px;border:1.5px solid var(--rule);background:transparent;color:var(--ink);font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13px;cursor:pointer;border-radius:2px}
+.pause:hover{border-color:var(--ink)}
+.pause svg{width:14px;height:14px}
+.pause .fl{fill:currentColor;stroke:none}
+.pause .i-play{display:none}
+.paused .pause .i-play{display:block}
+.paused .pause .i-pause{display:none}
+.relay{margin-top:clamp(40px,5vw,64px);border:1.5px solid var(--rule);padding:clamp(18px,3vw,36px);background:color-mix(in srgb,var(--panel2) 55%,transparent)}
+.lanes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(8px,2vw,24px)}
+.lane{border:1.5px dashed var(--rule);padding:clamp(12px,2vw,20px);display:flex;flex-direction:column;gap:6px;min-height:104px;transition:border-color .4s var(--ease),background-color .4s var(--ease)}
+.lane.on{border-style:solid;border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.lab{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.lane-t{font-family:var(--display);font-stretch:var(--stretch);font-weight:700;font-size:clamp(15px,1.7vw,22px);line-height:1.15}
+.track{position:relative;height:64px;margin:8px 0}
+.track::before{content:"";position:absolute;left:16.666%;right:16.666%;top:50%;border-top:2px dashed var(--rule)}
+.baton-row{position:absolute;top:0;left:0;width:100%;height:100%;transition:transform .7s var(--ease)}
+.baton-row.p1{transform:translateX(33.333%)}
+.baton-row.p2{transform:translateX(66.666%)}
+.baton{position:absolute;left:16.666%;top:50%;transform:translate(-50%,-50%);background:var(--accent);color:var(--accent-ink);font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;padding:9px 14px;white-space:nowrap;box-shadow:4px 4px 0 var(--ink)}
+.stepbox{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:20px 48px;align-items:start;margin-top:12px}
+.steps{display:flex;gap:8px;flex-wrap:wrap}
+.step{width:48px;height:48px;border:1.5px solid var(--rule);background:transparent;color:var(--muted);font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:16px;font-weight:600;cursor:pointer;border-radius:2px;transition:background-color .3s var(--ease),color .3s var(--ease)}
+.step:hover{color:var(--ink);border-color:var(--ink)}
+.step.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.step-t{font-size:clamp(19px,1.9vw,25px);line-height:1.35;margin-top:8px;text-wrap:pretty;font-weight:500}
+.quote{display:inline-block;font-size:clamp(20px,2vw,26px);margin-top:36px;transform:rotate(-1deg)}
+.say-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(440px,100%),1fr));gap:clamp(28px,4vw,56px);margin-top:clamp(36px,4vw,56px);align-items:start}
+.say-lab{display:block;margin-bottom:12px}
+.say{display:block;width:100%;min-height:66px;padding:0 20px;background:var(--panel2);border:1.5px solid var(--rule);color:var(--ink);font-family:inherit;font-size:clamp(18px,1.8vw,22px);border-radius:2px}
+.say::placeholder{color:var(--muted);opacity:.85}
+.say:focus{outline:2px solid var(--accent);outline-offset:2px;border-color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.chip{min-height:44px;padding:0 16px;border:1.5px solid var(--rule);background:transparent;color:var(--ink);font-family:inherit;font-size:15px;border-radius:999px;cursor:pointer}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.mcard{position:relative;border:1.5px solid var(--accent);background:var(--panel);padding:clamp(24px,3vw,36px);min-height:270px;display:flex;flex-direction:column;gap:14px}
+.mcard.idle{border-style:dashed;border-color:var(--rule);background:transparent}
+.mnum{position:absolute;top:20px;right:20px;border:2px solid var(--accent);color:var(--accent);padding:5px 10px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;transform:rotate(5deg)}
+.mname{font-family:var(--display);font-stretch:var(--stretch);font-weight:800;font-size:clamp(34px,4vw,52px);line-height:1;padding-right:120px;text-wrap:balance}
+.mdoes{font-size:clamp(17px,1.5vw,20px);text-wrap:pretty;max-width:46ch}
+.fab{font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:600;font-size:clamp(30px,3.4vw,44px);line-height:1}
+.fab b{color:var(--accent);font-weight:600}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr));margin-top:clamp(36px,4vw,56px);border-top:1px solid var(--rule);border-left:1px solid var(--rule)}
+.cell{display:flex;align-items:baseline;gap:12px;min-height:56px;padding:12px 16px;border:0;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);background:transparent;color:var(--muted);font-family:inherit;font-size:16px;text-align:left;cursor:pointer;transition:background-color .3s var(--ease),color .3s var(--ease)}
+.cell:hover{color:var(--ink)}
+.cell-n{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--accent)}
+.cell.on{background:var(--accent);color:var(--accent-ink)}
+.cell.on .cell-n{color:var(--accent-ink)}
+.docs-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:20px;margin-top:clamp(36px,4vw,56px);align-items:start}
+.tree{border:1.5px solid var(--rule);padding:12px 0;background:color-mix(in srgb,var(--panel2) 55%,transparent)}
+.dir{display:flex;align-items:center;min-height:40px;padding:0 18px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:15px;font-weight:600}
+.file{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;padding:0 18px;border:0;background:transparent;color:var(--muted);font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:15px;text-align:left;cursor:pointer}
+.file.d1{padding-left:44px}
+.file:hover{color:var(--ink)}
+.file.on{background:var(--panel);color:var(--ink)}
+.sq{width:9px;height:9px;border:1.5px solid var(--rule);flex:none}
+.file.on .sq{background:var(--accent);border-color:var(--accent)}
+.pv{border:1.5px solid var(--accent);background:var(--panel);padding:clamp(22px,3vw,36px);display:flex;flex-direction:column;gap:16px}
+.path{font-size:14px;color:var(--accent);letter-spacing:.04em}
+.pv-t{font-family:var(--display);font-stretch:var(--stretch);font-weight:700;font-size:clamp(23px,2.5vw,32px);line-height:1.18;text-wrap:balance}
+.snip{margin:0;padding:18px 20px;background:var(--panel2);border:1px solid var(--rule);font-size:14px;line-height:1.7;color:var(--ink);white-space:pre-wrap;overflow-x:auto}
+.snipwrap[hidden]{display:none}
+.proof-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(440px,100%),1fr));gap:clamp(28px,4vw,56px);margin-top:clamp(36px,4vw,56px);align-items:start}
+.msg{border:1.5px solid var(--rule);background:var(--panel);padding:clamp(22px,3vw,34px);display:flex;flex-direction:column;gap:20px;box-shadow:8px 8px 0 0 color-mix(in srgb,var(--accent) 80%,transparent)}
+.line{display:flex;flex-direction:column;gap:4px}
+.line-l{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.line-t{font-size:clamp(18px,1.7vw,22px);font-weight:600;text-wrap:pretty}
+.gloss{font-size:15px;color:var(--muted);border-top:1px dashed var(--rule);padding-top:16px}
+.checks{display:flex;flex-direction:column;border-top:1px solid var(--rule)}
+.chk{display:flex;gap:16px;align-items:flex-start;padding:20px 0;border-bottom:1px solid var(--rule)}
+.chk svg{width:26px;height:26px;flex:none;margin-top:2px;color:var(--accent)}
+.chk-q{font-weight:700;font-size:18px}
+.chk-a{color:var(--muted);font-size:16px;margin-top:2px}
+.log-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(500px,100%),1fr));gap:clamp(28px,4vw,56px);margin-top:clamp(36px,4vw,56px);align-items:start}
+.revs{border-top:1px solid var(--rule)}
+.rev{display:grid;grid-template-columns:64px minmax(0,1fr);gap:16px;padding:20px 0;border-bottom:1px solid var(--rule)}
+.rev-n{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:15px;font-weight:600;padding-top:3px;text-decoration:none}
+.rev-t{font-weight:700;font-size:19px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.rev-d{color:var(--muted);font-size:16px;margin-top:4px;text-wrap:pretty}
+.tag{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.14em;background:var(--accent);color:var(--accent-ink);padding:3px 8px;font-weight:600}
+.blog{position:sticky;top:24px;border:1.5px solid var(--rule);background:color-mix(in srgb,var(--panel2) 70%,transparent);padding:clamp(18px,2.6vw,28px)}
+.blog-h{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.commit{display:grid;grid-template-columns:76px minmax(0,1fr);gap:4px 14px;padding:14px 0;border-bottom:1px dashed var(--rule)}
+.commit:last-child{border-bottom:0}
+.sha{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:14px;font-weight:600;text-decoration:none}
+.cmsg{font-size:16px;overflow-wrap:anywhere}
+.cwhen{grid-column:2;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--muted);letter-spacing:.06em}
+.inst-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(440px,100%),1fr));gap:24px;margin-top:clamp(36px,4vw,56px);align-items:stretch}
+.inst{border:1.5px solid var(--rule);background:var(--panel);padding:clamp(22px,3vw,32px);display:flex;flex-direction:column;gap:14px}
+.inst.main{border-color:var(--accent)}
+.inst-h{font-family:var(--display);font-stretch:var(--stretch);font-weight:800;font-size:26px}
+.inst-d{color:var(--muted);font-size:16px}
+.code{margin:0;padding:16px 18px;background:var(--panel2);border:1px solid var(--rule);font-size:14.5px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink)}
+.copy{align-self:flex-start;margin-top:auto}
+.inst-note{font-size:20px;margin-top:28px;display:inline-block;transform:rotate(-1.5deg)}
+.foot{border-top:1px solid var(--rule);padding:clamp(56px,7vw,88px) 0 40px}
+.tblock{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr));border-top:1.5px solid var(--ink);border-left:1.5px solid var(--ink)}
+.tb{padding:14px 16px;border-right:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink);display:flex;flex-direction:column;gap:4px}
+.tb-l{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.tb-v{font-family:var(--display);font-stretch:var(--stretch);font-weight:700;font-size:17px}
+.foot-row{display:flex;justify-content:space-between;align-items:center;gap:12px 24px;flex-wrap:wrap;margin-top:24px;font-size:15px;color:var(--muted)}
+.foot-links{display:flex;gap:4px 24px;flex-wrap:wrap}
+.foot-links a{min-height:44px;display:inline-flex;align-items:center}
+.egg-wrap{display:flex;align-items:center;gap:8px}
+.egg-btn{width:44px;height:44px;border:0;background:transparent;color:var(--muted);font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:15px;cursor:pointer;opacity:.5;border-radius:2px}
+.egg-btn:hover{opacity:1;color:#F5883D}
+.eggnote{font-size:13px;color:var(--accent);display:none}
+.egg .eggnote{display:inline}
+.anim .draw{stroke-dasharray:1500;animation:bm-draw 10s var(--ease) infinite both}
+.anim .build{transform-box:fill-box;transform-origin:center;animation:bm-build 10s var(--ease) infinite both}
+.anim .buildline{stroke-dasharray:400;animation:bm-line 10s var(--ease) infinite both}
+.anim .note{animation:bm-note 10s linear infinite both}
+.anim .stamp{animation:bm-stamp 10s var(--ease) infinite both}
+.anim .ph{animation-duration:10s;animation-timing-function:linear;animation-iteration-count:infinite;animation-fill-mode:both}
+.anim .ph1{animation-name:bm-ph1}
+.anim .ph2{animation-name:bm-ph2}
+.anim .ph3{animation-name:bm-ph3}
+.paused .draw,.paused .build,.paused .buildline,.paused .note,.paused .stamp,.paused .ph{animation-play-state:paused}
+.anim .stamp-a{animation:bm-in-a .5s var(--ease) both}
+.anim .stamp-b{animation:bm-in-b .5s var(--ease) both}
+@keyframes bm-draw{0%{stroke-dashoffset:1500;opacity:1}32%{stroke-dashoffset:0;opacity:1}90%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
+@keyframes bm-build{0%,36%{opacity:0;transform:scale(.6)}46%{opacity:1;transform:scale(1)}90%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1)}}
+@keyframes bm-line{0%,36%{stroke-dashoffset:400}50%{stroke-dashoffset:0;opacity:1}90%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
+@keyframes bm-note{0%,16%{opacity:0}24%{opacity:1}90%{opacity:1}100%{opacity:0}}
+@keyframes bm-stamp{0%,58%{opacity:0;transform:rotate(-12deg) scale(1.9)}62%{opacity:1;transform:rotate(-12deg) scale(.92)}65%{opacity:1;transform:rotate(-12deg) scale(1)}90%{opacity:1;transform:rotate(-12deg) scale(1)}100%{opacity:0;transform:rotate(-12deg) scale(1)}}
+@keyframes bm-ph1{0%,35%{opacity:1}36%,100%{opacity:.35}}
+@keyframes bm-ph2{0%,35%{opacity:.35}36%,57%{opacity:1}58%,100%{opacity:.35}}
+@keyframes bm-ph3{0%,57%{opacity:.35}58%,96%{opacity:1}97%,100%{opacity:.35}}
+@keyframes bm-in-a{0%{opacity:0;transform:scale(1.06) rotate(-1.2deg)}100%{opacity:1;transform:none}}
+@keyframes bm-in-b{0%{opacity:0;transform:scale(1.06) rotate(-1.2deg)}100%{opacity:1;transform:none}}
+@media (max-width:720px){.navlinks,.pill{display:none}.lg{display:none}}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}.bm *{animation:none !important;transition:none !important}}
+</style>
+</head>
+<body>
+<div class="bm anim" id="bm">
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav">
+<div class="wrap navin">
+<a class="brand" href="#top" aria-label="Build Mode, back to top">
+<svg viewBox="0 0 28 28" aria-hidden="true"><path class="mk" d="M4 24 L4 4 L24 24 Z"/><path class="mk" d="M9.5 18.5 L9.5 13 L15 18.5 Z"/></svg>
+<span class="brand-t">BUILD MODE</span>
+<span class="mono xfab">× [fabricaite]</span>
+</a>
+<nav class="navlinks" aria-label="Sections">
+<a href="#relay">How it works</a>
+<a href="#modes">Modes</a>
+<a href="#docs">Doc pack</a>
+<a href="#changelog">Changelog</a>
+</nav>
+<div class="navact">
+<span class="pill" data-live="version-pill">v3.0.1</span>
+<a class="btn btn-g btn-sm" href="https://github.com/Samcarr01/build-mode" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="ic" d="M12 3.5 L14.6 8.9 L20.5 9.7 L16.2 13.8 L17.3 19.6 L12 16.8 L6.7 19.6 L7.8 13.8 L3.5 9.7 L9.4 8.9 Z"/></svg><span>Star<span class="lg"> on GitHub</span></span><span class="mono" data-live="stars-nav"></span></a>
+</div>
+</div>
+</header>
+
+<main id="main">
+<section class="hero" id="top">
+<div class="wrap hero-g">
+<div>
+<p class="sheet">Sheet 01 / A skill for Claude Code builders</p>
+<h1 class="disp h1"><span class="l-plan">Plan it.</span><span>Prompt it.</span><span class="l-prove">Prove it.</span></h1>
+<p class="hero-sub">The planning half of building with Claude Code. It interviews you once, writes the plan, hands over one prompt at a time, then checks the work instead of taking “done” on trust.</p>
+<p class="hero-for">For people who ship, but won’t catch a bad call by reading a diff.</p>
+<div class="cta">
+<a class="btn btn-p" href="#install">Install it<svg viewBox="0 0 24 24" aria-hidden="true"><path class="ic" d="M12 4 V18 M6 12 L12 18 L18 12"/></svg></a>
+<a class="btn btn-g" href="https://github.com/Samcarr01/build-mode" target="_blank" rel="noopener">View on GitHub</a>
+</div>
+<p class="live" id="live" hidden><span class="dot" aria-hidden="true"></span><span id="liveText">Live from GitHub</span></p>
+<p class="hand psst">psst: you never type <b>/build-mode</b>. It just knows.</p>
+</div>
+<div class="art" id="art">
+<div class="art-top"><span>You said: “I want to build a habit tracker”</span><span>DRG 01 · Home</span></div>
+<svg class="draw-svg" viewBox="0 0 560 540" role="img" aria-label="A blueprint of a habit tracker screen being drawn, then built, then stamped as verified">
+<path class="dim draw" d="M170 26 H400 M170 20 V32 M400 20 V32"/>
+<text class="svgtxt mid note" x="285" y="15">390</text>
+<path class="dim draw" d="M140 50 V490 M134 50 H146 M134 490 H146"/>
+<text class="svgtxt mid note" x="126" y="274" transform="rotate(-90 126 270)">844</text>
+<rect class="ln draw" x="170" y="50" width="230" height="440" rx="30"/>
+<path class="ln thin draw" d="M170 110 H400" style="animation-delay:.5s"/>
+<rect class="ln draw" x="194" y="72" width="96" height="14" rx="4" style="animation-delay:.6s"/>
+<circle class="ln draw" cx="372" cy="79" r="10" style="animation-delay:.7s"/>
+<circle class="ln draw" cx="285" cy="180" r="46" style="animation-delay:.8s"/>
+<path class="strokeA buildline" d="M285 134 A46 46 0 1 1 241.3 194.2"/>
+<text class="svgnum mid build" x="285" y="185">5 of 7</text>
+<rect class="ln draw" x="194" y="260" width="182" height="46" rx="10" style="animation-delay:1s"/>
+<rect class="ln draw" x="208" y="273" width="20" height="20" rx="5" style="animation-delay:1.1s"/>
+<path class="ln thin draw" d="M242 278 H332 M242 290 H300" style="animation-delay:1.15s"/>
+<path class="strokeA build" d="M212 283 L217 288 L225 278" style="animation-delay:.1s"/>
+<rect class="ln draw" x="194" y="320" width="182" height="46" rx="10" style="animation-delay:1.2s"/>
+<rect class="ln draw" x="208" y="333" width="20" height="20" rx="5" style="animation-delay:1.3s"/>
+<path class="ln thin draw" d="M242 338 H332 M242 350 H300" style="animation-delay:1.35s"/>
+<path class="strokeA build" d="M212 343 L217 348 L225 338" style="animation-delay:.25s"/>
+<rect class="ln draw" x="194" y="380" width="182" height="46" rx="10" style="animation-delay:1.4s"/>
+<rect class="ln draw" x="208" y="393" width="20" height="20" rx="5" style="animation-delay:1.5s"/>
+<path class="ln thin draw" d="M242 398 H332 M242 410 H300" style="animation-delay:1.55s"/>
+<rect class="fillA build" x="194" y="440" width="182" height="32" rx="16" style="animation-delay:.35s"/>
+<rect class="ln draw" x="194" y="440" width="182" height="32" rx="16" style="animation-delay:1.6s"/>
+<text class="btntxt mid build" x="285" y="461" style="animation-delay:.4s">Add habit</text>
+<text class="svghand note" x="414" y="158">one ring,</text>
+<text class="svghand note" x="414" y="180">not a stat tile</text>
+<path class="ln thin draw" d="M410 190 C 384 200, 362 196, 336 186 M336 186 L346 181 M336 186 L345 192" style="animation-delay:1.8s"/>
+<text class="svghand note" x="16" y="300">labels:</text>
+<text class="svghand note" x="16" y="322">3 words</text>
+<path class="ln thin draw" d="M84 314 C 120 320, 150 304, 188 296 M188 296 L178 292 M188 296 L180 302" style="animation-delay:2s"/>
+<text class="svghand note mid" x="285" y="527">match this picture</text>
+<g transform="translate(316 318)">
+<g class="stamp">
+<rect class="stampbg" x="0" y="0" width="206" height="70" rx="3"/>
+<rect class="stampbox" x="0" y="0" width="206" height="70" rx="3"/>
+<rect class="stampbox thin" x="6" y="6" width="194" height="58" rx="2"/>
+<text class="stamptxt" x="103" y="40" id="stampWord">VERIFIED</text>
+<text class="stampsub mid" x="103" y="56" id="stampSub">CHECKPOINT PASSED</text>
+</g>
+</g>
+</svg>
+<div class="phases">
+<div class="ph-row" aria-hidden="true"><span class="ph ph1">PLAN</span><span class="arr">→</span><span class="ph ph2">PROMPT</span><span class="arr">→</span><span class="ph ph3">PROVE</span></div>
+<button class="pause" type="button" id="pauseBtn" aria-pressed="false">
+<svg class="i-play" viewBox="0 0 14 14" aria-hidden="true"><path class="fl" d="M3 2 L12 7 L3 12 Z"/></svg>
+<svg class="i-pause" viewBox="0 0 14 14" aria-hidden="true"><path class="fl" d="M3 2 H6 V12 H3 Z M8 2 H11 V12 H8 Z"/></svg>
+<span id="pauseLabel">Pause</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+
+<section class="sec" id="relay">
+<div class="wrap">
+<p class="sheet">Sheet 02 / The relay</p>
+<h2 class="disp h2">Two sessions. One baton.</h2>
+<p class="lede">Claude plans and checks. Claude Code builds and proves. You carry the baton between them, and that’s about it.</p>
+<div class="relay">
+<div class="lanes">
+<div class="lane on" id="lane0"><span class="lab">Claude</span><span class="lane-t">Plans, designs, checks</span></div>
+<div class="lane" id="lane1"><span class="lab">You</span><span class="lane-t">Carry the baton</span></div>
+<div class="lane" id="lane2"><span class="lab">Claude Code</span><span class="lane-t">Builds, proves, commits</span></div>
+</div>
+<div class="track" aria-hidden="true"><div class="baton-row p0" id="batonRow"><span class="baton" id="baton">Step 1 of 6</span></div></div>
+<div class="stepbox">
+<div class="steps" role="group" aria-label="Relay steps" id="steps"></div>
+<div aria-live="polite">
+<p class="lab" id="stepWho">Claude</p>
+<p class="step-t" id="stepText">You say “I want to build a habit tracker”. It interviews you once, picks the stack and tells you why.</p>
+</div>
+</div>
+</div>
+<p class="hand quote">Two places check, and they check different things. You’re the last resort, not the first.</p>
+</div>
+</section>
+
+<section class="sec" id="modes">
+<div class="wrap">
+<p class="sheet">Sheet 03 / Twelve modes</p>
+<h2 class="disp h2">Just say it.</h2>
+<p class="lede">You never pick a mode. Type what you’d actually say mid-build and it works out the rest. Go on, try it.</p>
+<div class="say-g">
+<div>
+<label class="tiny say-lab" for="say">Say it like you would to Claude</label>
+<input class="say" id="say" type="text" autocomplete="off" spellcheck="false" placeholder="e.g. it was working yesterday">
+<div class="chips" id="chips">
+<button class="chip" type="button" data-say="it was working yesterday">“it was working yesterday”</button>
+<button class="chip" type="button" data-say="make it flashy">“make it flashy”</button>
+<button class="chip" type="button" data-say="give me the next prompt">“give me the next prompt”</button>
+<button class="chip" type="button" data-say="get it on Google">“get it on Google”</button>
+</div>
+</div>
+<div class="mcard idle stamp-a" id="card" aria-live="polite">
+<p class="tiny">Waiting for you</p>
+<p class="mname">Say something.</p>
+<p class="mdoes">It reads what you said and picks one of twelve modes, from Kickoff to Undo.</p>
+</div>
+</div>
+<div class="legend" role="group" aria-label="All twelve modes" id="legend"></div>
+</div>
+</section>
+
+<section class="sec" id="docs">
+<div class="wrap">
+<p class="sheet">Sheet 04 / The doc pack</p>
+<h2 class="disp h2">Your repo remembers everything.</h2>
+<p class="lede">Nothing depends on you remembering anything. The repo carries the state. Tap a file.</p>
+<div class="docs-g">
+<div class="tree" role="group" aria-label="Files Build Mode writes" id="tree"></div>
+<div class="pv" aria-live="polite">
+<p class="mono path" id="pvPath">docs/ROADMAP.md</p>
+<p class="pv-t" id="pvDesc">Milestones and tasks with permanent IDs, plus what “worked” means.</p>
+<div class="snipwrap" id="pvSnipWrap">
+<pre class="snip mono" id="pvSnip"></pre>
+<p class="tiny" style="margin-top:12px">Example project: a habit tracker</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="sec" id="proof">
+<div class="wrap">
+<p class="sheet">Sheet 05 / Proof, not promises</p>
+<h2 class="disp h2">Plain English. Checked by itself.</h2>
+<p class="lede">Every update opens with three plain lines. Every save runs the safety checks without being asked.</p>
+<div class="proof-g">
+<div class="msg">
+<p class="tiny">After task M1-T3 · example</p>
+<div class="line"><span class="line-l">What changed</span><span class="line-t">The habit list screen is in, and it matches the mockup.</span></div>
+<div class="line"><span class="line-l">Anything risky?</span><span class="line-t">Nothing risky.</span></div>
+<div class="line"><span class="line-l">What you need to do</span><span class="line-t">Open the preview and tick a habit.</span></div>
+<p class="gloss">Detail sits underneath. Technical words stay, but each one gets a few plain words in brackets: commit (a saved snapshot of the code).</p>
+</div>
+<div class="checks">
+<div class="chk"><svg viewBox="0 0 26 26" aria-hidden="true"><path class="ic" d="M5 13.5 L10.5 19 L21 7"/></svg><div><p class="chk-q">Passwords or keys left in the code?</p><p class="chk-a">Scanned on every save, with gitleaks.</p></div></div>
+<div class="chk"><svg viewBox="0 0 26 26" aria-hidden="true"><path class="ic" d="M5 13.5 L10.5 19 L21 7"/></svg><div><p class="chk-q">Add-on packages with critical security holes?</p><p class="chk-a">Checked with npm audit before anything is saved.</p></div></div>
+<div class="chk"><svg viewBox="0 0 26 26" aria-hidden="true"><path class="ic" d="M5 13.5 L10.5 19 L21 7"/></svg><div><p class="chk-q">A critical finding from the code reviewer?</p><p class="chk-a">Nothing gets committed until it’s fixed.</p></div></div>
+<div class="chk"><svg viewBox="0 0 26 26" aria-hidden="true"><path class="ic" d="M5 13.5 L10.5 19 L21 7"/></svg><div><p class="chk-q">Can customer A open customer B’s records?</p><p class="chk-a">A test tries on every checkpoint. It must be refused, or it can’t go live.</p></div></div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="sec" id="changelog">
+<div class="wrap">
+<p class="sheet">Sheet 06 / Revision table</p>
+<h2 class="disp h2">Straight from the repo.</h2>
+<p class="lede" id="logLede">What changed, release by release, read from the README on GitHub every time this page loads.</p>
+<div class="log-g">
+<div class="revs" id="revs">
+<div class="rev"><a class="rev-n" href="https://github.com/Samcarr01/build-mode#what-is-new-in-301">3.0.1</a><div><p class="rev-t"><span>Out-of-date projects always speak up</span><span class="tag">LATEST</span></p><p class="rev-d">Your planning notes no longer block it · Project-specific rules are merged, not wiped</p></div></div>
+<div class="rev"><a class="rev-n" href="https://github.com/Samcarr01/build-mode#what-is-new-in-30">3.0</a><div><p class="rev-t"><span>Easier to read, safer to ship, and projects that keep themselves up to date</span></p><p class="rev-d">Three plain lines on every message · Safety checks that run by themselves · The customer A/B test</p></div></div>
+<div class="rev"><a class="rev-n" href="https://github.com/Samcarr01/build-mode#what-is-new-in-29">2.9</a><div><p class="rev-t"><span>Branches and previews once something is live</span></p><p class="rev-d">Branch mode after launch · A live line, planned at kickoff · Go live mode</p></div></div>
+<div class="rev"><a class="rev-n" href="https://github.com/Samcarr01/build-mode#what-is-new-in-28">2.8</a><div><p class="rev-t"><span>Sites that get found, by Google and by AI answers</span></p><p class="rev-d">SEO, GEO and AIO treated as one job · Decided at kickoff · Checked, not assumed</p></div></div>
+<div class="rev"><a class="rev-n" href="https://github.com/Samcarr01/build-mode#what-is-new-in-27">2.7</a><div><p class="rev-t"><span>Motion you can check, and a mode for sites that need to impress</span></p><p class="rev-d">Motion is decided at kickoff · Craft rules and a ban list · Showcase mode</p></div></div>
+<div class="rev"><a class="rev-n" href="https://github.com/Samcarr01/build-mode#what-was-new-in-20">2.0</a><div><p class="rev-t"><span>Version 1 was a good planner with a weak evidence loop</span></p><p class="rev-d">/checkpoint now has to prove it · Sync looks at the running app · Undo mode</p></div></div>
+</div>
+<div class="blog">
+<div class="blog-h"><p class="lab">Latest on main</p><a class="tiny" href="https://github.com/Samcarr01/build-mode/commits/main" target="_blank" rel="noopener" style="color:var(--muted)">All commits</a></div>
+<div id="commits"><p class="tiny" style="padding:14px 0">Loading the build log from GitHub…</p></div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="sec" id="install">
+<div class="wrap">
+<p class="sheet">Sheet 07 / Install</p>
+<h2 class="disp h2">Two lines. Then just talk.</h2>
+<div class="inst-g">
+<div class="inst main">
+<p class="tiny">Where it lives</p>
+<p class="inst-h">In Claude</p>
+<p class="inst-d">Paste this into a chat, connect your project folder, then start talking.</p>
+<pre class="code mono" id="cmdA">Install this skill: https://github.com/Samcarr01/build-mode</pre>
+<button class="btn btn-p btn-sm copy" type="button" data-copy="cmdA">Copy</button>
+</div>
+<div class="inst">
+<p class="tiny">Optional</p>
+<p class="inst-h">In Claude Code</p>
+<p class="inst-d">The repo is also a plugin marketplace, if you want the skill on that side too.</p>
+<pre class="code mono" id="cmdB">/plugin marketplace add Samcarr01/build-mode
+/plugin install build-mode@samcarr</pre>
+<button class="btn btn-g btn-sm copy" type="button" data-copy="cmdB">Copy</button>
+</div>
+</div>
+<p class="hand inst-note">Then say “I want to build…” and it takes it from there.</p>
+</div>
+</section>
+</main>
+
+<footer class="foot">
+<div class="wrap">
+<div class="tblock">
+<div class="tb"><span class="tb-l">Project</span><span class="tb-v">Build Mode</span></div>
+<div class="tb"><span class="tb-l">Revision</span><span class="tb-v" data-live="version-tb">3.0.1</span></div>
+<div class="tb"><span class="tb-l">Drawn by</span><span class="tb-v">Sam Carr</span></div>
+<div class="tb"><span class="tb-l">Stars</span><span class="tb-v" data-live="stars-tb">–</span></div>
+<div class="tb"><span class="tb-l">Last push</span><span class="tb-v" data-live="pushed-tb">–</span></div>
+<div class="tb"><span class="tb-l">Licence</span><span class="tb-v">MIT</span></div>
+</div>
+<div class="foot-row">
+<div class="foot-links">
+<a href="https://github.com/Samcarr01/build-mode" target="_blank" rel="noopener">GitHub repo</a>
+<a href="https://github.com/Samcarr01/build-mode/issues/new/choose" target="_blank" rel="noopener">Report a skill problem</a>
+</div>
+<div class="egg-wrap">
+<span class="mono eggnote">Fabricaite mode on. Tap again to switch back.</span>
+<button class="egg-btn" type="button" aria-label="A secret" id="eggBtn">[ ]</button>
+</div>
+</div>
+</div>
+</footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var REPO = 'Samcarr01/build-mode';
+  var root = document.getElementById('bm');
+  var $ = function (id) { return document.getElementById(id); };
+  var reduce = false;
+  try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  /* ---------- Fabricaite easter egg ---------- */
+  function setEgg(on) {
+    root.classList.toggle('egg', on);
+    $('stampWord').textContent = on ? 'FABRICAITE' : 'VERIFIED';
+    $('stampSub').textContent = on ? 'MADE IN LEEDS' : 'CHECKPOINT PASSED';
+  }
+  $('eggBtn').addEventListener('click', function () { setEgg(!root.classList.contains('egg')); });
+
+  /* ---------- Hero pause ---------- */
+  $('pauseBtn').addEventListener('click', function () {
+    var on = !$('art').classList.contains('paused');
+    $('art').classList.toggle('paused', on);
+    $('pauseBtn').setAttribute('aria-pressed', on ? 'true' : 'false');
+    $('pauseLabel').textContent = on ? 'Play' : 'Pause';
+  });
+
+  /* ---------- The relay ---------- */
+  var steps = [
+    { who: 'Claude', pos: 0, text: 'You say “I want to build a habit tracker”. It interviews you once, picks the stack and tells you why.' },
+    { who: 'Claude', pos: 0, text: 'Writes the design brief, mocks up the core screens for you to approve, then drops docs/next-prompt.md into your repo.' },
+    { who: 'You', pos: 1, text: 'Open Claude Code and type /next. That’s your whole job.' },
+    { who: 'Claude Code', pos: 2, text: 'Builds the task, then runs /checkpoint: builds it, clicks through it in a real browser and commits. Only ticked off if that passed.' },
+    { who: 'You', pos: 1, text: 'Back in Claude, say “done”, “it broke” or “next”.' },
+    { who: 'Claude', pos: 0, text: 'Checks the deploy, opens the live app, scores the design against the mockup and writes the next prompt.' }
+  ];
+  var step = 0, auto = true;
+  var stepsEl = $('steps');
+  steps.forEach(function (s, i) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'step'; b.textContent = String(i + 1);
+    b.setAttribute('aria-label', 'Step ' + (i + 1));
+    b.addEventListener('click', function () { auto = false; step = i; renderStep(); });
+    stepsEl.appendChild(b);
+  });
+  function renderStep() {
+    var s = steps[step];
+    for (var i = 0; i < 3; i++) $('lane' + i).classList.toggle('on', s.pos === i);
+    $('batonRow').className = 'baton-row p' + s.pos;
+    $('baton').textContent = 'Step ' + (step + 1) + ' of 6';
+    Array.prototype.forEach.call(stepsEl.children, function (b, i) {
+      b.classList.toggle('on', i === step);
+      b.setAttribute('aria-pressed', i === step ? 'true' : 'false');
+    });
+    $('stepWho').textContent = s.who;
+    $('stepText').textContent = s.text;
+  }
+  renderStep();
+  if (!reduce) setInterval(function () { if (auto && !document.hidden) { step = (step + 1) % 6; renderStep(); } }, 3400);
+
+  /* ---------- Just say it ---------- */
+  var modes = [
+    { id: 'kickoff', n: '01', name: 'Kickoff', ex: 'I want to build a habit tracker', does: 'Interviews you once, picks the stack and says why, writes the design brief, mocks up the core screens and drops the whole doc pack into your repo.', re: /build|new project|set ?up the repo|\bstart\b|\bidea\b|\bapp\b|website|make me/ },
+    { id: 'next', n: '02', name: 'Next task', ex: 'give me the next prompt', does: 'Writes one ready-to-paste prompt into docs/next-prompt.md. You type /next in Claude Code. That’s it.', re: /\bnext\b|prompt|what do i (tell|say)|what now/ },
+    { id: 'sync', n: '03', name: 'Sync', ex: 'done, check it', does: 'Checks the deploy, opens the live app, compares it with the mockup and scores the design. Takes nothing on trust.', re: /\bdone\b|built it|check|where am i|finished/ },
+    { id: 'unblock', n: '04', name: 'Unblock', ex: 'it built the wrong thing', does: 'Reproduces the problem, finds the real cause and writes the fix as a prompt.', re: /stuck|error|broke|wrong thing|failing|crash|not working|\bbug/ },
+    { id: 'undo', n: '05', name: 'Undo', ex: 'it was working yesterday', does: 'Finds the last good commit, tells you in plain English what you’d lose, and refuses to strand your database.', re: /put it back|\bundo\b|yesterday|revert|roll ?back/ },
+    { id: 'golive', n: '06', name: 'Go live', ex: 'we’ve launched', does: 'Switches to branches and previews. From then on, your merge is the one moment anything goes live.', re: /\blive\b|launch|branches|real users/ },
+    { id: 'replan', n: '07', name: 'Replan', ex: 'actually, drop the calendar', does: 'Adds, drops or moves work, and updates the roadmap without losing what’s already done.', re: /\badd\b|change|\bdrop\b|move it|actually|instead|feature/ },
+    { id: 'design', n: '08', name: 'Design pass', ex: 'the UI is boring', does: 'Runs the five-check design score and fixes the flat, grey, wordy bits.', re: /look better|generic|boring|ugly|bland|\bui\b|prettier|looks (bad|meh|flat|plain)/ },
+    { id: 'showcase', n: '09', name: 'Showcase', ex: 'make it flashy', does: 'One signature moment drawn from your own world, a storyboard you approve first, and guardrails for phones.', re: /flashy|\bwow\b|award|impress|showcase/ },
+    { id: 'find', n: '10', name: 'Findability', ex: 'get it on Google', does: 'SEO, GEO and AIO as one job. The words go in the first HTML, so Google and ChatGPT can both read them.', re: /\bseo\b|google|chatgpt|perplexity|found|\brank/ },
+    { id: 'upgrade', n: '11', name: 'Upgrade', ex: 'refresh the setup', does: 'Refreshes the project’s setup files. Never touches your roadmap, progress log or design.', re: /upgrade|refresh|setup files/ },
+    { id: 'skill', n: '12', name: 'Skill review', ex: 'any skill issues?', does: 'Gathers the notes on where Build Mode itself went wrong and proposes one fix.', re: /skill (issue|review|problem)/ }
+  ];
+  var byId = {}; modes.forEach(function (m) { byId[m.id] = m; });
+  var order = ['undo', 'unblock', 'showcase', 'find', 'design', 'golive', 'upgrade', 'skill', 'replan', 'sync', 'next', 'kickoff'];
+  function match(q) {
+    var t = (q || '').toLowerCase().trim();
+    if (!t) return null;
+    if (/fabric ?ai ?te|fabricaite/.test(t)) return { id: 'egg' };
+    for (var i = 0; i < order.length; i++) { if (byId[order[i]].re.test(t)) return byId[order[i]]; }
+    return { id: 'none' };
+  }
+  var legend = $('legend');
+  modes.forEach(function (m) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'cell'; b.dataset.id = m.id;
+    b.setAttribute('aria-pressed', 'false');
+    b.innerHTML = '<span class="cell-n">' + m.n + '</span><span>' + esc(m.name) + '</span>';
+    b.addEventListener('click', function () { setQuery(m.ex); });
+    legend.appendChild(b);
+  });
+  var card = $('card'), flip = false, lastId = '';
+  function renderCard(m) {
+    var id = m ? m.id : '';
+    if (id !== lastId) { flip = !flip; lastId = id; }
+    var html;
+    if (!m) {
+      html = '<p class="tiny">Waiting for you</p><p class="mname">Say something.</p><p class="mdoes">It reads what you said and picks one of twelve modes, from Kickoff to Undo.</p>';
+    } else if (id === 'none') {
+      html = '<p class="tiny">No clear match</p><p class="mname">Say a bit more.</p><p class="mdoes">Try “it’s stuck”, “make it flashy” or “where am I”.</p>';
+    } else if (id === 'egg') {
+      html = '<span class="mnum">Mode 13</span><p class="tiny">Hidden mode unlocked</p><p class="fab"><b>[</b>fabricaite<b>]</b></p><p class="mdoes">You found the secret one. Build Mode is made by Sam Carr, who also runs Fabricaite in Leeds. We make the tools you already pay for work together.</p><div class="cta" style="margin-top:6px"><a class="btn btn-p btn-sm" href="https://fabricaite.ai" target="_blank" rel="noopener">Visit fabricaite.ai</a><button class="btn btn-g btn-sm" type="button" id="eggOff">Back to the blueprint</button></div>';
+    } else {
+      html = '<span class="mnum">Mode ' + m.n + '</span><p class="tiny">Picked for you</p><p class="mname">' + esc(m.name) + '</p><p class="mdoes">' + esc(m.does) + '</p>';
+    }
+    card.className = 'mcard ' + (flip ? 'stamp-a' : 'stamp-b') + (m ? '' : ' idle');
+    card.innerHTML = html;
+    var off = $('eggOff');
+    if (off) off.addEventListener('click', function () { setEgg(false); $('say').value = ''; update(''); });
+    Array.prototype.forEach.call(legend.children, function (b) {
+      var on = !!(m && b.dataset.id === id);
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+  function update(q) {
+    var m = match(q);
+    if (m && m.id === 'egg') setEgg(true);
+    renderCard(m);
+  }
+  function setQuery(q) { $('say').value = q; update(q); }
+  $('say').addEventListener('input', function (e) { update(e.target.value); });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-say]'), function (b) {
+    b.addEventListener('click', function () { setQuery(b.getAttribute('data-say')); });
+  });
+
+  /* ---------- Doc pack ---------- */
+  var files = [
+    { k: 'claude', label: 'CLAUDE.md', d: 0, path: 'CLAUDE.md', desc: 'How this project works. Claude Code loads it every session.', snip: '# Habit tracker\nStack: Next.js, Supabase, Vercel\nA push to main deploys.\nRun /checkpoint before ticking anything off.' },
+    { dir: true, label: 'docs/' },
+    { k: 'roadmap', label: 'ROADMAP.md', d: 1, path: 'docs/ROADMAP.md', desc: 'Milestones and tasks with permanent IDs, plus what “worked” means.', snip: 'Worked if: you can tick a habit on your phone\nin under five seconds.\n\n## M1  First useful version\n[x] M1-T1  Scaffold and first deploy\n[x] M1-T2  Sign-in\n[ ] M1-T3  Habit list        ← next' },
+    { k: 'progress', label: 'PROGRESS.md', d: 1, path: 'docs/PROGRESS.md', desc: 'What actually got built, with commit SHAs, newest first.', snip: 'M1-T2  Sign-in     a41f9c2  verified in browser\nM1-T1  Scaffold    7be03d1  live at /version' },
+    { k: 'design', label: 'DESIGN.md', d: 1, path: 'docs/DESIGN.md', desc: 'Fonts, hex codes, spacing, layout, hierarchy, a copy budget and one spec per core screen.', snip: 'Copy budget: labels 3 words,\nunder 60 words per screen.\n\nNever: gradients, glass, three feature cards,\ngrey-on-grey at 13px.' },
+    { k: 'mock', label: 'design/*.png', d: 1, path: 'docs/design/*.png', desc: 'The approved mockup for every core screen. Every UI prompt says: match this picture.' },
+    { k: 'next', label: 'next-prompt.md', d: 1, path: 'docs/next-prompt.md', desc: 'The current prompt, overwritten each time. /next reads it, so nothing gets lost in copy and paste.' },
+    { k: 'arch', label: 'ARCHITECTURE.md', d: 1, path: 'docs/ARCHITECTURE.md', desc: 'The stack call, the schema, every decision and why.' },
+    { k: 'learn', label: 'LEARNINGS.md', d: 1, path: 'docs/LEARNINGS.md', desc: 'Anything that cost more than ten minutes to figure out, so it never costs ten minutes again.' },
+    { k: 'tooling', label: 'TOOLING.md', d: 1, path: 'docs/TOOLING.md', desc: 'What’s actually available, so plans never assume tools you don’t have.' },
+    { dir: true, label: '.claude/' },
+    { k: 'skills', label: 'skills/', d: 1, path: '.claude/skills/', desc: '/next, /checkpoint and /blocked, ready to use inside Claude Code.' },
+    { k: 'agents', label: 'agents/', d: 1, path: '.claude/agents/', desc: 'A read-only code reviewer that can’t touch what it judges, and a test runner that finds the cause without applying the fix.' }
+  ];
+  var tree = $('tree'), fileBtns = [];
+  files.forEach(function (f) {
+    if (f.dir) { var d = document.createElement('div'); d.className = 'dir'; d.textContent = f.label; tree.appendChild(d); return; }
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'file' + (f.d ? ' d1' : '');
+    b.innerHTML = '<span class="sq"></span><span>' + esc(f.label) + '</span>';
+    b.addEventListener('click', function () { pickFile(f.k); });
+    b.dataset.k = f.k; tree.appendChild(b); fileBtns.push(b);
+  });
+  function pickFile(k) {
+    var f = files.filter(function (x) { return x.k === k; })[0];
+    $('pvPath').textContent = f.path;
+    $('pvDesc').textContent = f.desc;
+    $('pvSnip').textContent = f.snip || '';
+    $('pvSnipWrap').hidden = !f.snip;
+    fileBtns.forEach(function (b) {
+      var on = b.dataset.k === k;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+  pickFile('roadmap');
+
+  /* ---------- Copy buttons ---------- */
+  Array.prototype.forEach.call(document.querySelectorAll('[data-copy]'), function (b) {
+    b.addEventListener('click', function () {
+      var text = $(b.getAttribute('data-copy')).textContent;
+      var reset = function () { setTimeout(function () { b.textContent = 'Copy'; }, 1800); };
+      try {
+        navigator.clipboard.writeText(text).then(function () { b.textContent = 'Copied'; reset(); }, function () { b.textContent = 'Select the text to copy'; reset(); });
+      } catch (e) { b.textContent = 'Select the text to copy'; reset(); }
+    });
+  });
+
+  /* ---------- Live data from GitHub ---------- */
+  function cached(key, url, asText) {
+    var k = 'bm:' + key, now = Date.now();
+    try {
+      var hit = JSON.parse(sessionStorage.getItem(k) || 'null');
+      if (hit && now - hit.t < 10 * 60 * 1000) return Promise.resolve(hit.v);
+    } catch (e) {}
+    return fetch(url, asText ? {} : { headers: { Accept: 'application/vnd.github+json' } }).then(function (r) {
+      if (!r.ok) throw new Error(url + ' ' + r.status);
+      return asText ? r.text() : r.json();
+    }).then(function (v) {
+      try { sessionStorage.setItem(k, JSON.stringify({ t: now, v: v })); } catch (e) {}
+      return v;
+    });
+  }
+  function ago(iso) {
+    var s = (Date.now() - new Date(iso).getTime()) / 1000;
+    if (!isFinite(s)) return '';
+    var d = Math.floor(s / 86400);
+    if (s < 3600) return Math.max(1, Math.floor(s / 60)) + ' min ago';
+    if (s < 86400) return Math.floor(s / 3600) + ' h ago';
+    if (d === 1) return 'yesterday';
+    if (d < 14) return d + ' days ago';
+    if (d < 60) return Math.floor(d / 7) + ' weeks ago';
+    return Math.floor(d / 30) + ' months ago';
+  }
+  function setLive(name, text) {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-live="' + name + '"]'), function (el) { el.textContent = text; });
+  }
+  function clean(s) { return s.replace(/`/g, '').replace(/\*/g, '').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/\s+/g, ' ').trim().replace(/\.$/, ''); }
+  function anchor(heading) { return heading.toLowerCase().replace(/[^a-z0-9 -]/g, '').replace(/ /g, '-'); }
+  function parseReadme(md) {
+    var re = /^## (What (?:is|was) new in ([0-9][0-9.]*))\s*$/gm, heads = [], m;
+    while ((m = re.exec(md))) heads.push({ title: m[1], v: m[2], start: re.lastIndex, at: m.index });
+    return heads.map(function (h, i) {
+      var end = md.indexOf('\n## ', h.start);
+      var body = md.slice(h.start, end === -1 ? undefined : end);
+      var bullets = [], b, bre = /^- \*\*(.+?)\*\*/gm;
+      while ((b = bre.exec(body))) bullets.push(clean(b[1]));
+      var intro = '';
+      var paras = body.split(/\n\s*\n/);
+      for (var p = 0; p < paras.length; p++) {
+        var t = paras[p].trim();
+        if (!t || /^[<!\-|>#`]/.test(t)) continue;
+        intro = clean(t.split(/\.\s/)[0]);
+        break;
+      }
+      var title = intro || bullets[0] || ('Version ' + h.v);
+      var items = intro ? bullets.slice(0, 3) : bullets.slice(1, 4);
+      return { v: h.v, title: title, items: items, href: 'https://github.com/' + REPO + '#' + anchor(h.title), latest: i === 0 };
+    });
+  }
+  function renderRevs(revs) {
+    if (!revs || revs.length < 3) return;
+    $('revs').innerHTML = revs.map(function (r) {
+      return '<div class="rev"><a class="rev-n" href="' + esc(r.href) + '" target="_blank" rel="noopener">' + esc(r.v) + '</a><div><p class="rev-t"><span>' + esc(r.title) + '</span>' + (r.latest ? '<span class="tag">LATEST</span>' : '') + '</p>' + (r.items.length ? '<p class="rev-d">' + esc(r.items.join(' · ')) + '</p>' : '') + '</div></div>';
+    }).join('');
+    $('logLede').textContent = revs.length + ' releases, read from the README on GitHub every time this page loads.';
+  }
+  function renderCommits(list) {
+    if (!Array.isArray(list) || !list.length) throw new Error('no commits');
+    $('commits').innerHTML = list.slice(0, 6).map(function (c) {
+      var lines = (c.commit && c.commit.message || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+      var msg = lines[0] || '';
+      var pr = /^Merge pull request #(\d+)/.exec(msg);
+      if (pr) msg = (lines[1] ? lines[1] + ' ' : 'Merged ') + '(PR #' + pr[1] + ')';
+      var when = c.commit && c.commit.author ? ago(c.commit.author.date) : '';
+      return '<div class="commit"><a class="sha" href="' + esc(c.html_url) + '" target="_blank" rel="noopener">' + esc(c.sha.slice(0, 7)) + '</a><span class="cmsg">' + esc(msg) + '</span><span class="cwhen">' + esc(when) + '</span></div>';
+    }).join('');
+  }
+  var live = { version: '', pushed: '', stars: '' };
+  function renderLive() {
+    var parts = ['Live from GitHub'];
+    if (live.version) parts.push('v' + live.version);
+    if (live.pushed) parts.push('updated ' + live.pushed);
+    if (live.stars !== '') parts.push(live.stars + (live.stars === 1 ? ' star' : ' stars'));
+    if (parts.length < 2) return;
+    $('liveText').textContent = parts.join('  ·  ');
+    $('live').hidden = false;
+  }
+  cached('repo', 'https://api.github.com/repos/' + REPO).then(function (r) {
+    live.stars = r.stargazers_count;
+    live.pushed = ago(r.pushed_at);
+    setLive('stars-nav', '· ' + live.stars);
+    setLive('stars-tb', String(live.stars));
+    setLive('pushed-tb', live.pushed);
+    renderLive();
+  }).catch(function () { setLive('stars-tb', 'On GitHub'); });
+  cached('plugin', 'https://raw.githubusercontent.com/' + REPO + '/main/plugins/build-mode/.claude-plugin/plugin.json').then(function (p) {
+    var v = p && p.version;
+    if (!v) return;
+    live.version = v;
+    setLive('version-pill', 'v' + v); setLive('version-tb', v);
+    renderLive();
+  }).catch(function () {});
+  cached('readme', 'https://raw.githubusercontent.com/' + REPO + '/main/README.md', true).then(function (md) {
+    renderRevs(parseReadme(md));
+  }).catch(function () {});
+  cached('commits', 'https://api.github.com/repos/' + REPO + '/commits?per_page=6').then(function (list) {
+    renderCommits(list);
+    if (!live.pushed && list[0] && list[0].commit) {
+      live.pushed = ago(list[0].commit.author.date);
+      setLive('pushed-tb', live.pushed);
+      renderLive();
+    }
+  }).catch(function () {
+    $('commits').innerHTML = '<p class="tiny" style="padding:14px 0">GitHub is busy. <a href="https://github.com/' + REPO + '/commits/main" target="_blank" rel="noopener">See the commits on GitHub</a>.</p>';
+  });
+})();
+</script>
+</body>
+</html>
