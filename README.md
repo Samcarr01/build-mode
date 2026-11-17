@@ -1,7 +1,7 @@
 # Build Mode
 
 <p align="center">
-  <img src="assets/build-mode-banner.png" alt="Build Mode 3.0: plan it, prompt it, prove it" width="100%">
+  <img src="assets/build-mode-hero.png" alt="Build Mode: plan it, prompt it, prove it" width="100%">
 </p>
 
 **A planning and prompting layer for people who build software in Claude Code but cannot read a diff.**
@@ -23,7 +23,24 @@ on trust.
 
 ---
 
+## What is new in 3.0.1
+
+- **Out-of-date projects always speak up.** If a project's setup can't update by itself,
+  the first line of the reply asks: *"This project's rules are out of date. Update them
+  now? (yes / not now)"*. It asks every session until it's done, instead of quietly noting
+  it in the progress log.
+- **Your planning notes no longer block it.** Unsaved notes in `docs/` don't count as
+  unsaved work, because an upgrade never rewrites them. Only unsaved code, `CLAUDE.md` or
+  `.claude/` changes hold it back.
+- **Project-specific rules are merged, not wiped.** If a setup file has lines written for
+  that project, such as extra checks in the code reviewer, the upgrade keeps every one
+  and adds the new lines around them.
+
 ## What is new in 3.0
+
+<p align="center">
+  <img src="assets/build-mode-banner.png" alt="Build Mode 3.0: the three plain lines" width="100%">
+</p>
 
 Easier to read, safer to ship, and projects that keep themselves up to date.
 
