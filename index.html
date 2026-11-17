@@ -202,6 +202,17 @@ body{margin:0;background:#0E2A52}
 .code{margin:0;padding:16px 18px;background:var(--panel2);border:1px solid var(--rule);font-size:14.5px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink)}
 .copy{align-self:flex-start;margin-top:auto}
 .inst-note{font-size:20px;margin-top:28px;display:inline-block;transform:rotate(-1.5deg)}
+.fab-band{--bg:#262E35;--panel:#303A44;--panel2:#1E252B;--ink:#F6F4F1;--muted:#BCC3CA;--accent:#F5883D;--accent-ink:#1E252B;--rule:rgba(246,244,241,.22);--display:'IBM Plex Mono',ui-monospace,monospace;--stretch:100%;background-color:#262E35;color:var(--ink);background-image:linear-gradient(rgba(245,136,61,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(245,136,61,.10) 1px,transparent 1px),linear-gradient(rgba(245,136,61,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(245,136,61,.045) 1px,transparent 1px);background-size:120px 120px,120px 120px,24px 24px,24px 24px;padding:clamp(80px,10vw,136px) 0;border-top:3px solid #F5883D}
+.fab-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(440px,100%),1fr));gap:clamp(36px,5vw,72px);align-items:center}
+.fab-band .h2{font-size:clamp(34px,4.6vw,62px);letter-spacing:-.03em}
+.fab-band .btn-p{box-shadow:5px 5px 0 0 var(--ink)}
+.fab-card{border:1.5px solid var(--accent);background:var(--panel2);padding:clamp(24px,3vw,40px);display:flex;flex-direction:column;gap:22px}
+.fab-word{font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:600;font-size:clamp(30px,3.6vw,46px);line-height:1}
+.fab-word b{color:var(--accent);font-weight:600}
+.fab-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.fab-list li{display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;padding:16px 0;border-top:1px dashed var(--rule);font-size:clamp(17px,1.5vw,19px);font-weight:600}
+.fab-list span{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13px;color:var(--accent);padding-top:3px}
+.fab-foot{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .foot{border-top:1px solid var(--rule);padding:clamp(56px,7vw,88px) 0 40px}
 .tblock{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr));border-top:1.5px solid var(--ink);border-left:1.5px solid var(--ink)}
 .tb{padding:14px 16px;border-right:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink);display:flex;flex-direction:column;gap:4px}
@@ -475,6 +486,27 @@ body{margin:0;background:#0E2A52}
 <p class="hand inst-note">Then say “I want to build…” and it takes it from there.</p>
 </div>
 </section>
+<section class="fab-band" id="built-for-you" aria-labelledby="bfy-h">
+<div class="wrap fab-g">
+<div>
+<p class="sheet">Sheet 08 / Or skip the build</p>
+<h2 class="disp h2" id="bfy-h">Rather have it built for you?</h2>
+<p class="lede">Build Mode gives you the method. Fabricaite brings the know-how. We build custom AI software for small businesses, connect it to the tools you already pay for, and look after it once it’s live.</p>
+<div class="cta">
+<a class="btn btn-p" href="https://fabricaite.ai" target="_blank" rel="noopener">Talk to Fabricaite<svg viewBox="0 0 24 24" aria-hidden="true"><path class="ic" d="M7 17 L17 7 M9 7 H17 V15"/></svg></a>
+</div>
+</div>
+<div class="fab-card">
+<p class="fab-word"><b>[</b>fabricaite<b>]</b></p>
+<ul class="fab-list">
+<li><span>01</span>A fixed price, agreed before any work starts</li>
+<li><span>02</span>Built around how your business actually runs</li>
+<li><span>03</span>Looked after on a monthly plan once it’s live</li>
+</ul>
+<p class="fab-foot">Custom AI software · Leeds</p>
+</div>
+</div>
+</section>
 </main>
 
 <footer class="foot">
@@ -491,6 +523,7 @@ body{margin:0;background:#0E2A52}
 <div class="foot-links">
 <a href="https://github.com/Samcarr01/build-mode" target="_blank" rel="noopener">GitHub repo</a>
 <a href="https://github.com/Samcarr01/build-mode/issues/new/choose" target="_blank" rel="noopener">Report a skill problem</a>
+<a href="https://fabricaite.ai" target="_blank" rel="noopener">Fabricaite</a>
 </div>
 <div class="egg-wrap">
 <span class="mono eggnote">Fabricaite mode on. Tap again to switch back.</span>
