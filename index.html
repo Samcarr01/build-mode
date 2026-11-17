@@ -3,11 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Build Mode: plan it, prompt it, prove it</title>
+<title>Build Mode by Fabricaite: plan it, prompt it, prove it</title>
+<meta name="author" content="Sam Carr, Fabricaite">
 <meta name="description" content="Build Mode is a free add-on for Claude that helps you build apps and websites with AI, even if you can’t code. It plans the build with you, tells Claude Code what to do one step at a time, and checks it actually works.">
 <link rel="canonical" href="https://samcarr01.github.io/build-mode/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Build Mode: plan it, prompt it, prove it">
+<meta property="og:title" content="Build Mode by Fabricaite: plan it, prompt it, prove it">
+<meta property="og:site_name" content="Build Mode by Fabricaite">
 <meta property="og:description" content="Build apps and websites with AI, even if you can’t code. Build Mode plans it, tells the AI what to build, and checks it works.">
 <meta property="og:url" content="https://samcarr01.github.io/build-mode/">
 <meta property="og:image" content="https://raw.githubusercontent.com/Samcarr01/build-mode/main/assets/build-mode-hero.png">
@@ -18,7 +20,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=Architects+Daughter&amp;display=swap" rel="stylesheet">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"Build Mode","description":"A planning and prompting layer for people who build software in Claude Code but cannot read a diff.","codeRepository":"https://github.com/Samcarr01/build-mode","url":"https://samcarr01.github.io/build-mode/","license":"https://opensource.org/licenses/MIT","version":"3.0.1","author":{"@type":"Person","name":"Sam Carr","url":"https://github.com/Samcarr01"}}
+{"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"Build Mode","description":"A planning and prompting layer for people who build software in Claude Code but cannot read a diff.","codeRepository":"https://github.com/Samcarr01/build-mode","url":"https://samcarr01.github.io/build-mode/","license":"https://opensource.org/licenses/MIT","version":"3.0.1","author":{"@type":"Person","name":"Sam Carr","url":"https://github.com/Samcarr01","worksFor":{"@type":"Organization","name":"Fabricaite"}},"publisher":{"@type":"Organization","name":"Fabricaite","url":"https://fabricaite.ai","sameAs":["https://www.linkedin.com/company/fabricaite1/","https://www.instagram.com/_fabricaite.ai/"]}}
 </script>
 <style>
 html{scroll-behavior:smooth}
@@ -58,8 +60,6 @@ body{margin:0;background:#0E2A52}
 .brand svg{width:28px;height:28px;flex:none}
 .mk{fill:none;stroke:var(--accent);stroke-width:2.2;stroke-linejoin:round}
 .brand-t{font-family:var(--display);font-stretch:var(--stretch);font-weight:900;font-size:19px;letter-spacing:.05em}
-.xfab{font-size:14px;color:var(--accent);font-weight:600;display:none}
-.egg .xfab{display:inline}
 .navlinks{display:flex;gap:4px 26px;flex-wrap:wrap}
 .bm .navlinks a{color:var(--muted);text-decoration:none;font-size:15px;min-height:44px;display:inline-flex;align-items:center}
 .bm .navlinks a:hover{color:var(--ink)}
@@ -214,6 +214,20 @@ body{margin:0;background:#0E2A52}
 .fab-list li{display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;padding:16px 0;border-top:1px dashed var(--rule);font-size:clamp(17px,1.5vw,19px);font-weight:600}
 .fab-list span{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13px;color:var(--accent);padding-top:3px}
 .fab-foot{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.brandwrap{display:flex;flex-direction:column;gap:2px}
+.by{display:inline-flex;align-items:center;gap:7px;padding-left:40px;min-height:24px;text-decoration:none;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.bm a.by,.bm a.by:hover{color:var(--muted)}
+.by img{height:13px;width:auto;display:block}
+.foot-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr));gap:36px 40px;margin-top:clamp(40px,5vw,64px);align-items:start}
+.foot-brand{display:flex;flex-direction:column;gap:16px;max-width:420px}
+@media (min-width:900px){.foot-g{grid-template-columns:minmax(0,1.7fr) repeat(3,minmax(0,1fr))}}
+.foot-brand img{width:220px;height:auto;display:block}
+.foot-brand p{color:var(--muted);font-size:16px}
+.foot-col{display:flex;flex-direction:column;gap:2px}
+.foot-col .tb-l{margin-bottom:8px}
+.bm .foot-col a{color:var(--ink);text-decoration:none;min-height:40px;display:inline-flex;align-items:center;gap:8px;font-size:16px}
+.bm .foot-col a:hover{color:var(--accent)}
+.foot-col a svg{width:14px;height:14px;flex:none;opacity:.6}
 .foot{border-top:1px solid var(--rule);padding:clamp(56px,7vw,88px) 0 40px}
 .tblock{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr));border-top:1.5px solid var(--ink);border-left:1.5px solid var(--ink)}
 .tb{padding:14px 16px;border-right:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink);display:flex;flex-direction:column;gap:4px}
@@ -259,11 +273,13 @@ body{margin:0;background:#0E2A52}
 
 <header class="nav">
 <div class="wrap navin">
+<div class="brandwrap">
 <a class="brand" href="#top" aria-label="Build Mode, back to top">
 <svg viewBox="0 0 28 28" aria-hidden="true"><path class="mk" d="M4 24 L4 4 L24 24 Z"/><path class="mk" d="M9.5 18.5 L9.5 13 L15 18.5 Z"/></svg>
 <span class="brand-t">BUILD MODE</span>
-<span class="mono xfab">× [fabricaite]</span>
 </a>
+<a class="by" href="https://fabricaite.ai/?utm_source=build-mode&amp;utm_medium=referral&amp;utm_campaign=build-mode-site&amp;utm_content=nav" target="_blank" rel="noopener" aria-label="By Fabricaite"><span>by</span><img src="fabricaite-lockup-on-dark.svg" alt="" width="111" height="13"></a>
+</div>
 <nav class="navlinks" aria-label="Sections">
 <a href="#relay">How it works</a>
 <a href="#modes">Modes</a>
@@ -282,7 +298,7 @@ body{margin:0;background:#0E2A52}
 <section class="hero" id="top">
 <div class="wrap hero-g">
 <div>
-<p class="sheet">Sheet 01 / A free add-on for Claude</p>
+<p class="sheet">Sheet 01 / A free add-on for Claude, by Fabricaite</p>
 <h1 class="disp h1"><span class="l-plan">Plan it.</span><span>Prompt it.</span><span class="l-prove">Prove it.</span></h1>
 <p class="hero-sub">Want to build an app or website with AI, but can’t code? Build Mode turns Claude into your project manager. It plans the build with you, tells Claude Code (the AI that writes the code) what to do one step at a time, then checks it actually works.</p>
 <p class="hero-for">Free to use. Made for people with ideas, not coding skills.</p>
@@ -516,17 +532,36 @@ body{margin:0;background:#0E2A52}
 <div class="tblock">
 <div class="tb"><span class="tb-l">Project</span><span class="tb-v">Build Mode</span></div>
 <div class="tb"><span class="tb-l">Revision</span><span class="tb-v" data-live="version-tb">3.0.1</span></div>
-<div class="tb"><span class="tb-l">Drawn by</span><span class="tb-v">Sam Carr</span></div>
+<div class="tb"><span class="tb-l">Drawn by</span><span class="tb-v">Sam Carr · Fabricaite</span></div>
 <div class="tb"><span class="tb-l">Stars</span><span class="tb-v" data-live="stars-tb">–</span></div>
 <div class="tb"><span class="tb-l">Last update</span><span class="tb-v" data-live="pushed-tb">–</span></div>
 <div class="tb"><span class="tb-l">Licence</span><span class="tb-v">MIT</span></div>
 </div>
-<div class="foot-row">
-<div class="foot-links">
-<a href="https://github.com/Samcarr01/build-mode" target="_blank" rel="noopener">GitHub repo</a>
-<a href="https://github.com/Samcarr01/build-mode/issues/new/choose" target="_blank" rel="noopener">Report a skill problem</a>
-<a href="https://fabricaite.ai/?utm_source=build-mode&amp;utm_medium=referral&amp;utm_campaign=build-mode-site&amp;utm_content=footer" target="_blank" rel="noopener">Fabricaite</a>
+<div class="foot-g">
+<div class="foot-brand">
+<img src="fabricaite-lockup-on-dark.svg" alt="Fabricaite" width="220" height="26">
+<p>Build Mode is made by Fabricaite in Leeds. We build integrations and custom software for small businesses, and look after it once it’s live.</p>
+<a class="btn btn-p btn-sm" style="align-self:flex-start" href="https://fabricaite.ai/book?utm_source=build-mode&amp;utm_medium=referral&amp;utm_campaign=build-mode-site&amp;utm_content=footer-book" target="_blank" rel="noopener">Book a call</a>
 </div>
+<nav class="foot-col" aria-label="Build Mode">
+<p class="tb-l">Build Mode</p>
+<a href="#install">Install it</a>
+<a href="https://github.com/Samcarr01/build-mode" target="_blank" rel="noopener">GitHub repo<svg viewBox="0 0 24 24" aria-hidden="true"><path class="ic" d="M7 17 L17 7 M9 7 H17 V15"/></svg></a>
+<a href="https://github.com/Samcarr01/build-mode/issues/new/choose" target="_blank" rel="noopener">Report a problem<svg viewBox="0 0 24 24" aria-hidden="true"><path class="ic" d="M7 17 L17 7 M9 7 H17 V15"/></svg></a>
+</nav>
+<nav class="foot-col" aria-label="Fabricaite">
+<p class="tb-l">Fabricaite</p>
+<a href="https://fabricaite.ai/?utm_source=build-mode&amp;utm_medium=referral&amp;utm_campaign=build-mode-site&amp;utm_content=footer" target="_blank" rel="noopener">Website<svg viewBox="0 0 24 24" aria-hidden="true"><path class="ic" d="M7 17 L17 7 M9 7 H17 V15"/></svg></a>
+<a href="https://www.linkedin.com/company/fabricaite1/" target="_blank" rel="noopener">LinkedIn<svg viewBox="0 0 24 24" aria-hidden="true"><path class="ic" d="M7 17 L17 7 M9 7 H17 V15"/></svg></a>
+<a href="https://www.instagram.com/_fabricaite.ai/" target="_blank" rel="noopener">Instagram<svg viewBox="0 0 24 24" aria-hidden="true"><path class="ic" d="M7 17 L17 7 M9 7 H17 V15"/></svg></a>
+</nav>
+<nav class="foot-col" aria-label="Sam Carr" id="samCol">
+<p class="tb-l">Sam Carr</p>
+<a href="https://github.com/Samcarr01" target="_blank" rel="noopener">GitHub<svg viewBox="0 0 24 24" aria-hidden="true"><path class="ic" d="M7 17 L17 7 M9 7 H17 V15"/></svg></a>
+</nav>
+</div>
+<div class="foot-row">
+<span>Build Mode is free and open source (MIT licence).</span>
 <div class="egg-wrap">
 <span class="mono eggnote">Fabricaite mode on. Tap again to switch back.</span>
 <button class="egg-btn" type="button" aria-label="A secret" id="eggBtn">[ ]</button>
@@ -638,7 +673,7 @@ body{margin:0;background:#0E2A52}
     } else if (id === 'none') {
       html = '<p class="tiny">No clear match</p><p class="mname">Say a bit more.</p><p class="mdoes">Try “it’s stuck”, “make it flashy” or “where am I”.</p>';
     } else if (id === 'egg') {
-      html = '<span class="mnum">Mode 13</span><p class="tiny">Hidden mode unlocked</p><img class="fab-logo" src="fabricaite-lockup-on-dark.svg" alt="Fabricaite" width="300" height="35"><p class="mdoes">You found the secret one. Build Mode is made by Sam Carr, who also runs Fabricaite in Leeds. We make the tools you already pay for work together.</p><div class="cta" style="margin-top:6px"><a class="btn btn-p btn-sm" href="https://fabricaite.ai/?utm_source=build-mode&amp;utm_medium=referral&amp;utm_campaign=build-mode-site&amp;utm_content=easter-egg" target="_blank" rel="noopener">Visit fabricaite.ai</a><button class="btn btn-g btn-sm" type="button" id="eggOff">Back to the blueprint</button></div>';
+      html = '<span class="mnum">Mode 13</span><p class="tiny">Hidden mode unlocked</p><img class="fab-logo" src="fabricaite-lockup-on-dark.svg" alt="Fabricaite" width="300" height="35"><p class="mdoes">You found the secret one. Build Mode is made by Fabricaite in Leeds. We make the tools you already pay for work together.</p><div class="cta" style="margin-top:6px"><a class="btn btn-p btn-sm" href="https://fabricaite.ai/?utm_source=build-mode&amp;utm_medium=referral&amp;utm_campaign=build-mode-site&amp;utm_content=easter-egg" target="_blank" rel="noopener">Visit fabricaite.ai</a><button class="btn btn-g btn-sm" type="button" id="eggOff">Back to the blueprint</button></div>';
     } else {
       html = '<span class="mnum">Mode ' + m.n + '</span><p class="tiny">Picked for you</p><p class="mname">' + esc(m.name) + '</p><p class="mdoes">' + esc(m.does) + '</p>';
     }
