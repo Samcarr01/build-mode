@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Build Mode: plan it, prompt it, prove it</title>
-<meta name="description" content="Build Mode is a free, open-source Claude skill that plans, prompts and verifies software you build in Claude Code. It interviews you once, writes the doc pack, hands over one prompt at a time and checks the live app.">
+<meta name="description" content="Build Mode is a free add-on for Claude that helps you build apps and websites with AI, even if you can’t code. It plans the build with you, tells Claude Code what to do one step at a time, and checks it actually works.">
 <link rel="canonical" href="https://samcarr01.github.io/build-mode/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Build Mode: plan it, prompt it, prove it">
-<meta property="og:description" content="The planning half of building with Claude Code. One interview, one prompt at a time, and proof before anything is ticked off.">
+<meta property="og:description" content="Build apps and websites with AI, even if you can’t code. Build Mode plans it, tells the AI what to build, and checks it works.">
 <meta property="og:url" content="https://samcarr01.github.io/build-mode/">
 <meta property="og:image" content="https://raw.githubusercontent.com/Samcarr01/build-mode/main/assets/build-mode-hero.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -207,6 +207,7 @@ body{margin:0;background:#0E2A52}
 .fab-band .h2{font-size:clamp(34px,4.6vw,62px);letter-spacing:-.03em}
 .fab-band .btn-p{box-shadow:5px 5px 0 0 var(--ink)}
 .fab-card{border:1.5px solid var(--accent);background:var(--panel2);padding:clamp(24px,3vw,40px);display:flex;flex-direction:column;gap:22px}
+.fab-logo{display:block;width:min(300px,100%);height:auto}
 .fab-word{font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:600;font-size:clamp(30px,3.6vw,46px);line-height:1}
 .fab-word b{color:var(--accent);font-weight:600}
 .fab-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
@@ -266,8 +267,9 @@ body{margin:0;background:#0E2A52}
 <nav class="navlinks" aria-label="Sections">
 <a href="#relay">How it works</a>
 <a href="#modes">Modes</a>
-<a href="#docs">Doc pack</a>
-<a href="#changelog">Changelog</a>
+<a href="#docs">Notes</a>
+<a href="#changelog">Updates</a>
+<a href="#built-for-you">Hire us</a>
 </nav>
 <div class="navact">
 <span class="pill" data-live="version-pill">v3.0.1</span>
@@ -280,10 +282,10 @@ body{margin:0;background:#0E2A52}
 <section class="hero" id="top">
 <div class="wrap hero-g">
 <div>
-<p class="sheet">Sheet 01 / A skill for Claude Code builders</p>
+<p class="sheet">Sheet 01 / A free add-on for Claude</p>
 <h1 class="disp h1"><span class="l-plan">Plan it.</span><span>Prompt it.</span><span class="l-prove">Prove it.</span></h1>
-<p class="hero-sub">The planning half of building with Claude Code. It interviews you once, writes the plan, hands over one prompt at a time, then checks the work instead of taking “done” on trust.</p>
-<p class="hero-for">For people who ship, but won’t catch a bad call by reading a diff.</p>
+<p class="hero-sub">Want to build an app or website with AI, but can’t code? Build Mode turns Claude into your project manager. It plans the build with you, tells Claude Code (the AI that writes the code) what to do one step at a time, then checks it actually works.</p>
+<p class="hero-for">Free to use. Made for people with ideas, not coding skills.</p>
 <div class="cta">
 <a class="btn btn-p" href="#install">Install it<svg viewBox="0 0 24 24" aria-hidden="true"><path class="ic" d="M12 4 V18 M6 12 L12 18 L18 12"/></svg></a>
 <a class="btn btn-g" href="https://github.com/Samcarr01/build-mode" target="_blank" rel="noopener">View on GitHub</a>
@@ -350,25 +352,25 @@ body{margin:0;background:#0E2A52}
 
 <section class="sec" id="relay">
 <div class="wrap">
-<p class="sheet">Sheet 02 / The relay</p>
-<h2 class="disp h2">Two sessions. One baton.</h2>
-<p class="lede">Claude plans and checks. Claude Code builds and proves. You carry the baton between them, and that’s about it.</p>
+<p class="sheet">Sheet 02 / How it works</p>
+<h2 class="disp h2">Two AIs. One job each.</h2>
+<p class="lede">Claude is the planner. Claude Code is the builder. You pass messages between them, and that’s about it. Watch a build go round, or tap a step.</p>
 <div class="relay">
 <div class="lanes">
-<div class="lane on" id="lane0"><span class="lab">Claude</span><span class="lane-t">Plans, designs, checks</span></div>
-<div class="lane" id="lane1"><span class="lab">You</span><span class="lane-t">Carry the baton</span></div>
-<div class="lane" id="lane2"><span class="lab">Claude Code</span><span class="lane-t">Builds, proves, commits</span></div>
+<div class="lane on" id="lane0"><span class="lab">Claude</span><span class="lane-t">The planner</span></div>
+<div class="lane" id="lane1"><span class="lab">You</span><span class="lane-t">The messenger</span></div>
+<div class="lane" id="lane2"><span class="lab">Claude Code</span><span class="lane-t">The builder</span></div>
 </div>
 <div class="track" aria-hidden="true"><div class="baton-row p0" id="batonRow"><span class="baton" id="baton">Step 1 of 6</span></div></div>
 <div class="stepbox">
 <div class="steps" role="group" aria-label="Relay steps" id="steps"></div>
 <div aria-live="polite">
-<p class="lab" id="stepWho">Claude</p>
-<p class="step-t" id="stepText">You say “I want to build a habit tracker”. It interviews you once, picks the stack and tells you why.</p>
+<p class="lab" id="stepWho">Claude · the planner</p>
+<p class="step-t" id="stepText">You say “I want to build a habit tracker”. It asks you a few questions, then picks the right tools and tells you why.</p>
 </div>
 </div>
 </div>
-<p class="hand quote">Two places check, and they check different things. You’re the last resort, not the first.</p>
+<p class="hand quote">Two AIs check the work before you ever have to. You’re the last resort, not the first.</p>
 </div>
 </section>
 
@@ -376,7 +378,7 @@ body{margin:0;background:#0E2A52}
 <div class="wrap">
 <p class="sheet">Sheet 03 / Twelve modes</p>
 <h2 class="disp h2">Just say it.</h2>
-<p class="lede">You never pick a mode. Type what you’d actually say mid-build and it works out the rest. Go on, try it.</p>
+<p class="lede">No commands to learn. Type what you’d normally say, like “it’s broken” or “make it look better”, and it knows what to do. Go on, try it.</p>
 <div class="say-g">
 <div>
 <label class="tiny say-lab" for="say">Say it like you would to Claude</label>
@@ -400,14 +402,14 @@ body{margin:0;background:#0E2A52}
 
 <section class="sec" id="docs">
 <div class="wrap">
-<p class="sheet">Sheet 04 / The doc pack</p>
-<h2 class="disp h2">Your repo remembers everything.</h2>
-<p class="lede">Nothing depends on you remembering anything. The repo carries the state. Tap a file.</p>
+<p class="sheet">Sheet 04 / Its notes</p>
+<h2 class="disp h2">It keeps notes, so you don’t have to.</h2>
+<p class="lede">Everything it knows is saved as a few files inside your project. Leave it for a month and it picks up where you left off. Tap a file to see what it’s for.</p>
 <div class="docs-g">
 <div class="tree" role="group" aria-label="Files Build Mode writes" id="tree"></div>
 <div class="pv" aria-live="polite">
 <p class="mono path" id="pvPath">docs/ROADMAP.md</p>
-<p class="pv-t" id="pvDesc">Milestones and tasks with permanent IDs, plus what “worked” means.</p>
+<p class="pv-t" id="pvDesc">The plan: every step in order, and what “finished” looks like.</p>
 <div class="snipwrap" id="pvSnipWrap">
 <pre class="snip mono" id="pvSnip"></pre>
 <p class="tiny" style="margin-top:12px">Example project: a habit tracker</p>
@@ -420,21 +422,21 @@ body{margin:0;background:#0E2A52}
 <section class="sec" id="proof">
 <div class="wrap">
 <p class="sheet">Sheet 05 / Proof, not promises</p>
-<h2 class="disp h2">Plain English. Checked by itself.</h2>
-<p class="lede">Every update opens with three plain lines. Every save runs the safety checks without being asked.</p>
+<h2 class="disp h2">Plain English. Safety built in.</h2>
+<p class="lede">Every update starts with three plain lines. Every save is checked for the mistakes that cause real trouble, without you having to ask.</p>
 <div class="proof-g">
 <div class="msg">
 <p class="tiny">After task M1-T3 · example</p>
 <div class="line"><span class="line-l">What changed</span><span class="line-t">The habit list screen is in, and it matches the mockup.</span></div>
 <div class="line"><span class="line-l">Anything risky?</span><span class="line-t">Nothing risky.</span></div>
 <div class="line"><span class="line-l">What you need to do</span><span class="line-t">Open the preview and tick a habit.</span></div>
-<p class="gloss">Detail sits underneath. Technical words stay, but each one gets a few plain words in brackets: commit (a saved snapshot of the code).</p>
+<p class="gloss">The detail sits underneath. Any technical word comes with a few plain words in brackets, like commit (a saved copy of the code).</p>
 </div>
 <div class="checks">
-<div class="chk"><svg viewBox="0 0 26 26" aria-hidden="true"><path class="ic" d="M5 13.5 L10.5 19 L21 7"/></svg><div><p class="chk-q">Passwords or keys left in the code?</p><p class="chk-a">Scanned on every save, with gitleaks.</p></div></div>
-<div class="chk"><svg viewBox="0 0 26 26" aria-hidden="true"><path class="ic" d="M5 13.5 L10.5 19 L21 7"/></svg><div><p class="chk-q">Add-on packages with critical security holes?</p><p class="chk-a">Checked with npm audit before anything is saved.</p></div></div>
-<div class="chk"><svg viewBox="0 0 26 26" aria-hidden="true"><path class="ic" d="M5 13.5 L10.5 19 L21 7"/></svg><div><p class="chk-q">A critical finding from the code reviewer?</p><p class="chk-a">Nothing gets committed until it’s fixed.</p></div></div>
-<div class="chk"><svg viewBox="0 0 26 26" aria-hidden="true"><path class="ic" d="M5 13.5 L10.5 19 L21 7"/></svg><div><p class="chk-q">Can customer A open customer B’s records?</p><p class="chk-a">A test tries on every checkpoint. It must be refused, or it can’t go live.</p></div></div>
+<div class="chk"><svg viewBox="0 0 26 26" aria-hidden="true"><path class="ic" d="M5 13.5 L10.5 19 L21 7"/></svg><div><p class="chk-q">Passwords left in the code?</p><p class="chk-a">Checked on every save, so they never end up online.</p></div></div>
+<div class="chk"><svg viewBox="0 0 26 26" aria-hidden="true"><path class="ic" d="M5 13.5 L10.5 19 L21 7"/></svg><div><p class="chk-q">Add-ons with known security holes?</p><p class="chk-a">Checked before anything is saved.</p></div></div>
+<div class="chk"><svg viewBox="0 0 26 26" aria-hidden="true"><path class="ic" d="M5 13.5 L10.5 19 L21 7"/></svg><div><p class="chk-q">A serious problem spotted by the reviewer?</p><p class="chk-a">Nothing gets saved until it’s fixed.</p></div></div>
+<div class="chk"><svg viewBox="0 0 26 26" aria-hidden="true"><path class="ic" d="M5 13.5 L10.5 19 L21 7"/></svg><div><p class="chk-q">Could one customer see another customer’s data?</p><p class="chk-a">Tested every time. If they can, it can’t go live.</p></div></div>
 </div>
 </div>
 </div>
@@ -442,9 +444,9 @@ body{margin:0;background:#0E2A52}
 
 <section class="sec" id="changelog">
 <div class="wrap">
-<p class="sheet">Sheet 06 / Revision table</p>
-<h2 class="disp h2">Straight from the repo.</h2>
-<p class="lede" id="logLede">What changed, release by release, read from the README on GitHub every time this page loads.</p>
+<p class="sheet">Sheet 06 / Updates</p>
+<h2 class="disp h2">Always getting better.</h2>
+<p class="lede" id="logLede">Every update, pulled live from GitHub (where the code is kept). These notes are written for builders, so they get a bit technical.</p>
 <div class="log-g">
 <div class="revs" id="revs">
 <div class="rev"><a class="rev-n" href="https://github.com/Samcarr01/build-mode#what-is-new-in-301">3.0.1</a><div><p class="rev-t"><span>Out-of-date projects always speak up</span><span class="tag">LATEST</span></p><p class="rev-d">Your planning notes no longer block it · Project-specific rules are merged, not wiped</p></div></div>
@@ -455,7 +457,7 @@ body{margin:0;background:#0E2A52}
 <div class="rev"><a class="rev-n" href="https://github.com/Samcarr01/build-mode#what-was-new-in-20">2.0</a><div><p class="rev-t"><span>Version 1 was a good planner with a weak evidence loop</span></p><p class="rev-d">/checkpoint now has to prove it · Sync looks at the running app · Undo mode</p></div></div>
 </div>
 <div class="blog">
-<div class="blog-h"><p class="lab">Latest on main</p><a class="tiny" href="https://github.com/Samcarr01/build-mode/commits/main" target="_blank" rel="noopener" style="color:var(--muted)">All commits</a></div>
+<div class="blog-h"><p class="lab">Latest changes</p><a class="tiny" href="https://github.com/Samcarr01/build-mode/commits/main" target="_blank" rel="noopener" style="color:var(--muted)">All commits</a></div>
 <div id="commits"><p class="tiny" style="padding:14px 0">Loading the build log from GitHub…</p></div>
 </div>
 </div>
@@ -470,14 +472,14 @@ body{margin:0;background:#0E2A52}
 <div class="inst main">
 <p class="tiny">Where it lives</p>
 <p class="inst-h">In Claude</p>
-<p class="inst-d">Paste this into a chat, connect your project folder, then start talking.</p>
+<p class="inst-d">Paste this into a chat in the Claude app. Then connect the folder for your project and say what you want to build.</p>
 <pre class="code mono" id="cmdA">Install this skill: https://github.com/Samcarr01/build-mode</pre>
 <button class="btn btn-p btn-sm copy" type="button" data-copy="cmdA">Copy</button>
 </div>
 <div class="inst">
 <p class="tiny">Optional</p>
 <p class="inst-h">In Claude Code</p>
-<p class="inst-d">The repo is also a plugin marketplace, if you want the skill on that side too.</p>
+<p class="inst-d">Only if you also want it inside Claude Code. Most people can skip this.</p>
 <pre class="code mono" id="cmdB">/plugin marketplace add Samcarr01/build-mode
 /plugin install build-mode@samcarr</pre>
 <button class="btn btn-g btn-sm copy" type="button" data-copy="cmdB">Copy</button>
@@ -491,19 +493,19 @@ body{margin:0;background:#0E2A52}
 <div>
 <p class="sheet">Sheet 08 / Or skip the build</p>
 <h2 class="disp h2" id="bfy-h">Rather have it built for you?</h2>
-<p class="lede">Build Mode gives you the method. Fabricaite brings the know-how. We build custom AI software for small businesses, connect it to the tools you already pay for, and look after it once it’s live.</p>
+<p class="lede">Build Mode is the method. Fabricaite is the people who wrote it. We build integrations and custom software for small businesses, connect it to the tools you already pay for, and look after it once it’s live.</p>
 <div class="cta">
 <a class="btn btn-p" href="https://fabricaite.ai" target="_blank" rel="noopener">Talk to Fabricaite<svg viewBox="0 0 24 24" aria-hidden="true"><path class="ic" d="M7 17 L17 7 M9 7 H17 V15"/></svg></a>
 </div>
 </div>
 <div class="fab-card">
-<p class="fab-word"><b>[</b>fabricaite<b>]</b></p>
+<img class="fab-logo" src="fabricaite-lockup-on-dark.svg" alt="Fabricaite" width="300" height="35">
 <ul class="fab-list">
 <li><span>01</span>A fixed price, agreed before any work starts</li>
 <li><span>02</span>Built around how your business actually runs</li>
 <li><span>03</span>Looked after on a monthly plan once it’s live</li>
 </ul>
-<p class="fab-foot">Custom AI software · Leeds</p>
+<p class="fab-foot">Integrations and custom software · Leeds</p>
 </div>
 </div>
 </section>
@@ -562,12 +564,12 @@ body{margin:0;background:#0E2A52}
 
   /* ---------- The relay ---------- */
   var steps = [
-    { who: 'Claude', pos: 0, text: 'You say “I want to build a habit tracker”. It interviews you once, picks the stack and tells you why.' },
-    { who: 'Claude', pos: 0, text: 'Writes the design brief, mocks up the core screens for you to approve, then drops docs/next-prompt.md into your repo.' },
-    { who: 'You', pos: 1, text: 'Open Claude Code and type /next. That’s your whole job.' },
-    { who: 'Claude Code', pos: 2, text: 'Builds the task, then runs /checkpoint: builds it, clicks through it in a real browser and commits. Only ticked off if that passed.' },
-    { who: 'You', pos: 1, text: 'Back in Claude, say “done”, “it broke” or “next”.' },
-    { who: 'Claude', pos: 0, text: 'Checks the deploy, opens the live app, scores the design against the mockup and writes the next prompt.' }
+    { who: 'Claude · the planner', pos: 0, text: 'You say “I want to build a habit tracker”. It asks you a few questions, then picks the right tools and tells you why.' },
+    { who: 'Claude · the planner', pos: 0, text: 'It designs the main screens for you to approve, then writes the first instruction for the builder.' },
+    { who: 'You · the messenger', pos: 1, text: 'Open Claude Code and type /next. No code to write. That’s your whole job.' },
+    { who: 'Claude Code · the builder', pos: 2, text: 'It builds that one step, then tests it in a real browser. It only ticks the step off if the test passes, then saves the work.' },
+    { who: 'You · the messenger', pos: 1, text: 'Back in Claude, say “done”, “it broke” or “next”.' },
+    { who: 'Claude · the planner', pos: 0, text: 'It opens the live app, checks it matches the design you approved, then writes the next instruction.' }
   ];
   var step = 0, auto = true;
   var stepsEl = $('steps');
@@ -595,18 +597,18 @@ body{margin:0;background:#0E2A52}
 
   /* ---------- Just say it ---------- */
   var modes = [
-    { id: 'kickoff', n: '01', name: 'Kickoff', ex: 'I want to build a habit tracker', does: 'Interviews you once, picks the stack and says why, writes the design brief, mocks up the core screens and drops the whole doc pack into your repo.', re: /build|new project|set ?up the repo|\bstart\b|\bidea\b|\bapp\b|website|make me/ },
-    { id: 'next', n: '02', name: 'Next task', ex: 'give me the next prompt', does: 'Writes one ready-to-paste prompt into docs/next-prompt.md. You type /next in Claude Code. That’s it.', re: /\bnext\b|prompt|what do i (tell|say)|what now/ },
-    { id: 'sync', n: '03', name: 'Sync', ex: 'done, check it', does: 'Checks the deploy, opens the live app, compares it with the mockup and scores the design. Takes nothing on trust.', re: /\bdone\b|built it|check|where am i|finished/ },
-    { id: 'unblock', n: '04', name: 'Unblock', ex: 'it built the wrong thing', does: 'Reproduces the problem, finds the real cause and writes the fix as a prompt.', re: /stuck|error|broke|wrong thing|failing|crash|not working|\bbug/ },
-    { id: 'undo', n: '05', name: 'Undo', ex: 'it was working yesterday', does: 'Finds the last good commit, tells you in plain English what you’d lose, and refuses to strand your database.', re: /put it back|\bundo\b|yesterday|revert|roll ?back/ },
-    { id: 'golive', n: '06', name: 'Go live', ex: 'we’ve launched', does: 'Switches to branches and previews. From then on, your merge is the one moment anything goes live.', re: /\blive\b|launch|branches|real users/ },
-    { id: 'replan', n: '07', name: 'Replan', ex: 'actually, drop the calendar', does: 'Adds, drops or moves work, and updates the roadmap without losing what’s already done.', re: /\badd\b|change|\bdrop\b|move it|actually|instead|feature/ },
-    { id: 'design', n: '08', name: 'Design pass', ex: 'the UI is boring', does: 'Runs the five-check design score and fixes the flat, grey, wordy bits.', re: /look better|generic|boring|ugly|bland|\bui\b|prettier|looks (bad|meh|flat|plain)/ },
-    { id: 'showcase', n: '09', name: 'Showcase', ex: 'make it flashy', does: 'One signature moment drawn from your own world, a storyboard you approve first, and guardrails for phones.', re: /flashy|\bwow\b|award|impress|showcase/ },
-    { id: 'find', n: '10', name: 'Findability', ex: 'get it on Google', does: 'SEO, GEO and AIO as one job. The words go in the first HTML, so Google and ChatGPT can both read them.', re: /\bseo\b|google|chatgpt|perplexity|found|\brank/ },
-    { id: 'upgrade', n: '11', name: 'Upgrade', ex: 'refresh the setup', does: 'Refreshes the project’s setup files. Never touches your roadmap, progress log or design.', re: /upgrade|refresh|setup files/ },
-    { id: 'skill', n: '12', name: 'Skill review', ex: 'any skill issues?', does: 'Gathers the notes on where Build Mode itself went wrong and proposes one fix.', re: /skill (issue|review|problem)/ }
+    { id: 'kickoff', n: '01', name: 'Kickoff', ex: 'I want to build a habit tracker', does: 'Asks you questions once, picks the tools, designs the screens and writes the whole plan into your project.', re: /build|new project|set ?up the repo|\bstart\b|\bidea\b|\bapp\b|website|make me/ },
+    { id: 'next', n: '02', name: 'Next task', ex: 'give me the next prompt', does: 'Writes the next instruction for Claude Code. You just type /next.', re: /\bnext\b|prompt|what do i (tell|say)|what now/ },
+    { id: 'sync', n: '03', name: 'Sync', ex: 'done, check it', does: 'Opens the live app and checks it really matches what you asked for. It doesn’t just take the builder’s word for it.', re: /\bdone\b|built it|check|where am i|finished/ },
+    { id: 'unblock', n: '04', name: 'Unblock', ex: 'it built the wrong thing', does: 'Works out why it’s broken and writes the fix for Claude Code.', re: /stuck|error|broke|wrong thing|failing|crash|not working|\bbug/ },
+    { id: 'undo', n: '05', name: 'Undo', ex: 'it was working yesterday', does: 'Takes you back to the last version that worked, and tells you first what you’d lose.', re: /put it back|\bundo\b|yesterday|revert|roll ?back/ },
+    { id: 'golive', n: '06', name: 'Go live', ex: 'we’ve launched', does: 'Gets it ready for real users. From then on, changes are tested on a private copy before anyone sees them.', re: /\blive\b|launch|branches|real users/ },
+    { id: 'replan', n: '07', name: 'Replan', ex: 'actually, drop the calendar', does: 'Adds, removes or changes features and updates the plan, without losing what’s already built.', re: /\badd\b|change|\bdrop\b|move it|actually|instead|feature/ },
+    { id: 'design', n: '08', name: 'Design pass', ex: 'the UI is boring', does: 'Makes it look less generic: clearer, bolder and with fewer words.', re: /look better|generic|boring|ugly|bland|\bui\b|prettier|looks (bad|meh|flat|plain)/ },
+    { id: 'showcase', n: '09', name: 'Showcase', ex: 'make it flashy', does: 'Adds one proper wow moment, like a big animation, that you approve first and that still works on phones.', re: /flashy|\bwow\b|award|impress|showcase/ },
+    { id: 'find', n: '10', name: 'Findability', ex: 'get it on Google', does: 'Helps people find it on Google and in AI answers like ChatGPT.', re: /\bseo\b|google|chatgpt|perplexity|found|\brank/ },
+    { id: 'upgrade', n: '11', name: 'Upgrade', ex: 'refresh the setup', does: 'Brings your project up to the latest Build Mode rules. Never touches your plan or design.', re: /upgrade|refresh|setup files/ },
+    { id: 'skill', n: '12', name: 'Skill review', ex: 'any skill issues?', does: 'Collects the times Build Mode itself got something wrong, so it can be fixed for everyone.', re: /skill (issue|review|problem)/ }
   ];
   var byId = {}; modes.forEach(function (m) { byId[m.id] = m; });
   var order = ['undo', 'unblock', 'showcase', 'find', 'design', 'golive', 'upgrade', 'skill', 'replan', 'sync', 'next', 'kickoff'];
@@ -636,7 +638,7 @@ body{margin:0;background:#0E2A52}
     } else if (id === 'none') {
       html = '<p class="tiny">No clear match</p><p class="mname">Say a bit more.</p><p class="mdoes">Try “it’s stuck”, “make it flashy” or “where am I”.</p>';
     } else if (id === 'egg') {
-      html = '<span class="mnum">Mode 13</span><p class="tiny">Hidden mode unlocked</p><p class="fab"><b>[</b>fabricaite<b>]</b></p><p class="mdoes">You found the secret one. Build Mode is made by Sam Carr, who also runs Fabricaite in Leeds. We make the tools you already pay for work together.</p><div class="cta" style="margin-top:6px"><a class="btn btn-p btn-sm" href="https://fabricaite.ai" target="_blank" rel="noopener">Visit fabricaite.ai</a><button class="btn btn-g btn-sm" type="button" id="eggOff">Back to the blueprint</button></div>';
+      html = '<span class="mnum">Mode 13</span><p class="tiny">Hidden mode unlocked</p><img class="fab-logo" src="fabricaite-lockup-on-dark.svg" alt="Fabricaite" width="300" height="35"><p class="mdoes">You found the secret one. Build Mode is made by Sam Carr, who also runs Fabricaite in Leeds. We make the tools you already pay for work together.</p><div class="cta" style="margin-top:6px"><a class="btn btn-p btn-sm" href="https://fabricaite.ai" target="_blank" rel="noopener">Visit fabricaite.ai</a><button class="btn btn-g btn-sm" type="button" id="eggOff">Back to the blueprint</button></div>';
     } else {
       html = '<span class="mnum">Mode ' + m.n + '</span><p class="tiny">Picked for you</p><p class="mname">' + esc(m.name) + '</p><p class="mdoes">' + esc(m.does) + '</p>';
     }
@@ -663,19 +665,19 @@ body{margin:0;background:#0E2A52}
 
   /* ---------- Doc pack ---------- */
   var files = [
-    { k: 'claude', label: 'CLAUDE.md', d: 0, path: 'CLAUDE.md', desc: 'How this project works. Claude Code loads it every session.', snip: '# Habit tracker\nStack: Next.js, Supabase, Vercel\nA push to main deploys.\nRun /checkpoint before ticking anything off.' },
+    { k: 'claude', label: 'CLAUDE.md', d: 0, path: 'CLAUDE.md', desc: 'The house rules. Claude Code reads this every time it starts.', snip: '# Habit tracker\nStack: Next.js, Supabase, Vercel\nA push to main deploys.\nRun /checkpoint before ticking anything off.' },
     { dir: true, label: 'docs/' },
-    { k: 'roadmap', label: 'ROADMAP.md', d: 1, path: 'docs/ROADMAP.md', desc: 'Milestones and tasks with permanent IDs, plus what “worked” means.', snip: 'Worked if: you can tick a habit on your phone\nin under five seconds.\n\n## M1  First useful version\n[x] M1-T1  Scaffold and first deploy\n[x] M1-T2  Sign-in\n[ ] M1-T3  Habit list        ← next' },
-    { k: 'progress', label: 'PROGRESS.md', d: 1, path: 'docs/PROGRESS.md', desc: 'What actually got built, with commit SHAs, newest first.', snip: 'M1-T2  Sign-in     a41f9c2  verified in browser\nM1-T1  Scaffold    7be03d1  live at /version' },
-    { k: 'design', label: 'DESIGN.md', d: 1, path: 'docs/DESIGN.md', desc: 'Fonts, hex codes, spacing, layout, hierarchy, a copy budget and one spec per core screen.', snip: 'Copy budget: labels 3 words,\nunder 60 words per screen.\n\nNever: gradients, glass, three feature cards,\ngrey-on-grey at 13px.' },
-    { k: 'mock', label: 'design/*.png', d: 1, path: 'docs/design/*.png', desc: 'The approved mockup for every core screen. Every UI prompt says: match this picture.' },
-    { k: 'next', label: 'next-prompt.md', d: 1, path: 'docs/next-prompt.md', desc: 'The current prompt, overwritten each time. /next reads it, so nothing gets lost in copy and paste.' },
-    { k: 'arch', label: 'ARCHITECTURE.md', d: 1, path: 'docs/ARCHITECTURE.md', desc: 'The stack call, the schema, every decision and why.' },
-    { k: 'learn', label: 'LEARNINGS.md', d: 1, path: 'docs/LEARNINGS.md', desc: 'Anything that cost more than ten minutes to figure out, so it never costs ten minutes again.' },
-    { k: 'tooling', label: 'TOOLING.md', d: 1, path: 'docs/TOOLING.md', desc: 'What’s actually available, so plans never assume tools you don’t have.' },
+    { k: 'roadmap', label: 'ROADMAP.md', d: 1, path: 'docs/ROADMAP.md', desc: 'The plan: every step in order, and what “finished” looks like.', snip: 'Worked if: you can tick a habit on your phone\nin under five seconds.\n\n## M1  First useful version\n[x] M1-T1  Scaffold and first deploy\n[x] M1-T2  Sign-in\n[ ] M1-T3  Habit list        ← next' },
+    { k: 'progress', label: 'PROGRESS.md', d: 1, path: 'docs/PROGRESS.md', desc: 'A diary of what actually got built, newest first, with a reference code for each save.', snip: 'M1-T2  Sign-in     a41f9c2  verified in browser\nM1-T1  Scaffold    7be03d1  live at /version' },
+    { k: 'design', label: 'DESIGN.md', d: 1, path: 'docs/DESIGN.md', desc: 'The look: fonts, colours, spacing, and a word limit for every screen.', snip: 'Copy budget: labels 3 words,\nunder 60 words per screen.\n\nNever: gradients, glass, three feature cards,\ngrey-on-grey at 13px.' },
+    { k: 'mock', label: 'design/*.png', d: 1, path: 'docs/design/*.png', desc: 'A picture of every screen you approved. The builder is told: make it match this.' },
+    { k: 'next', label: 'next-prompt.md', d: 1, path: 'docs/next-prompt.md', desc: 'The next instruction for the builder. /next reads it, so there’s no copying and pasting.' },
+    { k: 'arch', label: 'ARCHITECTURE.md', d: 1, path: 'docs/ARCHITECTURE.md', desc: 'Which tools were picked, how the data is stored, and why.' },
+    { k: 'learn', label: 'LEARNINGS.md', d: 1, path: 'docs/LEARNINGS.md', desc: 'Anything that took ages to fix, so it never takes ages again.' },
+    { k: 'tooling', label: 'TOOLING.md', d: 1, path: 'docs/TOOLING.md', desc: 'What’s actually set up on your computer, so the plan never relies on something you don’t have.' },
     { dir: true, label: '.claude/' },
-    { k: 'skills', label: 'skills/', d: 1, path: '.claude/skills/', desc: '/next, /checkpoint and /blocked, ready to use inside Claude Code.' },
-    { k: 'agents', label: 'agents/', d: 1, path: '.claude/agents/', desc: 'A read-only code reviewer that can’t touch what it judges, and a test runner that finds the cause without applying the fix.' }
+    { k: 'skills', label: 'skills/', d: 1, path: '.claude/skills/', desc: 'Three shortcuts for Claude Code: /next (do the next step), /checkpoint (test and save) and /blocked (I’m stuck).' },
+    { k: 'agents', label: 'agents/', d: 1, path: '.claude/agents/', desc: 'Two helper AIs: a reviewer that checks the code but isn’t allowed to change it, and a tester that tracks down bugs.' }
   ];
   var tree = $('tree'), fileBtns = [];
   files.forEach(function (f) {
@@ -768,7 +770,7 @@ body{margin:0;background:#0E2A52}
     $('revs').innerHTML = revs.map(function (r) {
       return '<div class="rev"><a class="rev-n" href="' + esc(r.href) + '" target="_blank" rel="noopener">' + esc(r.v) + '</a><div><p class="rev-t"><span>' + esc(r.title) + '</span>' + (r.latest ? '<span class="tag">LATEST</span>' : '') + '</p>' + (r.items.length ? '<p class="rev-d">' + esc(r.items.join(' · ')) + '</p>' : '') + '</div></div>';
     }).join('');
-    $('logLede').textContent = revs.length + ' releases, read from the README on GitHub every time this page loads.';
+    $('logLede').textContent = revs.length + ' updates so far, pulled live from GitHub (where the code is kept). These notes are written for builders, so they get a bit technical.';
   }
   function renderCommits(list) {
     if (!Array.isArray(list) || !list.length) throw new Error('no commits');
