@@ -20,6 +20,7 @@ Each file has one job. Keep them to it:
 Loaded into every Claude Code session, so every line costs tokens forever. Under 200 lines, no exceptions. Point at the other docs rather than importing them - an `@import` loads at launch and would drag the whole roadmap in every time.
 
 ```markdown
+<!-- build-mode setup: 3.0.0 -->
 # <Project name>
 
 <One sentence: what it does and who for.>
@@ -102,7 +103,11 @@ The superpowers plugin is installed and loads every session. For this project:
 ## The person you are working with
 The user is probably not a developer. They may ship fast and understand systems, but they will not
 catch a bad call by reading a diff. So:
-- Explain what you did in plain English, not in diff summaries.
+- Every message to the user opens with three plain lines: What changed (as a user would
+  notice it), Anything risky? (No, or Yes and why), What you need to do (one action,
+  or Nothing). Detail goes below, after a --- line.
+- Technical words are fine if explained: a few plain words in brackets the first time,
+  e.g. "migration (a change to how the database is laid out)".
 - Flag anything irreversible - schema changes, deletions, deploys - before doing it.
 - If a decision has a real trade-off, say so and recommend one. Do not present a menu.
 ```

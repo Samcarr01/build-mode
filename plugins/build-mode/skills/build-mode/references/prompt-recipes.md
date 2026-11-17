@@ -86,14 +86,16 @@ nothing else is. This task creates the app and pushes it, so the deploy task tha
 follows can prove the pipeline before there is anything complicated to debug.
 
 ## Build
-1. **First, get the folder out of the scaffolder's way.** `create-next-app` refuses to
-   run in a directory containing files it does not recognise, and `CLAUDE.md` is one of
-   them. So: `mv CLAUDE.md docs/CLAUDE.md.tmp` before you start, and move it back
-   afterwards. (`docs/` and `.claude/` are both ignored by the scaffolder, so they can
-   stay where they are.)
-2. Create a <framework> app with TypeScript, Tailwind and the App Router, in this
-   directory.
-3. Move `CLAUDE.md` back to the project root. Check it is there before continuing.
+1. **Scaffold in a scratch folder, not here.** `create-next-app` refuses a directory
+   that already holds `CLAUDE.md` or `.claude/`. Create a <framework> app with
+   TypeScript, Tailwind and the App Router in a new folder outside this project, with
+   every option spelled out so it never stops to ask.
+2. Copy everything from the scratch folder into this project except `node_modules`
+   and `.git`, then run `npm install` here. `CLAUDE.md`, `.claude/` and `docs/` never
+   move. Delete the scratch folder.
+3. Switch off the framework's own agent instructions file (`AGENTS.md`; on Next.js,
+   also `agentRules: false` in `next.config.ts`). `CLAUDE.md` is the only instructions
+   file this project has.
 4. Set up <UI library> with the base config.
 5. Replace the default homepage with a single page showing the project name.
 6. Add a `.gitignore` covering `.env*`, `node_modules`, `.next`. Add a `.env.example`
@@ -120,8 +122,9 @@ follows can prove the pipeline before there is anything complicated to debug.
 - Do not start the next task.
 ```
 
-Step 1 is not fussiness. It is a verified failure: with `CLAUDE.md` in the folder,
-`create-next-app` prints *"The directory contains files that could conflict"* and exits.
+Step 1 is not fussiness. It is a verified failure: with `CLAUDE.md` or `.claude/` in
+the folder, `create-next-app` prints *"The directory contains files that could conflict"*
+and exits.
 Without that line, the very first prompt of every project stalls, and Claude Code
 improvises around a collision the plan created.
 
@@ -481,6 +484,31 @@ the list in step 1 exists.
 ```
 
 If the project has nothing that reaches outside the app, the task is ticked with "nothing outbound" and the ARCHITECTURE section says "none".
+
+### Customer A/B test
+
+Written by the first task that adds sign-in plus stored data, inside that task rather
+than as a separate one, so no data screen ever exists without it. Any app with more than
+one customer, company or user account gets it.
+
+```
+## Also build
+An automatic test, in the project's test runner, that:
+1. Creates two customers, A and B, each with one record of the kind this task stores.
+2. Signs in as A and tries to open B's record every way the app allows: the page URL
+   with B's ID, the API route or server action with B's ID, and any list or search.
+3. Passes only if every attempt is refused or returns nothing of B's.
+Name it so it is obvious (`customer-isolation.test.ts`). It runs in /checkpoint with
+the other tests from now on.
+
+## Done when (add)
+- [ ] The customer A/B test exists, runs in /checkpoint, and passes
+- [ ] Changing the code so A can read B's record makes it fail (try it once, then undo)
+```
+
+The second tick matters. A test that has never been seen to fail proves nothing, and the
+user cannot read the test to tell. Go live cannot finish until this test passes; see
+`references/branch-mode.md`.
 
 ### Debugging
 

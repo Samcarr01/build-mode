@@ -30,7 +30,7 @@ Now: Building - commits go straight to main
 
 ## Going live, once per project
 
-The last four tasks of the milestone before the live line, in this order. Previews do not get switched on until steps 1 and 2 are done and live.
+The last five tasks of the milestone before the live line, in this order. Go live is not finished until the customer A/B test (recipe in `references/prompt-recipes.md`) passes in `/checkpoint`; if the project has none yet, writing it comes first. Previews do not get switched on until steps 1 and 2 are done and live.
 
 1. **Find out what a preview will touch (Cowork).** Read the Hosting section of `docs/TOOLING.md` and the database row of `docs/ARCHITECTURE.md`, then answer two questions and write the answers in the Hosting section.
    - **Which database does a preview use?**
@@ -60,6 +60,13 @@ The last four tasks of the milestone before the live line, in this order. Previe
    - **Any other host:** check its docs. With no previews, branch mode still works: the merge is still the single moment it goes live, and Sync checks production straight after it.
 
 4. **The first pull request is the proof (Cowork, in its Sync).** Check with the host's MCP that the preview has the database step 1 said it would, and note whether it came up empty or holding data. Write the answer in `docs/LEARNINGS.md`. If the preview points at the live database, the user closes the pull request and nothing else gets built until it is fixed.
+
+5. **Backup practice (`[@]` for the user, any project with a database).** A backup nobody has restored is a hope, not a backup. Write click-by-click steps for the host the project uses, and check them against the host's current docs before handing them over:
+   - **Railway Postgres:** use point-in-time restore, which builds a separate spare database; never the plain restore, which goes back into the live one. Check the spare holds yesterday's data, then delete it. Delete the spare's variables first if the docs warn they hold a key that can write to the live backups.
+   - **Supabase:** backups depend on the plan. If the plan has none, say so plainly and add a scheduled database dump as its own task instead.
+   - **Any other host:** restore into a copy, never over the live database, and check the data is there.
+
+   Go live cannot finish without it. Report the result in the three plain lines, ending with "fine, carry on" or "stop, here's what to do".
 
 ## Every task in branch mode
 
