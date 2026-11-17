@@ -1,7 +1,7 @@
 # Build Mode
 
 <p align="center">
-  <img src="assets/build-mode-hero.png" alt="Build Mode: plan it, prompt it, prove it" width="100%">
+  <img src="assets/build-mode-hero.png" alt="Build Mode by Fabricaite: plan it, prompt it, prove it" width="100%">
 </p>
 
 **A planning and prompting layer for people who build software in Claude Code but cannot read a diff.**
