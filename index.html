@@ -484,7 +484,7 @@ body{margin:0;background:#0E2A52}
 <div class="tb"><span class="tb-l">Revision</span><span class="tb-v" data-live="version-tb">3.0.1</span></div>
 <div class="tb"><span class="tb-l">Drawn by</span><span class="tb-v">Sam Carr</span></div>
 <div class="tb"><span class="tb-l">Stars</span><span class="tb-v" data-live="stars-tb">–</span></div>
-<div class="tb"><span class="tb-l">Last push</span><span class="tb-v" data-live="pushed-tb">–</span></div>
+<div class="tb"><span class="tb-l">Last update</span><span class="tb-v" data-live="pushed-tb">–</span></div>
 <div class="tb"><span class="tb-l">Licence</span><span class="tb-v">MIT</span></div>
 </div>
 <div class="foot-row">
@@ -760,10 +760,8 @@ body{margin:0;background:#0E2A52}
   }
   cached('repo', 'https://api.github.com/repos/' + REPO).then(function (r) {
     live.stars = r.stargazers_count;
-    live.pushed = ago(r.pushed_at);
     setLive('stars-nav', '· ' + live.stars);
     setLive('stars-tb', String(live.stars));
-    setLive('pushed-tb', live.pushed);
     renderLive();
   }).catch(function () { setLive('stars-tb', 'On GitHub'); });
   cached('plugin', 'https://raw.githubusercontent.com/' + REPO + '/main/plugins/build-mode/.claude-plugin/plugin.json').then(function (p) {
@@ -778,7 +776,7 @@ body{margin:0;background:#0E2A52}
   }).catch(function () {});
   cached('commits', 'https://api.github.com/repos/' + REPO + '/commits?per_page=6').then(function (list) {
     renderCommits(list);
-    if (!live.pushed && list[0] && list[0].commit) {
+    if (list[0] && list[0].commit) {
       live.pushed = ago(list[0].commit.author.date);
       setLive('pushed-tb', live.pushed);
       renderLive();
