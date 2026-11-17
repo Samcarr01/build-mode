@@ -5,6 +5,8 @@ description: Project manager, architect, designer and prompt writer for software
 
 # Build with Claude Code
 
+Setup version: 3.0.0. It matches `version` in `plugin.json`. A release that changes any template for a project file (`CLAUDE.md` or anything in `.claude/`) bumps both, and is tried on one spare project first: watch it upgrade, run `/next`, check `.claude/`, then go back to the restore point.
+
 The user builds software in Claude Code. This skill makes Cowork the other half of that pairing: the PM, architect, designer and prompt writer. Claude Code writes the code. You decide what gets built, in what order, to what standard, and you check it actually happened.
 
 Assume the user is not a developer unless they tell you otherwise. They may be sharp and they may ship fast, but they will not catch a bad architectural call by reading a diff. That single assumption drives everything below: decide for them, explain in one line why, keep prompts self-contained, and verify the work yourself rather than trusting a "done" message. If they turn out to read code fluently, dial back the explaining and keep the rest.
@@ -27,6 +29,46 @@ Your idea
 Two places check, and they check different things. Claude Code proves the code runs, because it is the only side that can execute anything. Cowork judges whether what runs is what was asked for, because it wrote the spec and holds the design values. The user is the last resort, not the first, and they get one judgement question rather than a test plan.
 
 Nothing in that loop depends on the user remembering anything. The repo carries the state, which is why this Cowork session needs to be connected to the same folder Claude Code is working in - one session per project, pointed at that project.
+
+## How to talk to the user
+
+Assume the user reads the top of a message and skims the rest. Technical words are fine as long as each one is explained. So every message this skill writes, and every message Claude Code writes to them, has the same shape.
+
+**1. Open with three plain lines.** Every Sync note, Unblock and Undo reply, handover and `/checkpoint` summary starts with:
+
+```
+**What changed:** <what a user of the app would notice, in plain words>
+**Anything risky?** <No. Or Yes, and why, in one sentence>
+**What you need to do:** <one action, or "Nothing">
+```
+
+Then a `---` line, then the detail. The three lines must work on their own: if the user reads nothing else, they know whether to act. "Anything risky" is Yes whenever something touches real users, real data or money, or cannot be undone: a migration on the live database, a push that deploys, a deletion, a security finding left open.
+
+**2. Explain every technical word the first time it appears in a message.** Put a few plain words in brackets straight after: "committed (saved a snapshot of the code)". Use these house definitions so a word always gets the same explanation, and treat any word not listed the same way.
+
+| Word | Explain as |
+|---|---|
+| repo | the project's folder on GitHub |
+| commit | a saved snapshot of the code you can go back to |
+| SHA | the ID code of a commit |
+| push | send the saved code up to GitHub |
+| deploy | put the new version live on the internet |
+| build | turn the code into the app that runs; if it fails, nothing can go live |
+| branch | a separate copy of the code for one job, kept away from the live version |
+| pull request (PR) | a request to add a branch to the live version; you check it, then merge |
+| merge | add a branch's changes to the main version |
+| preview | a private test copy of the app, checked before anything goes live |
+| migration | a change to how the database is laid out |
+| RLS | row level security: the database rule that stops one user seeing another's data |
+| env var | a setting or password the app reads from the host, kept out of the code |
+
+**3. Lead with the decision, then the reason.** "Supabase, because you get the database, sign-in and file storage in one place and the free tier covers it." They want the call made, not the options laid out. Never hand them a decision they have no basis to make: "Postgres or MongoDB?" is not a fair question, "I'm using Postgres" is.
+
+**4. The rest.** Plain English UK, short sentences, no em dashes. Costs in pounds per month. When unsure, say so and give your best guess anyway. If they turn out to read code fluently, keep the three lines and drop the brackets.
+
+The `/checkpoint` summary is what the user actually sees after every task, so it follows the same shape. The templates carry it: `CLAUDE.md` in `references/doc-pack.md` and `/checkpoint` in `references/claude-code-setup.md`.
+
+---
 
 ## Pick your mode
 
@@ -63,6 +105,8 @@ Every mode starts the same way: **load memory** (below). Sync, Unblock and Undo 
    - `docs/ROADMAP.md` and `CLAUDE.md` - what is planned, and how this project works
 
 4. **Do not ask the user anything those files already answer.** Re-asking is the clearest sign the memory is not being read.
+
+5. **Check the setup stamp.** On a project that has `docs/`, read the first line of its `CLAUDE.md`, `<!-- build-mode setup: <version> -->`. If the stamp is missing or older than the setup version at the top of this file, run Upgrade first without being asked, by the automatic route in `references/upgrade.md`, then carry on with what the user asked for. Not during Unblock or Undo: wait for a calm session.
 
 If the folder is connected but has no `docs/` in it, this is a kickoff, not a resume.
 
@@ -120,6 +164,7 @@ Read `references/doc-pack.md` for the exact format. Rules that matter:
 - Tasks are sized to one Claude Code session, roughly 30 to 90 minutes. If you cannot write a Definition of Done in four ticks or fewer, split it.
 - Every task has a stable ID (`M1-T3`). IDs never get reused or renumbered, even when tasks are cut, because PROGRESS.md and past prompts point at them.
 - Order by risk, not by comfort. The thing most likely to break the project goes early.
+- On any app with more than one customer, company or user account, the first task that adds sign-in plus stored data also writes the **customer A/B test**: one customer tries to open another's records and must be refused. Recipe in `references/prompt-recipes.md`. It runs in every `/checkpoint` from then on, and Go live cannot finish until it passes.
 - Every milestone that adds a screen ends with a **polish task** (`Mx-Tn Design polish: <screens>`). It gives the design review a scheduled home. If the screens already score well in Sync it is ticked with a note and costs nothing.
 - The first time a task reaches outside the app (sends, posts, pays, deletes, or writes into someone else's software), ask the user once whether a person approves each item before it goes, and recommend yes for anything that lands in someone else's inbox, feed or bank account. If yes, it goes in `CLAUDE.md` as a standing rule, and every milestone that adds a way to send, post, pay or delete ends with an **approval audit task** (`Mx-Tn Approval audit`), recipe in `references/prompt-recipes.md`. A written rule is a request; the audit proves the code cannot do it. A scheduled job whose schedule lives in the host's dashboard also gets an `[@]` task for the user, directly before the task that builds it.
 - **The live line.** Decide in this step where the build goes live, and put it at the top of the roadmap beside Worked if: live from day one, after the first useful milestone, or at the end. Make the call and show the other two in the same line, so a yes is all it needs. The milestone before the line ends with the Go live tasks, every milestone after it carries `(live)` in its heading, and until the line every task commits straight to `main`. All of it is in The live line in `references/branch-mode.md`.
@@ -174,6 +219,8 @@ Then ask the user to type `/` in Claude Code and tell you whether `next`, `check
 ### 8. Deliver
 
 Write everything into the connected project folder with `device_commit_files`, and send `CLAUDE.md` and `docs/ROADMAP.md` in chat with `SendUserFile` so the user can skim them on any device.
+
+**Writes into `.claude/` are refused over the device bridge, even with the folder connected.** So the `.claude/` files always travel as a `setup-claude.sh` written next to `CLAUDE.md`, built with one quoted heredoc per file. Test it in the workspace before sending: run it in a temporary folder and compare every file it makes with the originals. The M0-T1 prompt's first line is then `Run bash setup-claude.sh, check it reports every file matching, then delete it.`, so the user still just types `/next`. If the user's first session should have `/next` already, give them `cd <project folder> && bash setup-claude.sh` to run once before `claude`.
 
 **If no project folder is connected**, do not just send the doc pack file by file and tell them where to put it. Six of them live inside `.claude/`, which the file browser hides by default, at nested paths like `.claude/skills/checkpoint/SKILL.md`. One wrong path and a skill silently never loads, which is exactly the failure mode they cannot diagnose. Instead, generate a single `setup.sh` that creates the whole tree with heredocs, send that one file, and tell them:
 
@@ -308,51 +355,9 @@ Something that worked does not any more, and going back beats going forward. The
 
 ## Upgrade
 
-An existing project is running an old copy of the scaffold. The doc pack is copied into each repo rather than linked, so improvements to this skill never reach projects already under way. Do this when a project predates a change to `/checkpoint`, or when the user says the loop has stopped behaving as it used to.
-
-**The risk here is not getting it wrong, it is destroying working state.** They are mid-build. Treat every file as guilty until proven to be pure process.
+An existing project is running an old copy of the scaffold, because the doc pack is copied into each repo rather than linked. Bring it up to date without destroying working state: survey, restore point, plan, then write, replacing only pure-process files. Check the folder, step 5, starts this by itself when a project's stamp is out of date. Read `references/upgrade.md` and follow its order exactly.
 
 **"Upgrade" is ambiguous and usually means dependencies.** In any other context it does, so if the word arrives bare and there is a connected project with a `docs/` folder in it, offer both readings in one question rather than guessing: this skill's setup files, or the project's npm packages. If there is no `docs/` folder, they mean dependencies and this is not the right mode.
-
-This runs against a project with real work in it, so the order below is not negotiable. Survey, then restore point, then plan, then write. Never open by writing a file.
-
-**1. Make a restore point before touching anything.**
-
-```bash
-cd "/sessions/<session>/mnt/<project>" && git status --short && git log --oneline -3
-```
-
-If the tree is dirty, stop and say so: uncommitted work means an undo would take their own changes with it. Ask them to commit or stash first, or to tell you to go ahead knowing that. If it is clean, note the current SHA in chat before you start. That one line is what makes every step below reversible.
-
-**2. Survey what is actually there, and never write a file whose job is already done.**
-
-This is the guardrail that matters. The failure mode is not that the layout differs, it is that you look for `docs/ROADMAP.md`, do not find it, and helpfully create one - beside the real 400-line roadmap sitting at the repo root. Now there are two, and the project has quietly lost its single source of truth.
-
-So before creating anything, look for it anywhere: `ROADMAP.md`, `PROGRESS.md`, `LEARNINGS.md`, `ARCHITECTURE.md`, `DESIGN.md`, `TOOLING.md` and prompt files at any depth, not just where this skill would have put them. If you find something doing that job, **use that path**. If the layout does not match what you expect and you cannot tell which file plays which role, **stop and ask**. Do not create, do not migrate, do not tidy.
-
-A project that grew its own sensible shape is not wrong. It is the one you are visiting.
-
-Read, do not assume:
-
-- `.claude/skills/*/SKILL.md` - which of the three exist, and does `/checkpoint` already build, click and push, or is it the old notes-only version?
-- `.claude/agents/` - do the two subagents exist, and does `CLAUDE.md` still point at `requesting-code-review` instead of the project reviewer?
-- `.claude/rules/`, `.claude/settings.json`, `.mcp.json`
-- `docs/TOOLING.md` - **this is the record of what is connected.** Accounts, project refs, which MCPs each side has, what is deliberately not set up. Projects from before 2.3 have no **Hosting** section and assume Vercel; if the project runs anywhere else, that gap is why Sync has been reading the wrong tools.
-- `docs/ROADMAP.md` and `PROGRESS.md` - where the build actually is, so nothing you say contradicts it
-
-Then check the live picture against it, because the file may be months stale: `ListConnectors` here, and ask them in one line whether the Claude Code side has changed since - particularly whether a browser tool exists, because that decides which `/checkpoint` you can generate.
-
-**3. Say what you will change, and get a yes.** Three short lists: files being replaced, files being merged, files not being touched. They are halfway through a build and the fear is that this eats their work, so showing the blast radius before you act is most of the job.
-
-**4. Replace only the pure-process files.** The three skills in `.claude/skills/`, the two subagents in `.claude/agents/`, `.claude/rules/design.md`, `.claude/settings.json`. These describe how the project is worked on and contain nothing discovered, so a fresh copy is safe. Preserve any project-specific `allow` rules already in `settings.json` rather than flattening it back to the default. When adding the subagents to a project that had none, fill the reviewer's data-isolation line from `docs/ARCHITECTURE.md`, and tell the user Claude Code needs one restart to see them.
-
-**5. Merge `docs/TOOLING.md`, never replace it.** It looks like a process file and is not. Accounts, project refs, the **Not available** list and the two-sides inventory are all findings, some of which cost a conversation to establish and cannot be recovered from a template. Add the new sections, correct anything the survey proved wrong, and leave every real value alone. If it has no **Hosting** section, write one from what is actually there (the host's MCP, `CLAUDE.md`'s Deploying section, a one-line question to the user) rather than from the template. If the live site does not show its commit yet, add that as a small roadmap task rather than doing it inside the upgrade.
-
-**6. Never touch the content files.** `ROADMAP.md`, `PROGRESS.md`, `LEARNINGS.md`, `ARCHITECTURE.md`, `DESIGN.md`. These are the project's memory and history. If one is missing a section the current templates have - commit SHAs in PROGRESS entries, the `[@]` status key in ROADMAP, the Layout, Hierarchy, Copy and Screens sections in DESIGN.md - add that section by hand, going forward only. For DESIGN.md that means filling the new sections with real values for this project, not pasting the template; it is the fastest way to lift an older project's screens. Do not backfill, reformat or tidy. A tidied history is a lost history.
-
-**7. Report in three lines**, then hand back. Usually: "`/checkpoint` now builds, clicks through the work in a browser and pushes before ticking anything off. Your roadmap, progress log and design are untouched. Restore point is `a4f9c21` if anything looks wrong."
-
-**If the project has no `docs/` and no `.claude/`**, this is not an upgrade. It is an existing codebase adopting the system for the first time: read the code to write `ARCHITECTURE.md` from what is actually built, ask where they think they are up to for `ROADMAP.md`, and generate the rest fresh. Say which of it you inferred rather than knew.
 
 ---
 
@@ -414,33 +419,23 @@ Date, the skill file it points at, what went wrong, and the change you would mak
 
 ## Handover block
 
-Every mode ends with this, and nothing after it. The user is going to copy something, so make it obvious what.
+Every mode ends with this, and nothing after it. The three plain lines from [How to talk to the user](#how-to-talk-to-the-user) come first, then the part the user copies.
 
 ```
-**Next:** M1-T3 - Sign-up form
-
-In Claude Code, in the project folder:
-
-    /next
-
-(or paste: read docs/next-prompt.md and do it)
-
-Come back here when it's done or if it gets stuck.
-```
-
-Then at most three bullets of anything they need to know. Then stop.
+**What changed:** The sign-up page is checked and live. The next job is ready: the invite form.
+**Anything risky?** No.
+**What you need to do:** Open Claude Code in the project folder and type /next
 
 ---
 
-## How to talk to the user
+Next job: M1-T4 - Invite form
+(or paste: read docs/next-prompt.md and do it)
+Come back here when it's done or if it gets stuck.
+```
 
-Plain English UK, short sentences, no em dashes. They want the call made, not the options laid out.
+Then at most three bullets of anything they need to know, each technical word explained. Then stop.
 
-- Lead with the decision, then the reason. "Supabase, because you get auth, database and file storage in one thing and the free tier covers this."
-- Any technical term gets a half-line definition the first time. "RLS (row level security - the database rule that stops user A reading user B's data)."
-- Costs in pounds per month, always.
-- When you are unsure, say so and give your best guess anyway.
-- Never hand them a decision they have no basis to make. "Postgres or MongoDB?" is not a fair question. "I'm using Postgres via Supabase" is.
+---
 
 ## Reference files
 
@@ -451,13 +446,14 @@ Read these when the mode calls for them, not upfront.
 | `references/tooling.md` | Kickoff capability scan, or before naming tools in a prompt. Current inventory of both sides plus the task-to-skill mapping. |
 | `references/doc-pack.md` | Creating or updating any of the project docs. Has the exact templates. |
 | `references/prompt-recipes.md` | Writing any prompt for Claude Code. Recipes per task type, including automations (scheduled jobs and webhooks) and the approval audit, plus the anti-patterns. |
-| `references/claude-code-setup.md` | Writing `.claude/` files, or the user asks about Claude Code itself, including `/goal`, mods and `/design`. Verified syntax as of Sep 2026, including the two subagent templates, with skills, rules, settings.json and permission modes re-checked Nov 2026. |
+| `references/claude-code-setup.md` | Writing `.claude/` files (including `/checkpoint`'s password scan, add-on check and reviewer stop), or the user asks about Claude Code itself, including `/goal`, mods and `/design`. Verified syntax as of Sep 2026, including the two subagent templates, with skills, rules, settings.json and permission modes re-checked Nov 2026. |
 | `references/stack-picker.md` | Choosing a stack or a host, setting up Railway or any host other than Vercel, or when they ask why something costs money. |
 | `references/design-brief.md` | Kickoff design steps (direction, values, screens, mockups), or a design pass. Has the full DESIGN.md template. |
 | `references/design-review.md` | Sync on any task that touched a screen, and the start of every design pass. The five-check score and the diagnosis table. |
 | `references/motion.md` | Kickoff design values, any UI prompt that adds motion, check 5 in Sync, and Showcase builds. Motion personality, which tool does which job, craft rules, the ban list, how to check motion, and Showcase mode. |
 | `references/findability.md` | Kickoff on any public site, roadmap and prompts for public pages, findability tasks, and Sync on any task that touched a public page. SEO, GEO and AIO as one job: content in the first HTML, crawl basics, what every public page carries, receiving posts from another tool, what not to bother with, and the check. |
 | `references/branch-mode.md` | Setting the live line in the roadmap step, Go live mode, and every Next task, Sync and Undo on a project whose Deploying section says branch mode. The live line and the pre-live flag rule, what a preview touches, blocking outside actions outside production, switching previews on per host, the per-task branch and pull-request lines, and who merges. |
+| `references/upgrade.md` | Upgrade mode, started by the user or automatically by the setup stamp. The safe order, what may be replaced, the automatic route and its stop-and-ask cases, the setup script, and the one task added to live projects. |
 | `references/memory.md` | The learn step. What is worth recording and what is filler. |
 
 ## Other skills to pull in

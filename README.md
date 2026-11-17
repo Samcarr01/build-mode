@@ -1,5 +1,9 @@
 # Build Mode
 
+<p align="center">
+  <img src="assets/build-mode-banner.png" alt="Build Mode 3.0: plan it, prompt it, prove it" width="100%">
+</p>
+
 **A planning and prompting layer for people who build software in Claude Code but cannot read a diff.**
 
 Claude Code is very good at writing code. It is less good at deciding what should get
@@ -18,6 +22,43 @@ on trust.
 > sessions and you move between them. Install it in Cowork.
 
 ---
+
+## What is new in 3.0
+
+Easier to read, safer to ship, and projects that keep themselves up to date.
+
+- **Three plain lines on every message.** Every update, from Cowork and from Claude Code's
+  `/checkpoint`, opens with **What changed**, **Anything risky?** and **What you need to
+  do**, with the detail underneath. Technical words are still used, but each one gets a
+  few plain words in brackets, from a fixed glossary, so the same word always gets the
+  same explanation.
+- **Safety checks that run by themselves.** `/checkpoint` now scans every save for
+  passwords and keys left in the code (gitleaks), checks add-on packages for critical
+  known security holes (`npm audit`), and will not commit while the code reviewer has a
+  critical finding open. Anything that could let one customer see another's data, expose
+  a key, skip sign-in, or send, post, pay or delete without approval is always critical.
+- **The customer A/B test.** On any app with more than one customer, the first task that
+  stores data also writes a test where one customer tries to open another's records. It
+  must be refused, it runs in every `/checkpoint`, and Go live cannot finish without it.
+- **Backup practice before launch.** Go live gains a fifth task: restore a backup into a
+  spare database and check the data is there, so you know the backups work before anyone
+  relies on them.
+- **Projects update themselves.** Each project's `CLAUDE.md` carries a setup stamp. At the
+  start of a session Build Mode compares it with its own version and upgrades the
+  project's setup files by itself: restore point first, never your roadmap, log or
+  design, and it stops and asks if a file looks hand-edited, if permissions would loosen,
+  or if something is broken. The new files install through a small script on your next
+  `/next`, and the stamp only changes once they are in. Projects already live also get
+  one task that runs the new checks over work done before 3.0.
+- **Tidier inside.** Upgrade lives in the new `references/upgrade.md`. The scaffold step
+  builds in a scratch folder, because `create-next-app` refuses a folder holding
+  `.claude/` as well as `CLAUDE.md`, and switches off the framework's own `AGENTS.md`.
+  Cowork cannot write into `.claude/` over the folder bridge, so setup files always travel
+  as `setup-claude.sh`.
+
+**Coming from 2.x:** install the new version (see Updating). Your projects pick it up by
+themselves the next time you open them in Cowork. Install gitleaks once:
+`brew install gitleaks` on a Mac.
 
 ## What is new in 2.9
 
@@ -418,9 +459,11 @@ session pointed at a different folder cannot see any of it.
 ### Updating
 
 In Cowork, install from the repo URL again to pick up a new version. In Claude Code,
-`/plugin marketplace update samcarr`. Then, in each project already under way, say
-"upgrade my project files" so the project's `.claude/` files catch up. Your roadmap,
-progress log and design are never touched by an upgrade.
+`/plugin marketplace update samcarr`. From 3.0, each project already under way catches
+up by itself the next time you open it in Cowork: it checks its setup stamp, upgrades its
+setup files and tells you in three plain lines. You can still say "upgrade my project
+files" at any time. Your roadmap, progress log and design are never touched by an
+upgrade.
 
 ### Found a problem?
 
@@ -498,7 +541,7 @@ Claude Code touches a UI file.
 
 ## What is actually in here
 
-Twelve files. The bulk of it is not prose, it is specifics:
+Thirteen files. The bulk of it is not prose, it is specifics:
 
 - **`SKILL.md`** - the twelve modes, the memory rules, the folder discipline
 - **`references/stack-picker.md`** - default stack and when to deviate, with costs, and
@@ -516,13 +559,16 @@ Twelve files. The bulk of it is not prose, it is specifics:
 - **`references/branch-mode.md`** - going live: the live line, what a preview touches, blocking outside
   actions outside production, previews per host, the branch and pull-request lines every
   task gets, and who merges
+- **`references/upgrade.md`** - bringing a project already under way up to date: the
+  safe order, the automatic route and when it stops to ask, the setup script, and the
+  one task added to projects that are already live
 - **`references/doc-pack.md`** - exact templates for every document
 - **`references/prompt-recipes.md`** - the six-part prompt shape, plus worked recipes for
   the first deploy, a new screen, a third-party integration, an LLM feature, an
-  automation, an approval audit and a bug report
+  automation, an approval audit, the customer A/B test and a bug report
 - **`references/claude-code-setup.md`** - verified `CLAUDE.md`, `.claude/rules/`, skill and
-  subagent frontmatter syntax, the two subagent templates, permission modes, the
-  superpowers handling, the traps that fail silently
+  subagent frontmatter syntax, the two subagent templates, the `/checkpoint` safety
+  checks, permission modes, the superpowers handling, the traps that fail silently
 - **`references/tooling.md`** - the capability scan and the skill-visibility gap
 - **`references/memory.md`** - what to write down and what to leave out
 
