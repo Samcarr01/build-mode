@@ -28,7 +28,7 @@ body{margin:0;background:#0E2A52}
 .bm{--bg:#0E2A52;--panel:#133766;--panel2:#0A2246;--ink:#EEF4FF;--muted:#A9C1E3;--accent:#FFD23F;--accent-ink:#0E2A52;--gmin:rgba(190,215,255,.055);--gmaj:rgba(190,215,255,.11);--rule:rgba(190,215,255,.26);--display:'Archivo',ui-sans-serif,system-ui,sans-serif;--stretch:125%;--ease:cubic-bezier(.2,.7,.2,1);background-color:var(--bg);color:var(--ink);font-family:'Archivo',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased;background-image:linear-gradient(var(--gmaj) 1px,transparent 1px),linear-gradient(90deg,var(--gmaj) 1px,transparent 1px),linear-gradient(var(--gmin) 1px,transparent 1px),linear-gradient(90deg,var(--gmin) 1px,transparent 1px);background-size:120px 120px,120px 120px,24px 24px,24px 24px;background-position:-1px -1px;transition:background-color .6s var(--ease);overflow-x:hidden}
 .bm.egg{--bg:#262E35;--panel:#303A44;--panel2:#1E252B;--ink:#F6F4F1;--muted:#BCC3CA;--accent:#F5883D;--accent-ink:#1E252B;--gmin:rgba(245,136,61,.05);--gmaj:rgba(245,136,61,.11);--rule:rgba(246,244,241,.24);--display:'IBM Plex Mono',ui-monospace,monospace;--stretch:100%}
 .bm *{box-sizing:border-box}
-.bm h1,.bm h2,.bm h3,.bm p{margin:0}
+.bm :where(h1,h2,h3,p){margin:0}
 .bm a{color:var(--accent)}
 .bm a:hover{color:var(--ink)}
 .bm :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
@@ -231,6 +231,41 @@ body{margin:0;background:#0E2A52}
 .bm .foot-col a{color:var(--ink);text-decoration:none;min-height:40px;display:inline-flex;align-items:center;gap:8px;font-size:16px}
 .bm .foot-col a:hover{color:var(--accent)}
 .foot-col a svg{width:14px;height:14px;flex:none;opacity:.6}
+.biz{display:inline-flex;align-items:center;gap:10px;margin-top:22px;min-height:44px;padding:0 16px;border:1.5px solid #F5883D;background:rgba(245,136,61,.10);text-decoration:none;font-size:15px;border-radius:2px}
+.bm a.biz,.bm a.biz:hover{color:var(--ink)}
+.biz b{color:#F5883D;font-weight:700}
+.bm a.biz:hover b{text-decoration:underline}
+.biz .br{white-space:nowrap;flex:none;font-family:'IBM Plex Mono',ui-monospace,monospace;color:#F5883D;font-weight:600}
+.nudge{font-size:15px;color:var(--muted);border-top:1px dashed var(--rule);padding-top:12px;margin-top:4px}
+.fab-head{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(440px,100%),1fr));gap:clamp(32px,5vw,64px);align-items:end}
+.fab-who{border:1.5px solid var(--accent);background:var(--panel2);padding:clamp(22px,3vw,32px);display:flex;flex-direction:column;gap:16px}
+.fab-who p{font-size:17px}
+.vs{width:100%;border-collapse:collapse;margin-top:clamp(40px,5vw,64px);font-size:16px}
+.vs th,.vs td{text-align:left;vertical-align:top;padding:16px 18px;border-bottom:1px solid var(--rule)}
+.vs thead th{font-family:var(--display);font-weight:700;font-size:18px;border-bottom:1.5px solid var(--ink)}
+.vs thead th span{display:block;font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:500;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.vs th[scope=row]{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);width:22%}
+.vs td{color:var(--muted)}
+.vs .fx{background:rgba(245,136,61,.08);color:var(--ink);border-left:1.5px solid var(--accent);border-right:1.5px solid var(--accent)}
+.vs thead .fx{border-top:1.5px solid var(--accent);color:var(--accent)}
+.vs tbody tr:last-child .fx{border-bottom:1.5px solid var(--accent)}
+@media (max-width:720px){
+.vs thead{display:none}
+.vs tr{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--rule)}
+.vs th[scope=row]{grid-column:1/-1;width:auto;border-bottom:0;padding:16px 0 6px}
+.vs td{border-bottom:0;padding:8px 12px 16px 0}
+.vs td::before{content:attr(data-label);display:block;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.vs .fx{border:0;padding-left:12px;border-left:1.5px solid var(--accent)}
+.vs tbody tr:last-child .fx{border-bottom:0}
+}
+.cases-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:clamp(48px,6vw,72px)}
+.cases{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(250px,100%),1fr));gap:16px;margin-top:20px}
+.case{border:1.5px solid var(--rule);background:var(--panel2);padding:20px 22px;display:flex;flex-direction:column;gap:8px}
+.case-n{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:var(--accent)}
+.case-t{font-weight:700;font-size:18px}
+.case-d{color:var(--muted);font-size:15px}
+.fab-cta{display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px;margin-top:clamp(40px,5vw,56px)}
+.fab-cta p{color:var(--muted);font-size:15px;max-width:46ch}
 .foot{border-top:1px solid var(--rule);padding:clamp(56px,7vw,88px) 0 40px}
 .tblock{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr));border-top:1.5px solid var(--ink);border-left:1.5px solid var(--ink)}
 .tb{padding:14px 16px;border-right:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink);display:flex;flex-direction:column;gap:4px}
@@ -304,11 +339,12 @@ body{margin:0;background:#0E2A52}
 <p class="sheet">Sheet 01 / A free add-on for Claude, by Fabricaite</p>
 <h1 class="disp h1"><span class="l-plan">Plan it.</span><span>Prompt it.</span><span class="l-prove">Prove it.</span></h1>
 <p class="hero-sub">Want to build an app or website with AI, but can’t code? Build Mode turns Claude into your project manager. It plans the build with you, tells Claude Code (the AI that writes the code) what to do one step at a time, then checks it actually works.</p>
-<p class="hero-for">Free to use. Made for people with ideas, not coding skills.</p>
+<p class="hero-for">Free to use. Made by Sam Carr at Fabricaite, for people with ideas, not coding skills.</p>
 <div class="cta">
 <a class="btn btn-p" href="#install">Install it<svg viewBox="0 0 24 24" aria-hidden="true"><path class="ic" d="M12 4 V18 M6 12 L12 18 L18 12"/></svg></a>
 <a class="btn btn-g" href="https://github.com/Samcarr01/build-mode" target="_blank" rel="noopener">View on GitHub</a>
 </div>
+<a class="biz" href="#built-for-you"><span class="br">[ ]</span><span>Running a business? <b>Have Fabricaite build it for you</b></span></a>
 <p class="live" id="live" hidden><span class="dot" aria-hidden="true"></span><span id="liveText">Live from GitHub</span></p>
 <p class="hand psst">psst: you never type <b>/build-mode</b>. It just knows.</p>
 </div>
@@ -517,23 +553,45 @@ body{margin:0;background:#0E2A52}
 </div>
 </section>
 <section class="fab-band" id="built-for-you" aria-labelledby="bfy-h">
-<div class="wrap fab-g">
+<div class="wrap">
+<div class="fab-head">
 <div>
 <p class="sheet">Sheet 08 / Or skip the build</p>
 <h2 class="disp h2" id="bfy-h">Rather have it built for you?</h2>
-<p class="lede">Build Mode is the method. Fabricaite is the people who wrote it. We build integrations and custom software for small businesses, connect it to the tools you already pay for, and look after it once it’s live.</p>
-<div class="cta">
-<a class="btn btn-p" href="https://fabricaite.ai/contact?utm_source=build-mode&amp;utm_medium=referral&amp;utm_campaign=build-mode-site&amp;utm_content=hire-us" target="_blank" rel="noopener">Talk to Fabricaite<svg viewBox="0 0 24 24" aria-hidden="true"><path class="ic" d="M7 17 L17 7 M9 7 H17 V15"/></svg></a>
+<p class="lede">Build Mode was written by Sam Carr, and it’s the method he uses on every Fabricaite job. The method is free, but using it still means doing the work yourself. With Fabricaite, it gets done for you, by the person who wrote it.</p>
 </div>
-</div>
-<div class="fab-card">
+<div class="fab-who">
 <img class="fab-logo" src="fabricaite-lockup-on-dark.svg" alt="Fabricaite" width="300" height="35">
-<ul class="fab-list">
-<li><span>01</span>A fixed price, agreed before any work starts</li>
-<li><span>02</span>Built around how your business actually runs</li>
-<li><span>03</span>Looked after on a monthly plan once it’s live</li>
-</ul>
+<p>Sam builds it. Richard handles the commercial side. There’s no third person to be handed off to.</p>
 <p class="fab-foot">Integrations and custom software · Leeds</p>
+</div>
+</div>
+
+<table class="vs">
+<caption class="tiny" style="text-align:left;caption-side:top;padding-bottom:12px">Build it yourself, or have it built</caption>
+<thead><tr><td></td><th scope="col">Build it yourself<span>With Build Mode, free</span></th><th scope="col" class="fx">Fabricaite builds it<span>By the person who wrote Build Mode</span></th></tr></thead>
+<tbody>
+<tr><th scope="row">Who does the work</th><td data-label="Yourself">You. Passing instructions to Claude Code and checking every step, for weeks.</td><td class="fx" data-label="Fabricaite">We do. Your part is under three hours in total.</td></tr>
+<tr><th scope="row">What it costs</th><td data-label="Yourself">Free, plus your Claude plan and hosting.</td><td class="fx" data-label="Fabricaite">One fixed price, in writing, before anything is built. Half up front, half when it works.</td></tr>
+<tr><th scope="row">Your existing tools</th><td data-label="Yourself">You work out how to connect Xero, your CRM and your inbox.</td><td class="fx" data-label="Fabricaite">Connecting the tools you already pay for is most of what we do.</td></tr>
+<tr><th scope="row">When it breaks</th><td data-label="Yourself">You fix it, whenever it happens.</td><td class="fx" data-label="Fabricaite">We fix it on a monthly plan from £99. Usually it’s Xero or Google changing something.</td></tr>
+<tr><th scope="row">Who owns it</th><td data-label="Yourself">You do.</td><td class="fx" data-label="Fabricaite">You do. If you leave, we move it into your accounts at no charge.</td></tr>
+<tr><th scope="row">Best for</th><td data-label="Yourself">Side projects, and people who enjoy building.</td><td class="fx" data-label="Fabricaite">Businesses that need it working, connected and looked after.</td></tr>
+</tbody>
+</table>
+
+<div class="cases-h"><p class="lab">Things we’ve built</p><a class="tiny" href="https://fabricaite.ai/case-studies?utm_source=build-mode&amp;utm_medium=referral&amp;utm_campaign=build-mode-site&amp;utm_content=case-studies" target="_blank" rel="noopener" style="color:var(--muted)">See the case studies</a></div>
+<div class="cases">
+<div class="case"><span class="case-n">01</span><p class="case-t">Volta Compliance</p><p class="case-d">A rented Salesforce to Xero connector, replaced with an integration they own outright.</p></div>
+<div class="case"><span class="case-n">02</span><p class="case-t">Duravault</p><p class="case-d">ServiceM8 to Xero: booked jobs land in the accounts as drafts the same day.</p></div>
+<div class="case"><span class="case-n">03</span><p class="case-t">Voltaforce</p><p class="case-d">A whole business moved off Salesforce onto a system built around it, with no per-user licence.</p></div>
+<div class="case"><span class="case-n">04</span><p class="case-t">GEO Engine</p><p class="case-d">The tool that writes Fabricaite’s blog. A person approves every post.</p></div>
+</div>
+
+<div class="fab-cta">
+<a class="btn btn-p" href="https://fabricaite.ai/contact?utm_source=build-mode&amp;utm_medium=referral&amp;utm_campaign=build-mode-site&amp;utm_content=hire-us" target="_blank" rel="noopener">Send us a message<svg viewBox="0 0 24 24" aria-hidden="true"><path class="ic" d="M7 17 L17 7 M9 7 H17 V15"/></svg></a>
+<a class="btn btn-g" href="https://fabricaite.ai/book?utm_source=build-mode&amp;utm_medium=referral&amp;utm_campaign=build-mode-site&amp;utm_content=hire-us-book" target="_blank" rel="noopener">Book a 20-minute call</a>
+<p>The call and the quote are free. If it isn’t worth what it would cost, we’ll say so.</p>
 </div>
 </div>
 </section>
@@ -689,6 +747,7 @@ body{margin:0;background:#0E2A52}
       html = '<span class="mnum">Mode 13</span><p class="tiny">Hidden mode unlocked</p><img class="fab-logo" src="fabricaite-lockup-on-dark.svg" alt="Fabricaite" width="300" height="35"><p class="mdoes">You found the secret one. Build Mode is made by Fabricaite in Leeds. We make the tools you already pay for work together.</p><div class="cta" style="margin-top:6px"><a class="btn btn-p btn-sm" href="https://fabricaite.ai/?utm_source=build-mode&amp;utm_medium=referral&amp;utm_campaign=build-mode-site&amp;utm_content=easter-egg" target="_blank" rel="noopener">Visit fabricaite.ai</a><button class="btn btn-g btn-sm" type="button" id="eggOff">Back to the blueprint</button></div>';
     } else {
       html = '<span class="mnum">Mode ' + m.n + '</span><p class="tiny">Picked for you</p><p class="mname">' + esc(m.name) + '</p><p class="mdoes">' + esc(m.does) + '</p>';
+      if (id === 'unblock' || id === 'undo') html += '<p class="nudge">Stuck for real? <a href="#built-for-you">Fabricaite can take it from here.</a></p>';
     }
     card.className = 'mcard ' + (flip ? 'stamp-a' : 'stamp-b') + (m ? '' : ' idle');
     card.innerHTML = html;
